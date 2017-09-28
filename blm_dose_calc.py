@@ -23,7 +23,7 @@ path_intensity_intervals = os.path.join(DATA_DIRs_NAMES['pickles'],'intensity_in
 iil = intensity_interval_loader(path_intensity_intervals,2016)
 iil.file_lister()
 
-print(iil.files)
+
 
 iil.file = iil.files[3]
 
