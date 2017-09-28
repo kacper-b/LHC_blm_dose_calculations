@@ -6,23 +6,20 @@ import pickle
 import random
 import time
 from decimal import Decimal
-sys.path.insert(0,'/media/sf_work/monitoring_analysis/projects/LHC_intensity_calculations')
 from statsmodels.nonparametric.smoothers_lowess import lowess
 
 from blm_data import *
 
 
-from config import DATA_DIRs_NAMES
+from config import DATA_DIRs_NAMES, PICKLE_INTENSITY_INTERVALS_PATH
 
 
 print(DATA_DIRs_NAMES)
 
 
 
-path_intensity_intervals = os.path.join(DATA_DIRs_NAMES['pickles'],'intensity_intervals')
-iil = intensity_interval_loader(path_intensity_intervals,2016)
+iil = intensity_interval_loader(PICKLE_INTENSITY_INTERVALS_PATH, 2016)
 iil.file_lister()
-
 
 
 iil.file = iil.files[3]
