@@ -24,13 +24,16 @@ class DosesCalculationReader:
         """
         self.df = pd.read_csv(file_path, index_col=0).sort_values(self.dose_col_name)
 
-    def get_blms(self, num=10):
+    def get_blms(self, num=None):
         """
 
         :param num:
         :return:
         """
-        indices = np.linspace(0, len(self.df[self.dose_col_name]) - 1, num=num, dtype=int)
+        if num:
+            indices = np.linspace(0, len(self.df[self.dose_col_name]) - 1, num=num, dtype=int)
+        else:
+            indices = range(len(self.df[self.dose_col_name]))
         return (self.df.iloc[idx].name for idx in indices)
 
     def save_to_file(self, file_path, blm_names):
