@@ -43,8 +43,7 @@ if __name__ == '__main__':
     blms = list(blm_loader.get_blms())
 
     print(time.time()-st)
-    N = 1
-
+    N = 7
     pool = Pool(processes=N)
 
     results = pool.map(run, blms)

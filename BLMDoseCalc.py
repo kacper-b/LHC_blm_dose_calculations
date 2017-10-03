@@ -11,20 +11,36 @@ class BLMDoseCalc:
         self.offset_post = 0
 
     def integrate_over_intensity_interval(self, intensity_interval):
-        integration_result_post_oc, integration_result_pre_oc = 0, 0
         try:
-            blm_beam_on_data = self.data[(intensity_interval.start <= self.data.index) & (self.data.index <= intensity_interval.end)]
-            offset_pre,_ = self.offset_calc_pre(intensity_interval)
-            offset_post,_ = self.offset_calc_post(intensity_interval)
+            offset_pre, _ = self.offset_calc_pre(intensity_interval)
+        except (PreOffsetEmpty, PreOffsetBelowZero, PreOffsetNan) as e:
+            offset_pre = 0
+            # print(e)
 
+        try:
+            offset_post, _ = self.offset_calc_post(intensity_interval)
+        except (PostOffsetEmpty, PostOffsetNan, PostOffsetBelowZero) as e:
+            offset_post = 0
+            # print(e)
+
+        blm_beam_on_data = self.data[(intensity_interval.start <= self.data.index) & (self.data.index <= intensity_interval.end)]
+
+        try:
             integration_result_pre_oc = self.__integrate_oc(intensity_interval, blm_beam_on_data - offset_pre)
+
+        except (IntegrationResultBelowZero, IntensityIntervalNotCoveredByBLMData, NoBLMDataForIntensityInterval) as e:
+            # print(e)
+            integration_result_pre_oc = 0
+            pass
+
+        try:
             integration_result_post_oc = self.__integrate_oc(intensity_interval, blm_beam_on_data - offset_post)
 
-        except (IntegrationResultBelowZero, IntensityIntervalNotCoveredByBLMData,
-                NoBLMDataForIntensityInterval, PreOffsetEmpty, PostOffsetNan, PreOffsetNan,
-                PostOffsetEmpty, PreOffsetBelowZero, PostOffsetBelowZero) as e:
+        except (IntegrationResultBelowZero, IntensityIntervalNotCoveredByBLMData, NoBLMDataForIntensityInterval) as e:
             # print(e)
+            integration_result_post_oc = 0
             pass
+
         return integration_result_pre_oc
 
     def __integrate_oc(self, intensity_interval, data):
@@ -35,7 +51,6 @@ class BLMDoseCalc:
             return integral
         else:
             raise NoBLMDataForIntensityInterval('{} dataframe for given intensity interval is empty: {}'.format(self.name, intensity_interval))
-
 
     def offset_calc_pre(self, intensity_interval, offset_sec=5 * 60):
         offset_period = (self.data.index >= (intensity_interval.start - offset_sec)) & (self.data.index <= intensity_interval.start)
