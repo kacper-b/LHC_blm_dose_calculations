@@ -1,15 +1,17 @@
-import pandas as pd
-import os
-import re
-import pickle
-from datetime import datetime, timedelta
-from config import BLM_FILES_REGEX_PATTERN, BLM_DATE_FORMAT
-from BLM_dose_calculation_exceptions import BLMLoaderWrongNumberOfColumns
-from BLMDoseCalc import BLMDoseCalc
 import glob
+import os
+import pickle
+import re
+from datetime import datetime, timedelta
+
+import pandas as pd
+
+from BLMDoseCalc import BLMDoseCalc
+from config import BLM_FILES_REGEX_PATTERN, BLM_DATE_FORMAT
+from source.BLM_dose_calculation_exceptions import BLMLoaderWrongNumberOfColumns
 
 
-class BLMsLoader:
+class BLMsDataLoader:
     """
 
     """

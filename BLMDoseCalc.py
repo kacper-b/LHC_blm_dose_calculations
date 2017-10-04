@@ -1,5 +1,6 @@
 import numpy as np
-from BLM_dose_calculation_exceptions import *
+
+from source.BLM_dose_calculation_exceptions import *
 
 
 class BLMDoseCalc:

@@ -1,12 +1,11 @@
-import os
 import time
 from datetime import datetime
-from statsmodels.nonparametric.smoothers_lowess import lowess
-from DosesCalculationReader import DosesCalculationReader
-from config import DATA_DIRs_NAMES, PICKLE_INTENSITY_INTERVALS_PATH
 from multiprocessing import Pool
-from IntensityIntervalsLoader import IntensityIntervalsLoader
-from BLMsLoader import BLMsLoader
+
+from source.Loaders.BLMsDataLoader import BLMsDataLoader
+from source.Loaders.IntensityIntervalsLoader import IntensityIntervalsLoader
+
+from config import PICKLE_INTENSITY_INTERVALS_PATH
 
 
 def run(blm):
@@ -36,7 +35,7 @@ if __name__ == '__main__':
                  'BLMQI.13R8.B2E30_MQ',
                  'BLMEI.04R6.B2I10_MSDA.C4R6.B2']
 
-    blm_loader = BLMsLoader(blm_names)
+    blm_loader = BLMsDataLoader(blm_names)
 
     blm_loader.set_files_path('/media/sf_monitoring_analysis/data/blm_data', start, end, field)
     blm_loader.read_pickled_blms()
