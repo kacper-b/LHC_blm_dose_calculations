@@ -2,14 +2,33 @@ import time
 from datetime import datetime
 from multiprocessing import Pool
 
+from config import PICKLE_INTENSITY_INTERVALS_PATH
+from source.Calculators.Integral.PostOffsetCorrectedIntegralCalc import PostOffsetCorrectedIntegralCalc
+from source.Calculators.Integral.PreOffsetCorrectedIntegralCalc import PreOffsetCorrectedIntegralCalc
+from source.Calculators.Integral.RawIntegralCalc import RawIntegralCalc
+from source.Calculators.Offset.PostOffsetCalc import PostOffsetCalc
+from source.Calculators.Offset.PreOffsetCalc import PreOffsetCalc
 from source.Loaders.BLMsDataLoader import BLMsDataLoader
 from source.Loaders.IntensityIntervalsLoader import IntensityIntervalsLoader
 
-from config import PICKLE_INTENSITY_INTERVALS_PATH
+pre_offset_calc = PreOffsetCalc()
+post_offset_calc = PostOffsetCalc()
+raw_integral_calc = RawIntegralCalc()
+post_integral_calc = PostOffsetCorrectedIntegralCalc()
+pre_integral_calc = PreOffsetCorrectedIntegralCalc()
 
 
 def run(blm):
-    return blm.name, sum(map(blm.integrate_over_intensity_interval, iil.intensity_intervals))
+    blm.set(pre_offset_calc)
+    blm.set(post_offset_calc)
+    blm.set(raw_integral_calc)
+    blm.set(pre_integral_calc)
+    return blm.name, blm.get_oc_dose(), blm.get_raw_dose()
+
+
+def fill_blms_with_intensity_intervals(blms, intensity_intervals):
+    for blm in blms:
+        blm.create_blm_intervals(intensity_intervals)
 
 
 if __name__ == '__main__':
@@ -23,10 +42,6 @@ if __name__ == '__main__':
     iil.read_pickled_intensity_intervals()
     iil.filter_interval_by_dates(start, end)
 
-    # dcr = DosesCalculationReader()
-    # file_path = os.path.join(DATA_DIRs_NAMES['blm_lists'], 'blm_data_2016_nn_new.csv')
-    # dcr.read_csv(file_path)
-    # blm_names = list(dcr.get_blms())
     blm_names = ['BLMTI.04L5.B2E10_TANC.4L5',
                  'BLMTI.04R5.B1E10_TANC.4R5',
                  'BLMQI.32R2.B2E30_MQ',
@@ -41,14 +56,14 @@ if __name__ == '__main__':
     blm_loader.read_pickled_blms()
     blms = list(blm_loader.get_blms())
 
-    print(time.time()-st)
-    N = 7
+    fill_blms_with_intensity_intervals(blms, iil.intensity_intervals)
+    middle = time.time()
+    print(middle - st)
+
+    N = 4
     pool = Pool(processes=N)
+    blms = pool.map(run, blms)
 
-    results = pool.map(run, blms)
-    # results = map(run, blms)
-    for blm_name, dose in results:
-        print(blm_name, dose)
-
-    print(time.time()-st)
-
+    for blm in blms:
+        print(blm)
+    print(time.time() - middle)

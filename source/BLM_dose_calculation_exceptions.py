@@ -33,6 +33,6 @@ class IntensityIntervalNotCoveredByBLMData(Exception):
 class NoBLMDataForIntensityInterval(Exception):
     pass
 
+
 class BLMLoaderWrongNumberOfColumns(Exception):
     pass
-

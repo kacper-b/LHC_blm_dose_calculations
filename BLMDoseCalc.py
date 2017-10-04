@@ -24,7 +24,8 @@ class BLMDoseCalc:
             offset_post = 0
             # print(e)
 
-        blm_beam_on_data = self.data[(intensity_interval.start <= self.data.index) & (self.data.index <= intensity_interval.end)]
+        blm_beam_on_data = self.data[
+            (intensity_interval.start <= self.data.index) & (self.data.index <= intensity_interval.end)]
 
         try:
             integration_result_pre_oc = self.__integrate_oc(intensity_interval, blm_beam_on_data - offset_pre)
@@ -51,10 +52,12 @@ class BLMDoseCalc:
                 raise IntegrationResultBelowZero('{} integrated dose < 0: {}'.format(self.name, intensity_interval))
             return integral
         else:
-            raise NoBLMDataForIntensityInterval('{} dataframe for given intensity interval is empty: {}'.format(self.name, intensity_interval))
+            raise NoBLMDataForIntensityInterval(
+                '{} dataframe for given intensity interval is empty: {}'.format(self.name, intensity_interval))
 
     def offset_calc_pre(self, intensity_interval, offset_sec=5 * 60):
-        offset_period = (self.data.index >= (intensity_interval.start - offset_sec)) & (self.data.index <= intensity_interval.start)
+        offset_period = (self.data.index >= (intensity_interval.start - offset_sec)) & (
+            self.data.index <= intensity_interval.start)
         offset_interval_pre = self.data[offset_period]
 
         if not offset_interval_pre.empty:
@@ -67,7 +70,8 @@ class BLMDoseCalc:
             raise PreOffsetEmpty('{} pre-offset dataframe is empty: {}'.format(self.name, intensity_interval))
 
     def offset_calc_post(self, intensity_interval, offset_sec=5 * 60):
-        offset_period = (self.data.index >= intensity_interval.end) & (self.data.index <= intensity_interval.end + offset_sec)
+        offset_period = (self.data.index >= intensity_interval.end) & (
+            self.data.index <= intensity_interval.end + offset_sec)
         offset_interval_post = self.data[offset_period]
 
         if not offset_interval_post.empty:

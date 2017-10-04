@@ -1,6 +1,8 @@
-import pandas as pd
-import numpy as np
 import os
+
+import numpy as np
+import pandas as pd
+
 from config import DATA_DIRs_NAMES
 
 
@@ -8,6 +10,7 @@ class DosesCalculationReader:
     """
 
     """
+
     def __init__(self, integrated_dose_column_name='TOTAL'):
         """
 
@@ -38,12 +41,11 @@ class DosesCalculationReader:
 
     def save_to_file(self, file_path, blm_names):
         with open(file_path, 'w') as f:
-            f.write('\n'.join('{},{}\n'.format(blm_name,self.df.loc[blm_name][self.dose_col_name])
-                                   for blm_name in blm_names))
+            f.write('\n'.join('{},{}\n'.format(blm_name, self.df.loc[blm_name][self.dose_col_name])
+                              for blm_name in blm_names))
 
 
 if __name__ == '__main__':
-
     file_path = os.path.join(DATA_DIRs_NAMES['blm_lists'], 'blm_data_2016_nn_new.csv')
 
     dcr = DosesCalculationReader()

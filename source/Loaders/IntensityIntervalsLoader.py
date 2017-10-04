@@ -1,14 +1,18 @@
-import os
-import sys,re
-import pickle
-from datetime import datetime, timedelta
-from config import INTENSITY_INTERVALS_FILES_REGEX_PATTERN
 import glob
+import os
+import pickle
+import re
+import sys
+from datetime import datetime, timedelta
+
+from config import INTENSITY_INTERVALS_FILES_REGEX_PATTERN
+
 
 class IntensityIntervalsLoader:
     """
 
     """
+
     def __init__(self, file_regex_pattern=INTENSITY_INTERVALS_FILES_REGEX_PATTERN):
         """
 
@@ -28,7 +32,7 @@ class IntensityIntervalsLoader:
         """
         append_to_self_paths = self.file_paths.append
         dt = timedelta(milliseconds=1)
-        for filename in glob.iglob(os.path.join(directory,'**/*'), recursive=True):
+        for filename in glob.iglob(os.path.join(directory, '**/*'), recursive=True):
             start_end_date = re.match(self.regex, filename)
             if start_end_date:
                 start_file_date = datetime.strptime(start_end_date.group(1), '%Y%m%d')
@@ -62,4 +66,3 @@ class IntensityIntervalsLoader:
         end_in_sec = (end_date - datetime.utcfromtimestamp(0)).total_seconds()
         func = (lambda interval: start_in_sec <= interval.start and interval.end <= end_in_sec)
         self.intensity_intervals = list(filter(func, self.intensity_intervals))
-
