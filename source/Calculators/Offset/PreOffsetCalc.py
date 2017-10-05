@@ -1,6 +1,6 @@
 import numpy as np
 
-from source.BLM_dose_calculation_exceptions import PreOffsetNan, PreOffsetEmpty
+from source.BLM_dose_calculation_exceptions import PreOffsetNan, PreOffsetEmpty, PreOffsetNotSetDueToNeighbourhood
 from source.Calculators.Offset.OffsetCalc import OffsetCalc
 
 
@@ -11,23 +11,45 @@ class PreOffsetCalc(OffsetCalc):
     def run(self, data, blm_intervals):
         col_name = data.columns[0]
         offset = 0
-        for blm_interval in blm_intervals:
+        offset_start = data.index[0]
+        offset_end = data.index[0]
+        for i, blm_interval in enumerate(blm_intervals):
             try:
-                offset = self.__find_offset(data, col_name, blm_interval)
-            except (PreOffsetNan, PreOffsetEmpty) as e:
+                offset_period = self.__get_offset_period(blm_intervals, col_name, data, i)
+                offset_data = data[offset_period]
+                offset = self.__find_offset(offset_data, col_name, blm_interval)
+            except (PreOffsetNan, PreOffsetEmpty, PreOffsetNotSetDueToNeighbourhood) as e:
+                # print(e)
                 pass
             finally:
                 blm_interval.offset_pre = offset
+                blm_interval.offset_pre_start = offset_start
+                blm_interval.offset_pre_end = offset_end
 
-    def __find_offset(self, data, col_name, blm_interval):
-        offset_period = (data.index >= (blm_interval.start - self.offset_sec)) & (data.index <= blm_interval.start)
-        offset_interval_pre = data[offset_period]
+    def __get_offset_period(self, blm_intervals, col_name, data, i):
+        is_enough_data_before = (blm_intervals[i].start - data.index[0]) > self.offset_sec
+        is_enough_space_between_prev_interval = (blm_intervals[i].start - blm_intervals[i - 1].end) > self.offset_sec
+        is_enough_data_after = False
+        is_enough_space_between_next_interval = False
+        if not (is_enough_data_before and is_enough_space_between_prev_interval):
+            is_interval_after_current = (i + 1) < len(blm_intervals)
+            is_enough_data_after = (data.index[-1] - blm_intervals[i].end) > self.offset_sec
+            is_enough_space_between_next_interval = is_interval_after_current and \
+                                                (blm_intervals[i + 1].start -blm_intervals[i].end) > self.offset_sec
+        if is_enough_data_before and is_enough_space_between_prev_interval:
+            return (data.index >= (blm_intervals[i].start - self.offset_sec)) & (data.index < blm_intervals[i].start)
+        elif is_enough_data_after and is_enough_space_between_next_interval:
+            return (data.index > blm_intervals[i].end) & (data.index <= blm_intervals[i].end + self.offset_sec)
+        else:
+            raise PreOffsetNotSetDueToNeighbourhood(
+                '{} pre-offset neighbourhood is too small: {}'.format(col_name, blm_intervals[i]))
 
-        if not offset_interval_pre.empty:
-            offset = np.mean(offset_interval_pre[col_name])
+    def __find_offset(self, offset_data, col_name, blm_interval):
+        if not offset_data.empty:
+            offset = np.average(offset_data[col_name])
             if not np.isnan(offset):
                 return offset
             else:
-                raise PreOffsetNan('{} pre-offset dataframe is empty: {}'.format(col_name, blm_interval))
+                raise PreOffsetNan('{} pre-offset is Nan: {}'.format(col_name, blm_interval))
         else:
             raise PreOffsetEmpty('{} pre-offset dataframe is empty: {}'.format(col_name, blm_interval))

@@ -18,7 +18,7 @@ class PreOffsetCorrectedIntegralCalc(IntegralCalc):
                     NoBLMDataForIntensityInterval) as e:
                 integral_offset_corrected = 0
             finally:
-                blm_interval.integral_offset_corrected = integral_offset_corrected
+                blm_interval.integral_pre_offset_corrected = integral_offset_corrected
 
     def __integrate(self, data, col_name, blm_interval):
         if not data.empty:

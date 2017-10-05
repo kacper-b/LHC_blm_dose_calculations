@@ -11,19 +11,23 @@ from source.Calculators.Offset.PreOffsetCalc import PreOffsetCalc
 from source.Loaders.BLMsDataLoader import BLMsDataLoader
 from source.Loaders.IntensityIntervalsLoader import IntensityIntervalsLoader
 
-pre_offset_calc = PreOffsetCalc()
-post_offset_calc = PostOffsetCalc()
-raw_integral_calc = RawIntegralCalc()
-post_integral_calc = PostOffsetCorrectedIntegralCalc()
-pre_integral_calc = PreOffsetCorrectedIntegralCalc()
+
 
 
 def run(blm):
+    pre_offset_calc = PreOffsetCalc()
+    post_offset_calc = PostOffsetCalc()
+    raw_integral_calc = RawIntegralCalc()
+    post_integral_calc = PostOffsetCorrectedIntegralCalc()
+    pre_integral_calc = PreOffsetCorrectedIntegralCalc()
+
     blm.set(pre_offset_calc)
     blm.set(post_offset_calc)
     blm.set(raw_integral_calc)
+    blm.set(post_integral_calc)
     blm.set(pre_integral_calc)
-    return blm.name, blm.get_oc_dose(), blm.get_raw_dose()
+    # blm.to_pickle('/media/sf_monitoring_analysis/data/pickles/analysed_blm')
+    return blm.name, blm.get_pre_oc_dose(), blm.get_post_oc_dose(), blm.get_raw_dose(), blm.get_file_name()
 
 
 def fill_blms_with_intensity_intervals(blms, intensity_intervals):
