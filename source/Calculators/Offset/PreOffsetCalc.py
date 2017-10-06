@@ -1,12 +1,14 @@
 import numpy as np
 
-from source.BLM_dose_calculation_exceptions import PreOffsetNan, PreOffsetEmpty, PreOffsetNotSetDueToNeighbourhood
+from source.BLM_dose_calculation_exceptions import PreOffsetNan, PreOffsetEmpty, PreOffsetNotSetDueToNeighbourhood, \
+    PreOffsetStdevOverThreshold
 from source.Calculators.Offset.OffsetCalc import OffsetCalc
-
+import pandas as pd
 
 class PreOffsetCalc(OffsetCalc):
-    def __init__(self, offset_sec=5 * 60):
+    def __init__(self, offset_sec=5 * 60, std_dev_threshold=0.5):
         self.offset_sec = offset_sec
+        self.std_dev_threshold = std_dev_threshold
 
     def run(self, data, blm_intervals):
         col_name = data.columns[0]
@@ -18,6 +20,8 @@ class PreOffsetCalc(OffsetCalc):
                 offset_period = self.__get_offset_period(blm_intervals, col_name, data, i)
                 offset_data = data[offset_period]
                 offset = self.__find_offset(offset_data, col_name, blm_interval)
+            except PreOffsetStdevOverThreshold as e:
+                print(e)
             except (PreOffsetNan, PreOffsetEmpty, PreOffsetNotSetDueToNeighbourhood) as e:
                 # print(e)
                 pass
@@ -42,14 +46,40 @@ class PreOffsetCalc(OffsetCalc):
             return (data.index > blm_intervals[i].end) & (data.index <= blm_intervals[i].end + self.offset_sec)
         else:
             raise PreOffsetNotSetDueToNeighbourhood(
-                '{} pre-offset neighbourhood is too small: {}'.format(col_name, blm_intervals[i]))
+                '{} PreOffset neighbourhood is too small:\n\tinterval: {}'.format(col_name, blm_intervals[i]))
 
-    def __find_offset(self, offset_data, col_name, blm_interval):
-        if not offset_data.empty:
-            offset = np.average(offset_data[col_name])
+    def __find_offset(self, offset_pandas_df, col_name, blm_interval):
+        if not offset_pandas_df.empty:
+            offset_data = offset_pandas_df[col_name].values
+            offset = np.average(offset_data)
             if not np.isnan(offset):
-                return offset
+                if self.__is_stdev_lower_than_threshold(offset_data, offset):
+                    return offset
+                else:
+                    offset_data_without_biggest_value = self.__drop_the_biggest_abs_value(offset_data)
+                    offset = np.average(offset_data_without_biggest_value)
+                    if self.__is_stdev_lower_than_threshold(offset_data_without_biggest_value, offset):
+                        return offset
+                    else:
+                        raise PreOffsetStdevOverThreshold('{} PreOffset data stdev {:.0%} > {:.0%} {} {}:\n\tinterval: {}'.
+                              format(col_name,
+                                     offset/np.average(offset_data_without_biggest_value),
+                                     self.std_dev_threshold,
+                                     len(offset_data),
+                                     len(offset_data_without_biggest_value), blm_interval))
             else:
-                raise PreOffsetNan('{} pre-offset is Nan: {}'.format(col_name, blm_interval))
+                raise PreOffsetNan('{} PreOffset is Nan:\n\tinterval: {}'.format(col_name, blm_interval))
         else:
-            raise PreOffsetEmpty('{} pre-offset dataframe is empty: {}'.format(col_name, blm_interval))
+            raise PreOffsetEmpty('{} PreOffset dataframe is empty:\n\tinterval: {}'.format(col_name, blm_interval))
+
+    def __drop_the_biggest_abs_value(self, data):
+        max_index = np.argmax(np.abs(data), axis=0)
+        return np.concatenate((data[:max_index], data[max_index+1:]))
+
+    def __is_stdev_lower_than_threshold(self, data, average):
+        return np.std(data)/average < self.std_dev_threshold
+
+
+if __name__  == '__main__':
+    calc = PreOffsetCalc()
+    print(calc._PreOffsetCalc__drop_the_biggest_abs_value(np.array([-65,1,2,3,4])))

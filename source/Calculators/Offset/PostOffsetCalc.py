@@ -1,6 +1,7 @@
 import numpy as np
 
-from source.BLM_dose_calculation_exceptions import PostOffsetNan, PostOffsetEmpty, PostOffsetNotSetDueToNeighbourhood
+from source.BLM_dose_calculation_exceptions import PostOffsetNan, PostOffsetEmpty, PostOffsetNotSetDueToNeighbourhood, \
+    PostOffsetStdevOverThreshold
 from source.Calculators.Offset.OffsetCalc import OffsetCalc
 
 
@@ -24,6 +25,8 @@ class PostOffsetCalc(OffsetCalc):
             except (PostOffsetNan, PostOffsetEmpty, PostOffsetNotSetDueToNeighbourhood) as e:
                 # print(e)
                 pass
+            except PostOffsetStdevOverThreshold as e:
+                print(e)
             finally:
                 blm_interval.offset_post = offset
                 blm_interval.offset_post_start = offset_start
@@ -47,16 +50,25 @@ class PostOffsetCalc(OffsetCalc):
 
         else:
             raise PostOffsetNotSetDueToNeighbourhood(
-                '{} Post-offset neighbourhood is too small: {}'.format(col_name, blm_intervals[i]))
+                '{} PostOffset neighbourhood is too small: {}'.format(col_name, blm_intervals[i]))
 
     def __find_offset(self, offset_data, col_name, blm_interval):
         if not offset_data.empty:
             offset = np.average(offset_data[col_name])
             if not np.isnan(offset):
+
+
                 return offset
             else:
-                raise PostOffsetNan('{} Post-offset value is Nan: {}'.format(col_name, blm_interval))
+                raise PostOffsetNan('{} PostOffset value is Nan: {}'.format(col_name, blm_interval))
         else:
-            raise PostOffsetEmpty('{} post-offset dataframe is empty: {}'.format(col_name, blm_interval))
+            raise PostOffsetEmpty('{} PostOffset dataframe is empty: {}'.format(col_name, blm_interval))
+
+    def __drop_the_biggest_abs_value(self, data):
+        max_index = np.argmax(np.abs(data), axis=0)
+        return np.concatenate((data[:max_index], data[max_index+1:]))
+
+    def __is_stdev_lower_than_threshold(self, data, average):
+        return np.std(data)/average < self.std_dev_threshold
 
 

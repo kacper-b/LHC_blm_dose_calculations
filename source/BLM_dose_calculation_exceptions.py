@@ -9,6 +9,11 @@ class PostOffsetNan(Exception):
 class PreOffsetNan(Exception):
     pass
 
+class PreOffsetStdevOverThreshold(Exception):
+    pass
+
+class PostOffsetStdevOverThreshold(Exception):
+    pass
 
 class PostOffsetEmpty(Exception):
     pass
