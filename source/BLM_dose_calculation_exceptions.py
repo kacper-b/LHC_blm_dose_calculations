@@ -9,11 +9,14 @@ class PostOffsetNan(Exception):
 class PreOffsetNan(Exception):
     pass
 
+
 class PreOffsetStdevOverThreshold(Exception):
     pass
 
+
 class PostOffsetStdevOverThreshold(Exception):
     pass
+
 
 class PostOffsetEmpty(Exception):
     pass
@@ -26,11 +29,14 @@ class PreOffsetBelowZero(Exception):
 class PostOffsetBelowZero(Exception):
     pass
 
+
 class PreOffsetNotSetDueToNeighbourhood(Exception):
     pass
 
+
 class PostOffsetNotSetDueToNeighbourhood(Exception):
     pass
+
 
 class IntegrationResultBelowZero(Exception):
     pass

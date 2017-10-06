@@ -67,31 +67,31 @@ class BLM:
 class BLMInterval:
     date_str_format = '%Y-%m-%d %X'
 
-    def __init__(self, start=None, end=None, offset_pre=0, offset_post=0, integral_raw=0,
-                 integral_offset_corrected=0):
+    def __init__(self, start=None, end=None):
         self.start = start
         self.end = end
-        self.offset_pre = offset_pre
+        self.offset_pre = 0
         self.offset_pre_start = None
         self.offset_pre_end = None
-        self.offset_post = offset_post
+        self.offset_post = 0
         self.offset_post_start = None
         self.offset_post_end = None
-        self.integral_raw = integral_raw
-        self.integral_pre_offset_corrected = integral_offset_corrected
-        self.integral_post_offset_corrected = integral_offset_corrected
+        self.integral_raw = 0
+        self.integral_pre_offset_corrected = 0
+        self.integral_post_offset_corrected = 0
+        self.is_suspected = None
 
     def get_integrated_data(self, data):
         if self.start is not None and self.end is not None:
-            return data[self.start <= data.index & data.index <= self.end]
+            return data[(self.start <= data.index) & (data.index <= self.end)]
 
     def get_preoffset_data(self, data):
         if self.offset_pre_start is not None and self.offset_pre_end is not None:
-            return data[self.offset_pre_start <= data.index & data.index <= self.offset_pre_end]
+            return data[(self.offset_pre_start <= data.index) & (data.index <= self.offset_pre_end)]
 
     def get_postoffset_data(self, data):
         if self.offset_pre_start is not None and self.offset_pre_end is not None:
-            return data[self.offset_post_start <= data.index & data.index <= self.offset_post_end]
+            return data[(self.offset_post_start <= data.index) & (data.index <= self.offset_post_end)]
 
     def __str__(self):
         return 'start: {}\tend: {}\tPre-offset: {:3.1e}\tPost-offset: {:3.1e}\traw integral: {}\tintegral_pre_oc: {}\tintegral_post_oc: {}'. \
