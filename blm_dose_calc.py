@@ -27,9 +27,9 @@ def run(blm):
     blm.set(raw_integral_calc)
     blm.set(post_integral_calc)
     blm.set(pre_integral_calc)
-    blm.set(plot_calc)
+    # blm.set(plot_calc)
     # blm.to_pickle('/media/sf_monitoring_analysis/data/pickles/analysed_blm')
-    return blm.name, blm.get_pre_oc_dose(), blm.get_post_oc_dose(), blm.get_file_name()
+    return blm.name, blm.get_pre_oc_dose(), blm.get_post_oc_dose(),  blm.get_raw_dose() #, blm.get_file_name()
 
 
 def fill_blms_with_intensity_intervals(blms, intensity_intervals):
@@ -48,13 +48,13 @@ if __name__ == '__main__':
     iil.read_pickled_intensity_intervals()
     iil.filter_interval_by_dates(start, end)
 
-    blm_names = ['BLMTI.04L5.B2E10_TANC.4L5']
-                 # 'BLMTI.04R5.B1E10_TANC.4R5']
-                 # 'BLMQI.32R2.B2E30_MQ',
-                 # 'BLMQI.19L1.B2E30_MQ',
-                 # 'BLMQI.16L8.B1E30_MQ',
-                 # 'BLMQI.13R8.B2E30_MQ',
-                 # 'BLMEI.04R6.B2I10_MSDA.C4R6.B2']
+    blm_names = ['BLMTI.04L5.B2E10_TANC.4L5',
+                 'BLMTI.04R5.B1E10_TANC.4R5',
+                 'BLMQI.32R2.B2E30_MQ',
+                 'BLMQI.19L1.B2E30_MQ',
+                 'BLMQI.16L8.B1E30_MQ',
+                 'BLMQI.13R8.B2E30_MQ',
+                 'BLMEI.04R6.B2I10_MSDA.C4R6.B2']
 
     blm_loader = BLMsDataLoader(blm_names)
 

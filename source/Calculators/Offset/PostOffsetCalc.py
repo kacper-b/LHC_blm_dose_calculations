@@ -6,8 +6,8 @@ from source.Calculators.Offset.OffsetCalc import OffsetCalc
 
 
 class PostOffsetCalc(OffsetCalc):
-    def __init__(self, offset_sec=5 * 60, post_offset_shift=85, std_dev_threshold=0.5):
-        self.offset_sec = offset_sec
+    def __init__(self, offset_length=5 * 60, post_offset_shift=85, std_dev_threshold=0.5):
+        self.offset_length = offset_length
         self.post_offset_shift = post_offset_shift
         self.std_dev_threshold = std_dev_threshold
 
@@ -45,26 +45,33 @@ class PostOffsetCalc(OffsetCalc):
         is_interval_after_current = (current_blm_idx + 1) < len(blm_intervals)
         interval_start = blm_intervals[current_blm_idx].start
         interval_end = blm_intervals[current_blm_idx].end
-        post_offset_period_beginning = interval_end + self.post_offset_shift
-        post_offset_period_end = post_offset_period_beginning + self.offset_sec
+        post_offset_period_start = interval_end + self.post_offset_shift
+        post_offset_period_end = post_offset_period_start + self.offset_length
+        pre_offset_period_start = interval_start - self.offset_length
+        pre_offset_period_end = interval_start
+        available_data_start = data.index[0]
+        available_data_end = data.index[-1]
 
-        is_enough_data_after = self.offset_sec < data.index[-1] - post_offset_period_beginning
-        is_enough_space_between_next_interval = is_interval_after_current and post_offset_period_end < blm_intervals[current_blm_idx + 1].start
+        is_enough_data_after = post_offset_period_end < available_data_end
+        is_the_first_interval = current_blm_idx == 0
+        is_enough_space_between_next_interval = (is_interval_after_current and post_offset_period_end < blm_intervals[current_blm_idx + 1].start) or not is_interval_after_current
         is_enough_data_before = None
         is_enough_space_between_prev_interval = None
 
         # if the interval beginning is too close to the beginning of data or to a previous interval check if there is enough space after the interval
         if not (is_enough_data_after and is_enough_space_between_next_interval):
-            is_enough_data_before = data.index[0] <= interval_start - self.offset_sec
-            is_enough_space_between_prev_interval = blm_intervals[current_blm_idx - 1].end <= interval_start - self.offset_sec
+            is_enough_data_before = available_data_start <= pre_offset_period_start
+            is_enough_space_between_prev_interval = is_the_first_interval or blm_intervals[current_blm_idx - 1].end <= pre_offset_period_start
 
         if is_enough_data_after and is_enough_space_between_next_interval:
-            return (post_offset_period_beginning < data.index) & (data.index <= post_offset_period_end)
+            return (post_offset_period_start < data.index) & (data.index <= post_offset_period_end)
         elif is_enough_data_before and is_enough_space_between_prev_interval:
-            return (interval_start - self.offset_sec <= data.index) & (data.index < interval_start)
+            return (pre_offset_period_start <= data.index) & (data.index < pre_offset_period_end)
 
         else:
             raise PostOffsetNotSetDueToNeighbourhood('{} PostOffset neighbourhood is too small: {}'.format(col_name, blm_intervals[current_blm_idx]))
+
+
 
     def __find_offset(self, offset_pandas_df, col_name, blm_interval):
         if not offset_pandas_df.empty:
