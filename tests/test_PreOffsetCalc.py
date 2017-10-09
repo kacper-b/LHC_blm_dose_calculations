@@ -21,7 +21,7 @@ t = np.arange(0, 16.,0.1)
 blm_data = t*10
 blm_data[7] = np.nan
 data = pd.DataFrame(data={'intensity':blm_data}, index=t)
-pre_offset_calc = PreOffsetCalc(2)
+pre_offset_calc = PreOffsetCalc(2, 0.001)
 
 def __reset_offsets():
     for blm_int_mock in blm_intervals:

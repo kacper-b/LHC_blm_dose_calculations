@@ -79,7 +79,7 @@ class BLMInterval:
         self.integral_raw = 0
         self.integral_pre_offset_corrected = 0
         self.integral_post_offset_corrected = 0
-        self.is_suspected = None
+        self.should_plot = None
 
     def get_integrated_data(self, data):
         if self.start is not None and self.end is not None:

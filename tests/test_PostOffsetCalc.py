@@ -17,11 +17,11 @@ blm_intervals =[not_enough_space_before_enough_after,
                 not_enough_space_before_because_of_interval_enough_after,
                 not_enough_space_before_not_enough_after]
 
-t = np.arange(0, 16.,0.1)
+t = np.arange(0, 18,0.1)
 blm_data = t*10
 blm_data[7] = np.nan
 data = pd.DataFrame(data={'intensity':blm_data}, index=t)
-post_offset_calc = PostOffsetCalc(2)
+post_offset_calc = PostOffsetCalc(2, 1)
 
 def __reset_offsets():
     for blm_int_mock in blm_intervals:

@@ -9,7 +9,7 @@ import re
 
 class PlotCalc(Calc):
     regex_name_pattern = re.compile(r"([\w\.]+):(\w+)")
-    date_format = '%Y_%M_%d_%H%M'
+    date_format = '%Y_%m_%d_%H%M'
 
     def __init__(self, output_directory):
         self.output_directory = output_directory
@@ -21,7 +21,7 @@ class PlotCalc(Calc):
             self.__plotter(col_name, blm_interval,data)
     
     def should_plot(self, blm_interval):
-        return bool(blm_interval.is_suspected)
+        return bool(blm_interval.should_plot)
 
     def get_plot_file_name(self, blm_timber_query, blm_interval):
         name_field = re.match(PlotCalc.regex_name_pattern, blm_timber_query)
@@ -63,7 +63,7 @@ class PlotCalc(Calc):
     def __post_offset(self, blm_name, blm_interval, data):
         data_to_plot = blm_interval.get_postoffset_data(data)
         if not data_to_plot.empty:
-            plt.plot(pd.to_datetime(data_to_plot.index, unit='s'), data_to_plot[blm_name], 'r-', label='pre_offset')
+            plt.plot(pd.to_datetime(data_to_plot.index, unit='s'), data_to_plot[blm_name], 'r--', label='post_offset')
             return True
         return False
 

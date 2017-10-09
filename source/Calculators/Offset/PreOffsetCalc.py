@@ -4,8 +4,9 @@ from source.BLM_dose_calculation_exceptions import PreOffsetNan, PreOffsetEmpty,
 from source.Calculators.Offset.OffsetCalc import OffsetCalc
 
 class PreOffsetCalc(OffsetCalc):
-    def __init__(self, offset_sec=5 * 60, std_dev_threshold=0.5):
+    def __init__(self, offset_sec=5 * 60, post_offset_shift=85, std_dev_threshold=0.5):
         self.offset_sec = offset_sec
+        self.post_offset_shift = post_offset_shift
         self.std_dev_threshold = std_dev_threshold
 
     def run(self, data, blm_intervals):
@@ -27,35 +28,39 @@ class PreOffsetCalc(OffsetCalc):
             offset_period_end = offset_data.index[-1]
         except PreOffsetStdevOverThreshold as e:
             # print(e)
-            blm_intervals[current_blm_idx].is_suspected = True
             pass
         except (PreOffsetNan, PreOffsetEmpty, PreOffsetNotSetDueToNeighbourhood) as e:
             # print(e)
-            blm_intervals[current_blm_idx].is_suspected = True
+            blm_intervals[current_blm_idx].should_plot = True
             pass
         finally:
             blm_intervals[current_blm_idx].offset_pre = current_offset_val
             blm_intervals[current_blm_idx].offset_pre_start = offset_period_start
             blm_intervals[current_blm_idx].offset_pre_end = offset_period_end
+            blm_intervals[current_blm_idx].should_plot = True
             return current_offset_val, offset_period_start, offset_period_end
 
     def __get_offset_period(self, blm_intervals, col_name, data, current_blm_idx):
-        is_enough_data_before = (blm_intervals[current_blm_idx].start - data.index[0]) > self.offset_sec
-        is_enough_space_between_prev_interval = (blm_intervals[current_blm_idx].start - blm_intervals[current_blm_idx - 1].end) > self.offset_sec
+        interval_start = blm_intervals[current_blm_idx].start
+        interval_end = blm_intervals[current_blm_idx].end
+        post_offset_period_beginning = interval_end + self.post_offset_shift
+        post_offset_period_end = post_offset_period_beginning + self.offset_sec
+
+        is_enough_data_before = data.index[0] < interval_start - self.offset_sec
+        is_enough_space_between_prev_interval = (interval_start - blm_intervals[current_blm_idx - 1].end) > self.offset_sec
         is_enough_data_after = None
         is_enough_space_between_next_interval = None
 
         # if the interval beginning is too close to the beginning of data or to a previous interval check if there is enough space after the interval
         if not (is_enough_data_before and is_enough_space_between_prev_interval):
-            is_any_interval_after_current = (current_blm_idx + 1) < len(blm_intervals)
-            is_enough_data_after = (data.index[-1] - blm_intervals[current_blm_idx].end) > self.offset_sec
-            is_enough_space_between_next_interval = is_any_interval_after_current and \
-                                                    (blm_intervals[current_blm_idx + 1].start - blm_intervals[current_blm_idx].end) > self.offset_sec
+            is_any_interval_after_current = current_blm_idx + 1 < len(blm_intervals)
+            is_enough_data_after = post_offset_period_end < data.index[-1]
+            is_enough_space_between_next_interval = is_any_interval_after_current and post_offset_period_end < blm_intervals[current_blm_idx + 1].start
 
         if is_enough_data_before and is_enough_space_between_prev_interval:
-            return (data.index >= (blm_intervals[current_blm_idx].start - self.offset_sec)) & (data.index < blm_intervals[current_blm_idx].start)
+            return (interval_start - self.offset_sec <= data.index) & (data.index < interval_start)
         elif is_enough_data_after and is_enough_space_between_next_interval:
-            return (data.index > blm_intervals[current_blm_idx].end) & (data.index <= blm_intervals[current_blm_idx].end + self.offset_sec)
+            return (post_offset_period_beginning < data.index) & (data.index <= post_offset_period_end)
         else:
             raise PreOffsetNotSetDueToNeighbourhood('{} PreOffset neighbourhood is too small:\n\tinterval: {}'.format(col_name, blm_intervals[current_blm_idx]))
 
