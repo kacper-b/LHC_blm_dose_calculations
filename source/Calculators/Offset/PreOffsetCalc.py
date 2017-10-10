@@ -1,5 +1,4 @@
 import numpy as np
-
 from source.BLM_dose_calculation_exceptions import PreOffsetNan, PreOffsetEmpty, PreOffsetNotSetDueToNeighbourhood, PreOffsetStdevOverThreshold
 from source.Calculators.Offset.OffsetCalc import OffsetCalc
 
@@ -40,18 +39,24 @@ class PreOffsetCalc(OffsetCalc):
             return current_offset_val, offset_period_start, offset_period_end
 
     def __get_offset_period(self, blm_intervals, col_name, data, current_blm_idx):
+        # START: definitions of variables
         interval_start = blm_intervals[current_blm_idx].start
         interval_end = blm_intervals[current_blm_idx].end
+
         post_offset_period_start = interval_end + self.post_offset_shift
         post_offset_period_end = post_offset_period_start + self.offset_length
-        prev_interval_end = blm_intervals[current_blm_idx - 1].end
-        available_data_beginning = data.index[0]
+
+        pre_offset_period_start = interval_start - self.offset_length
+        pre_offset_period_end = interval_start
+
+        available_data_start = data.index[0]
 
         is_the_first_interval = current_blm_idx == 0
-        is_enough_data_before = available_data_beginning < interval_start - self.offset_length
-        is_enough_space_between_prev_interval = (not is_the_first_interval and self.offset_length < interval_start - prev_interval_end) or is_the_first_interval
+        is_enough_data_before = available_data_start < pre_offset_period_start
+        is_enough_space_between_prev_interval = (not is_the_first_interval and blm_intervals[current_blm_idx-1].end < pre_offset_period_start) or is_the_first_interval
         is_enough_data_after = None
         is_enough_space_between_next_interval = None
+        # END: definitions of variables
 
         # if the interval beginning is too close to the beginning of data or to a previous interval check if there is enough space after the interval
         if not (is_enough_data_before and is_enough_space_between_prev_interval):
@@ -62,11 +67,14 @@ class PreOffsetCalc(OffsetCalc):
             is_enough_space_between_next_interval = (is_interval_after_current and post_offset_period_end < blm_intervals[next_blm_idx].start) or not is_interval_after_current
 
         if is_enough_data_before and is_enough_space_between_prev_interval:
-            return (interval_start - self.offset_length <= data.index) & (data.index < interval_start)
+            return (pre_offset_period_start <= data.index) & (data.index < pre_offset_period_end)
+
         elif is_enough_data_after and is_enough_space_between_next_interval:
             return (post_offset_period_start < data.index) & (data.index <= post_offset_period_end)
+
         else:
             raise PreOffsetNotSetDueToNeighbourhood('{} PreOffset neighbourhood is too small:\n\tinterval: {}'.format(col_name, blm_intervals[current_blm_idx]))
+
 
     def __find_offset(self, offset_pandas_df, col_name, blm_interval):
         if not offset_pandas_df.empty:
