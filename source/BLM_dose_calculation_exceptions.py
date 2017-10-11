@@ -52,3 +52,8 @@ class NoBLMDataForIntensityInterval(Exception):
 
 class BLMLoaderWrongNumberOfColumns(Exception):
     pass
+
+class BLMDataEmpty(Exception):
+    pass
+class BLMIntervalsEmpty(Exception):
+    pass

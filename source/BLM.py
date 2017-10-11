@@ -2,6 +2,7 @@ import re
 from _datetime import datetime
 import pickle
 import os
+from source.BLM_dose_calculation_exceptions import BLMIntervalsEmpty, BLMDataEmpty
 
 
 class BLM:
@@ -22,7 +23,10 @@ class BLM:
         if self.blm_intervals is not None and not self.data.empty:
             calc.run(self.data, self.blm_intervals)
         else:
-            print('Data incomplete: {}'.format(self.name))
+            if self.blm_intervals is None:
+                raise BLMIntervalsEmpty('No valid {} intervals'.format(self.name))
+            else:
+                raise BLMDataEmpty('No data for {}'.format(self.name))
 
     def get_post_oc_dose(self, start=None, end=None):
         return self.__get_dose(lambda blm: blm.integral_post_offset_corrected, start, end)
