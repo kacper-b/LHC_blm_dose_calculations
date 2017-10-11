@@ -19,8 +19,10 @@ class BLM:
         self.blm_intervals = self.__sort_blm_intervals_by_starting_date(blm_intervals_gen)
 
     def set(self, calc):
-        if self.blm_intervals is not None:
+        if self.blm_intervals is not None and not self.data.empty:
             calc.run(self.data, self.blm_intervals)
+        else:
+            print('Data incomplete: {}'.format(self.name))
 
     def get_post_oc_dose(self, start=None, end=None):
         return self.__get_dose(lambda blm: blm.integral_post_offset_corrected, start, end)
@@ -80,18 +82,31 @@ class BLMInterval:
         self.integral_pre_offset_corrected = 0
         self.integral_post_offset_corrected = 0
         self.should_plot = None
+        self.__integration_data = None
+        self.__preoffset_data = None
+        self.__postoffset_data = None
 
     def get_integrated_data(self, data):
         if self.start is not None and self.end is not None:
-            return data[(self.start <= data.index) & (data.index <= self.end)]
+            if self.__integration_data is None:
+                self.__integration_data = data[(self.start <= data.index) & (data.index <= self.end)]
+            return self.__integration_data
 
     def get_preoffset_data(self, data):
         if self.offset_pre_start is not None and self.offset_pre_end is not None:
-            return data[(self.offset_pre_start <= data.index) & (data.index <= self.offset_pre_end)]
+            if self.__preoffset_data is None:
+                self.__preoffset_data = data[(self.offset_pre_start <= data.index) & (data.index <= self.offset_pre_end)]
+            return self.__preoffset_data
 
     def get_postoffset_data(self, data):
         if self.offset_pre_start is not None and self.offset_pre_end is not None:
-            return data[(self.offset_post_start <= data.index) & (data.index <= self.offset_post_end)]
+            if self.__postoffset_data is None:
+                self.__postoffset_data = data[(self.offset_post_start <= data.index) & (data.index <= self.offset_post_end)]
+            return self.__postoffset_data
+    def __clean_data(self):
+        self.__integration_data = None
+        self.__preoffset_data = None
+        self.__postoffset_data = None
 
     def __str__(self):
         return 'start: {}\tend: {}\tPre-offset: {:3.1e}\tPost-offset: {:3.1e}\traw integral: {}\tintegral_pre_oc: {}\tintegral_post_oc: {}'. \

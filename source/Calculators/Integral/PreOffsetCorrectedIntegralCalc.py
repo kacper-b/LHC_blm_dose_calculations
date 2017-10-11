@@ -9,8 +9,7 @@ class PreOffsetCorrectedIntegralCalc(IntegralCalc):
     def run(self, data, blm_intervals):
         col_name = data.columns[0]
         for blm_interval in blm_intervals:
-            blm_beam_on_data = data[(blm_interval.start <= data.index) & (
-                data.index <= blm_interval.end)] - blm_interval.offset_pre
+            blm_beam_on_data = blm_interval.get_integrated_data(data) - blm_interval.offset_pre
             try:
                 integral_offset_corrected = self.__integrate(blm_beam_on_data, col_name, blm_interval)
             except (
