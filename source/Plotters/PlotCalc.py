@@ -6,8 +6,9 @@ import matplotlib.dates as md
 import matplotlib.pyplot as plt
 import pandas as pd
 import re
+from source.Plotters.IPlotter import IPlotter
 
-class PlotCalc(Calc):
+class PlotCalc(Calc, IPlotter):
     regex_name_pattern = re.compile(r"([\w\.]+):(\w+)")
     date_format = '%Y_%m_%d_%H%M'
 
@@ -49,8 +50,8 @@ class PlotCalc(Calc):
         # self.__offset_level_plot(interval)
         # self.__info_box_plot(interval, ax)
         if plotted_data and plotted_pre_oc and plotted_post_oc:
-            self.__save_plot(plot_file_path)
-        self.__clear()
+            self.save_plot(plot_file_path)
+        self.clear()
 
 
     def __pre_offset(self,blm_name, blm_interval, data):
@@ -91,11 +92,3 @@ class PlotCalc(Calc):
     #     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
     #     ax.text(0.1, 1.25, textstr, transform=ax.transAxes, fontsize=14, verticalalignment='top', bbox=props)
 
-    def __save_plot(self, file_path):
-        plt.legend(loc='best')
-        plt.savefig(file_path, bbox_inches='tight')
-
-    def __clear(self):
-        plt.clf()
-        plt.cla()
-        plt.close()

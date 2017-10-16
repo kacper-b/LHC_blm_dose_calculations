@@ -11,13 +11,12 @@ class RawIntegralCalc(IntegralCalc):
         for blm_interval in blm_intervals:
             blm_beam_on_data = blm_interval.get_integrated_data(data)
             try:
-                integral_raw = self.__integrate(blm_beam_on_data, col_name, blm_interval)
+                blm_interval.integral_raw = self.__integrate(blm_beam_on_data, col_name, blm_interval)
             except (
                     IntegrationResultBelowZero, IntensityIntervalNotCoveredByBLMData,
                     NoBLMDataForIntensityInterval) as e:
-                integral_raw = 0
-            finally:
-                blm_interval.integral_raw = integral_raw
+                blm_interval.integral_raw = 0
+
 
     def __integrate(self, data, col_name, blm_interval):
         if not data.empty:

@@ -13,7 +13,7 @@ PICKLE_INTENSITY_INTERVALS_DIR = os.path.join(DATA_DIRs_NAMES['pickles'], 'inten
 BLM_DATA_DIR = DATA_DIRs_NAMES['blm_data']
 BLM_LIST_DIR = DATA_DIRs_NAMES['blm_lists']
 BLM_FILES_REGEX_PATTERN = re.compile(
-    r".*\/(\w+)_(\d{4}(?:_?)\d{2}(?:_?)\d{2})\d*_(\d{4}(?:_?)\d{2}(?:_?)\d{2}).*(LOSS_RS\d\d|DOSE_INT_HH)\.p")
+    r".*\/([\w\-]+)_(\d{4}(?:_?)\d{2}(?:_?)\d{2})\d*_(\d{4}(?:_?)\d{2}(?:_?)\d{2}).*(LOSS_RS\d\d|DOSE_INT_HH)\.p")
 INTENSITY_INTERVALS_FILES_REGEX_PATTERN = re.compile(r".*_(\d{8})\d*_(\d{8})\d*\.p")
 BLM_DATE_FORMAT = '%Y_%m_%d'
 PICKLE_BLM_INTERVALS_DIR = os.path.join(DATA_DIRs_NAMES['pickles'], 'analysed_blm')
