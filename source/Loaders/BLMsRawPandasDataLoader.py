@@ -1,53 +1,21 @@
-import glob
+from source.Loaders.IBLMsLoader import IBLMsLoader
 import os
 import pickle
 import re
-from datetime import datetime, timedelta
-
+from datetime import datetime
 import pandas as pd
-
-from config import BLM_FILES_REGEX_PATTERN, BLM_DATE_FORMAT
+from config import BLM_DATE_FORMAT
 from source.BLM import BLM
 from source.BLM_dose_calculation_exceptions import BLMLoaderWrongNumberOfColumns
 
 
-class BLMsDataLoader:
-    """
+class BLMsRawPandasDataLoader(IBLMsLoader):
+    def __init__(self, names=[]):
+        super(BLMsRawPandasDataLoader, self).__init__(names)
 
-    """
-
-    def __init__(self, names=[], file_regex_pattern=BLM_FILES_REGEX_PATTERN):
-        """
-
-        """
-        self.names = [name.replace('.', '_') for name in names]
-        self.regex = file_regex_pattern
-        self.file_paths = []
-        self.blm_data = []
-
-    def set_files_path(self, directory, start, end, field):
-        """
-
-        :param directory:
-        :param start:
-        :param end:
-        :param field:
-        :return:
-        """
-        file_paths = (filename for filename in glob.iglob(os.path.join(directory, '**/*'), recursive=True)
-                      if self.is_file_name_valid(filename, start, end, field))
-        self.file_paths = [file_path for file_path in file_paths]
-
-    def is_file_name_valid(self, filename, start, end, field):
-        """
-
-        :param filename:
-        :param start:
-        :param end:
-        :param field:
-        :return:
-        """
-        start_end_date = re.match(self.regex, filename)
+    def is__file_name_valid(self, file_path, start, end, field):
+        dt = self.dt
+        start_end_date = re.match(self.regex, file_path)
         if start_end_date:
             blm_name = start_end_date.group(1)
             start_file_date = datetime.strptime(start_end_date.group(2), BLM_DATE_FORMAT)
@@ -57,33 +25,31 @@ class BLMsDataLoader:
             is_blm_right = blm_name in self.names
             if not (is_blm_right and is_field_right):
                 return False
-            dt = timedelta(milliseconds=5)
             is_between = (start - dt <= start_file_date and end_file_date <= end + dt)
             is_end_covers = start_file_date < end < end_file_date + dt
             is_beginning_covers = start_file_date - dt < start < end_file_date
             return is_between or is_end_covers or is_beginning_covers
         return False
 
+    def set_files_paths(self, directory, start, end, field):
+        for blm_name in self.names:
+            super(IBLMsLoader, self).set_files_paths(os.path.join(directory, blm_name), start, end, field)
 
-    def read_pickled_blms(self):
-        """
-
-        :return:
-        """
+    def load_pickles(self):
         for file_path in self.file_paths:
             with open(file_path, 'rb') as blm_pickle:
-                self.blm_data.append(pickle.load(blm_pickle))
+                self.data.append(pickle.load(blm_pickle))
 
     def group_by_blm_name(self):
         """
 
         :return:
         """
-        if any(map(lambda blm: len(blm.columns) != 1, self.blm_data)):
+        if any(map(lambda blm: len(blm.columns) != 1, self.data)):
             raise BLMLoaderWrongNumberOfColumns('Data from BLM should have only one column!')
 
         blm_name_data_dict = {}
-        for blm in self.blm_data:
+        for blm in self.data:
             blm_name_data_dict[blm.columns[0]] = blm_name_data_dict.setdefault(blm.columns[0], pd.DataFrame()).append(blm)
         for blm in blm_name_data_dict.values():
             blm.sort_index(inplace=True)
@@ -91,3 +57,4 @@ class BLMsDataLoader:
 
     def get_blms(self):
         return (BLM(key, data) for key, data in self.group_by_blm_name().items())
+

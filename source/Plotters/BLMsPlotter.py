@@ -29,13 +29,12 @@ class BLMsPlotter(IPlotter):
             blm_positions[index] = blm.position
 
         order = blm_positions.argsort()
-
         f, ax = plt.subplots(1, 1, figsize=[20, 13.5])
 
         plt.xlabel(r'DCUM [$m$]')
         plt.ylabel(r'normalized TID [$Gy/ps$]')
 
-        plt.semilogy(blm_positions[order] / 1e2, integrated_doses[order] / integrated_intensity, '.-', label='BLM data')
+        plt.plot(blm_positions[order] / 1e2, integrated_doses[order] / integrated_intensity, '.-', label='BLM data')
         self.legend()
         self.show()
 
@@ -49,7 +48,7 @@ class BLMsPlotter(IPlotter):
             blm_positions[index] = blm.position
 
         order = blm_positions.argsort()
-
+        return (blm_positions[order] / 1e2, integrated_doses[order])
         f, ax = plt.subplots(1, 1, figsize=[20, 13.5])
 
         plt.xlabel(r'DCUM [$km$]')

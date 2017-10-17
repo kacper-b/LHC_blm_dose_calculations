@@ -1,10 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta,timezone
 
 
 class BLMInterval:
     date_str_format = '%Y-%m-%d %X'
+    dt = 0.000001
 
-    def __init__(self, start=None, end=None, integrated_intensity_offset_corrected=None):
+    def __init__(self, start, end, integrated_intensity_offset_corrected=None):
         self.start = start
         self.end = end
         self.offset_pre = 0
@@ -54,3 +55,24 @@ class BLMInterval:
             format(datetime.utcfromtimestamp(self.start).strftime(BLMInterval.date_str_format),
                    datetime.utcfromtimestamp(self.end).strftime(BLMInterval.date_str_format),
                    self.offset_pre, self.offset_post, self.integral_raw, self.integral_pre_offset_corrected, self.integral_post_offset_corrected)
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and abs(self.start - other.start) < BLMInterval.dt and abs(self.end - other.end) < BLMInterval.dt
+
+    def __lt__(self, other):
+        return isinstance(other, self.__class__) and self.start < other.start + BLMInterval.dt and self.end < other.end + BLMInterval.dt
+
+    def __le__(self, other):
+        return self == other or self < other
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __gt__(self, other):
+        return isinstance(other, self.__class__) and self.start > other.start + BLMInterval.dt and self.end > other.end + BLMInterval.dt
+
+    def __ge__(self, other):
+        return self == other or self > other
+
+    def __hash__(self):
+        return hash(((self.start), (self.end)))
