@@ -47,8 +47,6 @@ class PlotCalc(Calc, IPlotter):
         plotted_data = self.__blm_data_plot(blm_name, blm_interval, data)
         plotted_pre_oc = self.__pre_offset(blm_name, blm_interval, data)
         plotted_post_oc = self.__post_offset(blm_name, blm_interval, data)
-        # self.__offset_level_plot(interval)
-        # self.__info_box_plot(interval, ax)
         if plotted_data and plotted_pre_oc and plotted_post_oc:
             self.save_plot(plot_file_path)
         self.clear()
@@ -74,21 +72,3 @@ class PlotCalc(Calc, IPlotter):
             plt.plot(pd.to_datetime(data_to_plot.index, unit='s'), data_to_plot[blm_name], 'b-', label='raw data')
             return True
         return False
-
-    # def __offset_level_plot(self, interval):
-    #     plt.plot([datetime.datetime.utcfromtimestamp(interval.start), datetime.datetime.utcfromtimestamp(interval.end)],
-    #              interval.offset_mean * np.ones(2), 'y--', label='offset')
-
-    # def __info_box_plot(self, interval, ax):
-    #     textstr = 'Start: {0:s}\nEnd: {5:s}\nDuration: {6:}\nFill: {1:d}\nIntensity max: {2:.1e}\nIntensity dump: {3:.2%}\nIntensity loss: {4:.2%}'. \
-    #         format(interval.get_start_date(),
-    #                interval.filling_number,
-    #                interval.max_intensity_offset_corrected,
-    #                interval.dumped_intensity_offset_corrected / interval.max_intensity_offset_corrected,
-    #                1 - interval.dumped_intensity_offset_corrected / interval.max_intensity_offset_corrected,
-    #                interval.get_end_date(),
-    #                interval.get_duration())
-    #
-    #     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-    #     ax.text(0.1, 1.25, textstr, transform=ax.transAxes, fontsize=14, verticalalignment='top', bbox=props)
-

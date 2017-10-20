@@ -26,10 +26,10 @@ class PreOffsetCalc(OffsetCalc):
             offset_period_start = offset_data.index[0]
             offset_period_end = offset_data.index[-1]
         except PreOffsetStdevOverThreshold as e:
-            # print(e)
+            e.logging_func('{}'.format(str(e)))
             pass
         except (PreOffsetNan, PreOffsetEmpty, PreOffsetNotSetDueToNeighbourhood) as e:
-            # print(e)
+            e.logging_func('{}'.format(str(e)))
             pass
         finally:
             blm_intervals[current_blm_idx].offset_pre = current_offset_val

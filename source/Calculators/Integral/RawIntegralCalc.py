@@ -16,7 +16,7 @@ class RawIntegralCalc(IntegralCalc):
                     IntegrationResultBelowZero, IntensityIntervalNotCoveredByBLMData,
                     NoBLMDataForIntensityInterval) as e:
                 blm_interval.integral_raw = 0
-
+                e.logging_func('{}'.format(str(e)))
 
     def __integrate(self, data, col_name, blm_interval):
         if not data.empty:

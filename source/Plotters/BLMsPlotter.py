@@ -38,7 +38,7 @@ class BLMsPlotter(IPlotter):
         self.legend()
         self.show()
 
-    def plot_pre_oc_dose(self, blms, blm_summing_func):
+    def plot_total_dose(self, blms, blm_summing_func):
 
         integrated_doses = np.zeros(len(blms), dtype=np.float)
         blm_positions = np.zeros(len(blms), dtype=np.float)
@@ -48,7 +48,6 @@ class BLMsPlotter(IPlotter):
             blm_positions[index] = blm.position
 
         order = blm_positions.argsort()
-        return (blm_positions[order] / 1e2, integrated_doses[order])
         f, ax = plt.subplots(1, 1, figsize=[20, 13.5])
 
         plt.xlabel(r'DCUM [$km$]')
@@ -58,7 +57,7 @@ class BLMsPlotter(IPlotter):
         self.legend()
         self.show()
 
-    def plot_pre_oc_dose_with_blm_names(self, blms, blm_summing_func):
+    def plot_total_dose_with_blm_names(self, blms, blm_summing_func):
         integrated_doses = np.zeros(len(blms), dtype=np.float)
         blm_positions = np.zeros(len(blms), dtype=np.float)
         blm_names = []

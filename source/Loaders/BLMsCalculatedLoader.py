@@ -8,8 +8,9 @@ from config import BLM_DATE_FORMAT
 
 
 class BLMsCalculatedLoader(IBLMsLoader):
-    def __init__(self, names):
+    def __init__(self, names, remove_raw_data=False):
         super(BLMsCalculatedLoader, self).__init__(names)
+        self.remove_raw_data = False
 
     def is__file_name_valid(self, filename, start, end, field):
         """
@@ -40,4 +41,7 @@ class BLMsCalculatedLoader(IBLMsLoader):
     def load_pickles(self):
         for file_path in self.file_paths:
             with open(file_path, 'rb') as blm_pickle:
-                return pickle.load(blm_pickle)
+                blm = pickle.load(blm_pickle)
+                if self.remove_raw_data:
+                    blm.data = None
+                return blm

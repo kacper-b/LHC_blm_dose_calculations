@@ -38,7 +38,8 @@ class BLMsRawPandasDataLoader(IBLMsLoader):
     def load_pickles(self):
         for file_path in self.file_paths:
             with open(file_path, 'rb') as blm_pickle:
-                self.data.append(pickle.load(blm_pickle))
+                data = pickle.load(blm_pickle)
+                self.data.append(data)
 
     def group_by_blm_name(self):
         """

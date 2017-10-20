@@ -1,6 +1,6 @@
 import re
 from source.BLMInterval import BLMInterval
-import pickle
+import _pickle as pickle
 import os
 from source.BLM_dose_calculation_exceptions import BLMIntervalsEmpty, BLMDataEmpty
 from sortedcontainers import SortedSet
@@ -8,8 +8,6 @@ from sortedcontainers import SortedSet
 
 class BLM:
     regex_name_pattern = re.compile(r"([\w\.\-]+):(\w+)")
-    regex_name_pattern = re.compile(r"([\w\.\-]+):(\w+)")
-
     date_format = '%Y_%m_%d'
 
     def __init__(self, name, data, position=None):
@@ -22,15 +20,9 @@ class BLM:
         self.blm_intervals = SortedSet(BLMInterval(ii.start, ii.end, ii.integrated_intensity_offset_corrected) for ii in intensity_intervals)
         return self.blm_intervals
 
-    def convert_blm_list_to_set(self, blm_intervals):
-        # TEMPORARY FOR TESTSS!!!!!
-        return SortedSet(BLMInterval(ii.start, ii.end, 0) for ii in blm_intervals)
-
     def get_missing_blm_intervals(self, intervals_set_container_to_check):
-        if not isinstance(intervals_set_container_to_check, SortedSet):
-            intervals_set_container_to_check = self.convert_blm_list_to_set(intervals_set_container_to_check)
         if self.blm_intervals is not None:
-            return intervals_set_container_to_check.difference(self.blm_intervals)
+            return intervals_set_container_to_check - self.blm_intervals
 
     def set(self, calc):
         if self.blm_intervals is not None and not self.data.empty:

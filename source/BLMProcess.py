@@ -1,0 +1,81 @@
+from config import PICKLE_BLM_INTERVALS_DIR, BLM_DATA_DIR
+from source.BLM_dose_calculation_exceptions import BLMDataEmpty, BLMIntervalsEmpty
+from source.Loaders.BLMsRawPandasDataLoader import BLMsRawPandasDataLoader
+from source.Loaders.BLMsCalculatedLoader import BLMsCalculatedLoader
+import logging
+import traceback
+
+
+class BLMProcess:
+    def __init__(self, start, end, field, calculators, should_return_blm=False):
+        self.start = start
+        self.end = end
+        self.field = field
+        self.calculators = calculators
+        self.should_return_blm = should_return_blm
+
+    def run(self, blm):
+        logging.info('{}\t start'.format(blm.name))
+
+        try:
+            self.load_pickled_raw_blm_data(blm)
+            calculated_blm_loader = BLMsCalculatedLoader(names=[blm.name], remove_raw_data=False)
+            is_calculated_blm_existing = self.check_if_blm_already_calculated(calculated_blm_loader)
+
+            if is_calculated_blm_existing and False:
+                blm_calculated = self.load_calculated_blm(blm, calculated_blm_loader)
+                missing_blm_intervals = blm.get_missing_blm_intervals(blm_calculated.blm_intervals)
+                if not missing_blm_intervals:
+                    logging.info('{}\t not missing anything'.format(blm.name))
+                    return blm_calculated if self.should_return_blm else None
+                else:
+                    self.set_calculators_for_missing_intervals(blm, missing_blm_intervals)
+            else:
+                self.set_blm_calculators(blm)
+
+            self.save_blm_as_pickle(blm)
+            print('done:\t' + blm.name, blm.get_pre_oc_dose())
+            return blm if self.should_return_blm else None
+
+        except (BLMDataEmpty, BLMIntervalsEmpty) as e:
+            e.logging_func('{} {}'.format(blm.name, e))
+        except Exception as e:
+            logging.critical('{} {} {}'.format(blm.name, traceback.format_exc(), e))
+            raise
+
+    def save_blm_as_pickle(self, blm):
+        blm.clean_blm_intervals_from_temporary_data(clean_blm_data=True)
+        blm.name = blm.name + ':' + self.field
+        blm.to_pickle(PICKLE_BLM_INTERVALS_DIR, self.start, self.end)
+        logging.info('{}\t done'.format(blm.name))
+
+    def set_calculators_for_missing_intervals(self, blm, missing_intervals):
+        logging.info('{}\t missing {} intervals'.format(blm.name, len(missing_intervals)))
+        blm_already_calculated_blms = blm.blm_intervals
+        blm.blm_intervals = missing_intervals
+        self.set_blm_calculators(blm)
+        self.merge_already_and_new_calculated_blm_intervals(blm, blm_already_calculated_blms)
+
+    def merge_already_and_new_calculated_blm_intervals(self, blm, blm_already_calculated_blms):
+        blm.blm_intervals = blm_already_calculated_blms | blm.blm_intervals
+
+    def load_calculated_blm(self, blm, calculated_blm_loader):
+        logging.info('{}\t exists'.format(blm.name))
+        blm_calculated = calculated_blm_loader.load_pickles()
+        return blm_calculated
+
+    def check_if_blm_already_calculated(self, calculated_blms_loader):
+        calculated_blms_loader.set_files_paths(PICKLE_BLM_INTERVALS_DIR, self.start, self.end, self.field)
+        is_calculated_blms_existing = bool(calculated_blms_loader.file_paths)
+        return is_calculated_blms_existing
+
+    def load_pickled_raw_blm_data(self, blm):
+        blm_names_list = [blm.name]
+        blm_loader = BLMsRawPandasDataLoader(blm_names_list)
+        blm_loader.set_files_paths(BLM_DATA_DIR, self.start, self.end, self.field)
+        blm_loader.load_pickles()
+        blm.data = next(blm_loader.get_blms()).data  # get_blms() method returns generator so next has to be used to obtain access to first element
+
+    def set_blm_calculators(self, blm):
+        for calc in self.calculators:
+            blm.set(calc)

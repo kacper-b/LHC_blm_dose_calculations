@@ -15,6 +15,7 @@ class PreOffsetCorrectedIntegralCalc(IntegralCalc):
             except (
                     IntegrationResultBelowZero, IntensityIntervalNotCoveredByBLMData,
                     NoBLMDataForIntensityInterval) as e:
+                e.logging_func('{}'.format(str(e)))
                 integral_offset_corrected = 0
             finally:
                 blm_interval.integral_pre_offset_corrected = integral_offset_corrected
