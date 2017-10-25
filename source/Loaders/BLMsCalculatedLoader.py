@@ -39,9 +39,17 @@ class BLMsCalculatedLoader(IBLMsLoader):
         return False
 
     def load_pickles(self):
+        blm = None
         for file_path in self.file_paths:
             with open(file_path, 'rb') as blm_pickle:
-                blm = pickle.load(blm_pickle)
+                blm_loaded = pickle.load(blm_pickle)
                 if self.remove_raw_data:
-                    blm.data = None
-                return blm
+                    blm_loaded.data = None
+
+                if blm is None:
+                    blm = blm_loaded
+                elif blm.name == blm_loaded.name:
+                    blm.blm_intervals.update(blm_loaded.blm_intervals)
+                else:
+                    raise Exception('something went wrong: BLMs with different names ')
+        return blm

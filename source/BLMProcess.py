@@ -1,5 +1,5 @@
 from config import PICKLE_BLM_INTERVALS_DIR, BLM_DATA_DIR
-from source.BLM_dose_calculation_exceptions import BLMDataEmpty, BLMIntervalsEmpty
+from source.BLM_dose_calculation_exceptions import BLMDataEmpty, BLMIntervalsEmpty, BLMNoRawData
 from source.Loaders.BLMsRawPandasDataLoader import BLMsRawPandasDataLoader
 from source.Loaders.BLMsCalculatedLoader import BLMsCalculatedLoader
 import logging
@@ -22,7 +22,7 @@ class BLMProcess:
             calculated_blm_loader = BLMsCalculatedLoader(names=[blm.name], remove_raw_data=False)
             is_calculated_blm_existing = self.check_if_blm_already_calculated(calculated_blm_loader)
 
-            if is_calculated_blm_existing and False:
+            if is_calculated_blm_existing:
                 blm_calculated = self.load_calculated_blm(blm, calculated_blm_loader)
                 missing_blm_intervals = blm.get_missing_blm_intervals(blm_calculated.blm_intervals)
                 if not missing_blm_intervals:
@@ -34,14 +34,14 @@ class BLMProcess:
                 self.set_blm_calculators(blm)
 
             self.save_blm_as_pickle(blm)
-            print('done:\t' + blm.name, blm.get_pre_oc_dose())
+            logging.info('{}\t done'.format(blm.name))
             return blm if self.should_return_blm else None
 
         except (BLMDataEmpty, BLMIntervalsEmpty) as e:
             e.logging_func('{} {}'.format(blm.name, e))
         except Exception as e:
             logging.critical('{} {} {}'.format(blm.name, traceback.format_exc(), e))
-            raise
+            raise e
 
     def save_blm_as_pickle(self, blm):
         blm.clean_blm_intervals_from_temporary_data(clean_blm_data=True)
@@ -74,7 +74,10 @@ class BLMProcess:
         blm_loader = BLMsRawPandasDataLoader(blm_names_list)
         blm_loader.set_files_paths(BLM_DATA_DIR, self.start, self.end, self.field)
         blm_loader.load_pickles()
-        blm.data = next(blm_loader.get_blms()).data  # get_blms() method returns generator so next has to be used to obtain access to first element
+        loaded_blms = list(blm_loader.get_blms())
+        if len(loaded_blms) != 1:
+            raise BLMNoRawData('No or too many files for {}'.format(blm.name))
+        blm.data = loaded_blms[0].data
 
     def set_blm_calculators(self, blm):
         for calc in self.calculators:

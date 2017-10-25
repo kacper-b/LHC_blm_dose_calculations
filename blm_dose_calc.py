@@ -24,20 +24,19 @@ from source.BLM import BLM
 from source.BLMFactory import BLMFactory
 from source.BLMProcess import BLMProcess
 import logging
-logging.basicConfig(level=60)
+logging.basicConfig(level=logging.CRITICAL)
 
 if __name__ == '__main__':
-    number_of_simultaneous_processes = 7
+    number_of_simultaneous_processes = 1
     calculators = [PreOffsetCalc(), PreOffsetCorrectedIntegralCalc(),
                    RawIntegralCalc(),
                    PostOffsetCalc(), PostOffsetCorrectedIntegralCalc(),
                    # PlotCalc(BLM_INTERVALS_PLOTS_DIR)
                    ]
-    start = datetime(year=2017, month=4, day=10)
-    end = datetime(year=2017, month=10, day=19)
+    start = datetime(year=2016, month=5, day=10)
+    end = datetime(year=2016, month=6, day=17)
     field = 'LOSS_RS12'
-    blm_list_file_path = os.path.join(BLM_LIST_DIR, 'allblm_20161013.csv')
-
+    blm_list_file_path = os.path.join(BLM_LIST_DIR, 'corina5R5B2.scv')
 
     iil = IntensityIntervalsLoader()
     iil.set_files_paths(PICKLE_INTENSITY_INTERVALS_DIR, start, end)
@@ -46,7 +45,7 @@ if __name__ == '__main__':
 
     blm_csv_content = {blm.raw_name: blm.position for blm in BLMsParser.read(blm_list_file_path)}
     factory = BLMFactory()
-    blm_process = BLMProcess(start, end, field, calculators, should_return_blm=False)
+    blm_process = BLMProcess(start, end, field, calculators, should_return_blm=True)
 
     with Pool(processes=number_of_simultaneous_processes) as pool:
         blms = pool.map(blm_process.run, factory.build(iil.data, blm_csv_content))
@@ -55,6 +54,6 @@ if __name__ == '__main__':
         print(blm.name, blm.get_pre_oc_dose())
 
     p = BLMsPlotter('.')
-    p.plot_total_dose()
-    # z = p.plot_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), lambda blm: blm.get_oc_intensity_integral())
+    # p.plot_total_dose(blms, lambda blm: blm.get_pre_oc_dose())
+    z = p.plot_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), lambda blm: blm.get_oc_intensity_integral())
 

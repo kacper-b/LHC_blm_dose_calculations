@@ -3,6 +3,8 @@ from datetime import timedelta
 import glob
 import os
 
+import logging
+
 
 class ILoader(ABC):
     def __init__(self, file_regex_pattern, date_format):
@@ -21,8 +23,9 @@ class ILoader(ABC):
         :param field:
         :return:
         """
-        file_paths = (filename for filename in glob.iglob(os.path.join(directory, '*')) if self.is__file_name_valid(filename, start, end, field))
+        file_paths = list(filename for filename in glob.iglob(os.path.join(directory, '*')) if self.is__file_name_valid(filename, start, end, field))
         self.file_paths.extend(file_path for file_path in file_paths)
+        logging.info('{}\n\t{}'.format(self.__class__.__name__,'\n\t'.join(self.file_paths)))
 
     def clean(self):
         self.file_paths = []

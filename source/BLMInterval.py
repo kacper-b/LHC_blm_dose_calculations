@@ -51,7 +51,7 @@ class BLMInterval:
         self.__postoffset_data = None
 
     def __str__(self):
-        return 'start: {}\tend: {}\tPre-offset: {:3.1e}\tPost-offset: {:3.1e}\traw integral: {}\tintegral_pre_oc: {}\tintegral_post_oc: {}'. \
+        return 'start: {}\tend: {}\tPre-offset: {:3.1e}\tPost-offset: {:3.1e}\traw integral: {:3.1e}\tintegral_pre_oc: {:3.1e}\tintegral_post_oc: {:3.1e}'. \
             format(datetime.utcfromtimestamp(self.start).strftime(BLMInterval.date_str_format),
                    datetime.utcfromtimestamp(self.end).strftime(BLMInterval.date_str_format),
                    self.offset_pre, self.offset_post, self.integral_raw, self.integral_pre_offset_corrected, self.integral_post_offset_corrected)
