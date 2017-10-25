@@ -15,7 +15,6 @@ class BLMsPlotter(IPlotter):
     """
     Tools to plot dose and normalized dose for specific blms.
     """
-    plt.style.use('ggplot')
     regex_name_pattern = re.compile(r"([\w\.]+):(\w+)")
     date_format = '%Y-%m-%d'
 
@@ -52,8 +51,10 @@ class BLMsPlotter(IPlotter):
         dcum_start, dcum_end = self.get_plot_xlim(blm_positions)
         f, ax = self.build_blm_layout(dcum_start, dcum_end)
         f.suptitle(r'Total integrated dose for [{} : {}] normalized with intensity'.format(start.strftime(self.date_format), end.strftime(self.date_format)))
+        ax.grid(True)
+        # ax.style.use('ggplot')
 
-        ax.set_ylabel(r'normalized TID [$Gy/ps$]')
+        ax.set_ylabel(r'normalized TID [$Gy/ps$]',fontsize = 12)
         ax.plot(blm_positions, integrated_doses / integrated_intensity, '.-', linewidth=0.1, markersize=10, label='BLM data')
         ax.legend()
 

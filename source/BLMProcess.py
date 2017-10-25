@@ -1,3 +1,5 @@
+import os
+
 from config import PICKLE_BLM_INTERVALS_DIR, BLM_DATA_DIR
 from source.BLM_dose_calculation_exceptions import BLMDataEmpty, BLMIntervalsEmpty, BLMNoRawData
 from source.Loaders.BLMsRawPandasDataLoader import BLMsRawPandasDataLoader
@@ -19,9 +21,8 @@ class BLMProcess:
 
         try:
             self.load_pickled_raw_blm_data(blm)
-            calculated_blm_loader = BLMsCalculatedLoader(names=[blm.name], remove_raw_data=False)
+            calculated_blm_loader = BLMsCalculatedLoader(names=[blm.name], remove_raw_data=True)
             is_calculated_blm_existing = self.check_if_blm_already_calculated(calculated_blm_loader)
-
             if is_calculated_blm_existing:
                 blm_calculated = self.load_calculated_blm(blm, calculated_blm_loader)
                 missing_blm_intervals = blm.get_missing_blm_intervals(blm_calculated.blm_intervals)
@@ -33,7 +34,8 @@ class BLMProcess:
             else:
                 self.set_blm_calculators(blm)
 
-            self.save_blm_as_pickle(blm)
+            file_path = self.save_blm_as_pickle(blm)
+            self.remove_old_pickles(calculated_blm_loader, file_path)
             logging.info('{}\t done'.format(blm.name))
             return blm if self.should_return_blm else None
 
@@ -43,11 +45,17 @@ class BLMProcess:
             logging.critical('{} {} {}'.format(blm.name, traceback.format_exc(), e))
             raise e
 
+    def remove_old_pickles(self, blm_calculated, new_pickle_file_path):
+        if blm_calculated is not None:
+            files_to_be_removed = filter(lambda f_path: f_path != new_pickle_file_path, blm_calculated.file_paths)
+            for file_path in files_to_be_removed:
+                os.remove(file_path)
+                logging.info('{}\t removed'.format(file_path))
+
     def save_blm_as_pickle(self, blm):
         blm.clean_blm_intervals_from_temporary_data(clean_blm_data=True)
         blm.name = blm.name + ':' + self.field
-        blm.to_pickle(PICKLE_BLM_INTERVALS_DIR, self.start, self.end)
-        logging.info('{}\t done'.format(blm.name))
+        return blm.to_pickle(PICKLE_BLM_INTERVALS_DIR, self.start, self.end)
 
     def set_calculators_for_missing_intervals(self, blm, missing_intervals):
         logging.info('{}\t missing {} intervals'.format(blm.name, len(missing_intervals)))

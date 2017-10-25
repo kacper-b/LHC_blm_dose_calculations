@@ -24,36 +24,38 @@ from source.BLM import BLM
 from source.BLMFactory import BLMFactory
 from source.BLMProcess import BLMProcess
 import logging
-logging.basicConfig(level=logging.CRITICAL)
+logging.basicConfig(level=logging.INFO)
 
 if __name__ == '__main__':
-    number_of_simultaneous_processes = 1
+    number_of_simultaneous_processes = 7
     calculators = [PreOffsetCalc(), PreOffsetCorrectedIntegralCalc(),
                    RawIntegralCalc(),
                    PostOffsetCalc(), PostOffsetCorrectedIntegralCalc(),
                    # PlotCalc(BLM_INTERVALS_PLOTS_DIR)
                    ]
-    start = datetime(year=2016, month=5, day=10)
-    end = datetime(year=2016, month=6, day=17)
+    start = datetime(year=2016, month=4, day=30)
+    end = datetime(year=2016, month=12, day=8)
     field = 'LOSS_RS12'
-    blm_list_file_path = os.path.join(BLM_LIST_DIR, 'corina5R5B2.scv')
+    blm_list_file_path = os.path.join(BLM_LIST_DIR, 'allblm_20161013.csv')
 
     iil = IntensityIntervalsLoader()
     iil.set_files_paths(PICKLE_INTENSITY_INTERVALS_DIR, start, end)
     iil.load_pickles()
     iil.filter_interval_by_dates(start, end)
+    iil.filter_interval_by_valid_flag()
 
     blm_csv_content = {blm.raw_name: blm.position for blm in BLMsParser.read(blm_list_file_path)}
     factory = BLMFactory()
-    blm_process = BLMProcess(start, end, field, calculators, should_return_blm=True)
+    blm_process = BLMProcess(start, end, field, calculators, should_return_blm=False)
 
     with Pool(processes=number_of_simultaneous_processes) as pool:
         blms = pool.map(blm_process.run, factory.build(iil.data, blm_csv_content))
 
-    for blm in blms:
-        print(blm.name, blm.get_pre_oc_dose())
+    if blm_process.should_return_blm:
+        for blm in blms:
+            print(blm.name, blm.get_pre_oc_dose())
 
-    p = BLMsPlotter('.')
-    # p.plot_total_dose(blms, lambda blm: blm.get_pre_oc_dose())
-    z = p.plot_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), lambda blm: blm.get_oc_intensity_integral())
+        p = BLMsPlotter('.')
+        # p.plot_total_doscat e(blms, lambda blm: blm.get_pre_oc_dose())
+        z = p.plot_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), lambda blm: blm.get_oc_intensity_integral())
 

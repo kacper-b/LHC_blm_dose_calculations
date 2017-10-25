@@ -22,7 +22,8 @@ class BLM:
 
     def get_missing_blm_intervals(self, intervals_set_container_to_check):
         if self.blm_intervals is not None:
-            return intervals_set_container_to_check - self.blm_intervals
+            z = self.blm_intervals - intervals_set_container_to_check
+            return z
 
     def set(self, calc):
         if self.blm_intervals is not None and not self.data.empty:
@@ -56,8 +57,10 @@ class BLM:
 
     def to_pickle(self, directory, start, end):
         self.clean_blm_intervals_from_temporary_data()
+        file_path = os.path.join(directory, self.get_file_name(start, end)) + '.p'
         with open(os.path.join(directory, self.get_file_name(start, end)) + '.p', 'wb') as f:
             pickle.dump(self, f)
+        return file_path
 
     def clean_blm_intervals_from_temporary_data(self, clean_blm_data=False):
         for blm_i in self.blm_intervals:

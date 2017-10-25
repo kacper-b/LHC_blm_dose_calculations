@@ -43,6 +43,16 @@ class IntensityIntervalsLoader(ILoader):
         func = (lambda interval: start_in_sec <= interval.start and interval.end <= end_in_sec)
         self.data = list(filter(func, self.data))
 
+    def filter_interval_by_valid_flag(self):
+        """
+
+        :param start_date:
+        :param end_date:
+        :return:
+        """
+        func = (lambda interval: interval.isValid())
+        self.data = list(filter(func, self.data))
+
     def load_pickles(self):
         import projects.LHC_intensity_calculations.source
         sys.modules['source'] = projects.LHC_intensity_calculations.source
