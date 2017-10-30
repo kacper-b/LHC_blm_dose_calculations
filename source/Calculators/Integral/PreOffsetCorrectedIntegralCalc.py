@@ -1,7 +1,7 @@
 import numpy as np
 
 from source.BLM_dose_calculation_exceptions import IntegrationResultBelowZero, IntensityIntervalNotCoveredByBLMData, \
-    NoBLMDataForIntensityInterval
+    NoBLMDataForIntensityInterval, IntegrationResultIsNan
 from source.Calculators.Integral.IntegralCalc import IntegralCalc
 
 
@@ -12,9 +12,8 @@ class PreOffsetCorrectedIntegralCalc(IntegralCalc):
             blm_beam_on_data = blm_interval.get_integrated_data(data) - blm_interval.offset_pre
             try:
                 integral_offset_corrected = self.__integrate(blm_beam_on_data, col_name, blm_interval)
-            except (
-                    IntegrationResultBelowZero, IntensityIntervalNotCoveredByBLMData,
-                    NoBLMDataForIntensityInterval) as e:
+            except (IntegrationResultBelowZero, IntensityIntervalNotCoveredByBLMData,
+                    NoBLMDataForIntensityInterval, IntegrationResultIsNan) as e:
                 e.logging_func('{}'.format(str(e)))
                 integral_offset_corrected = 0
             finally:
@@ -25,6 +24,8 @@ class PreOffsetCorrectedIntegralCalc(IntegralCalc):
             integral = np.trapz(y=data[data.columns[0]], x=data.index)
             if integral < 0:
                 raise IntegrationResultBelowZero('{} integrated dose < 0: {}'.format(col_name, blm_interval))
+            elif np.isnan(integral):
+                IntegrationResultIsNan('{} integrated dose is Nan: {}'.format(col_name, blm_interval))
             return integral
         else:
             raise NoBLMDataForIntensityInterval(

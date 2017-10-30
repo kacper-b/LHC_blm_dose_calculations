@@ -1,5 +1,7 @@
 import logging
 
+import matplotlib.gridspec as gridspec
+
 from source.Calculators.Calc import Calc
 from datetime import datetime
 import os
@@ -20,6 +22,7 @@ class BLMsPlotter(IPlotter):
 
     def __init__(self, output_directory):
         self.output_directory = output_directory
+        self.pl = plotter_layout()
 
     def build_blm_layout(self, dcum_start, dcum_end):
         """
@@ -28,16 +31,37 @@ class BLMsPlotter(IPlotter):
         :param dcum_end:
         :return: t
         """
-        pl = plotter_layout()
+        pl = self.pl
         pl.start, pl.end = dcum_start, dcum_end
-        pl.x_off = 1
+        pl.x_off = 0
         fig_size = [24, 16]
-        f, ax = plt.subplots(3, sharex=True, figsize=fig_size)
+        fig = plt.figure(figsize=fig_size)
+        fig.subplots_adjust(hspace=.001)
         plt.subplots_adjust(hspace=.001)
         plt.subplots_adjust(top=0.95)
-        pl.plotter_layout(ax[1], 0, 1)
-        pl.plotter_optics(ax[2], ['BETX', 'DX'])
-        return f, ax[0]
+        gs1 = gridspec.GridSpec(3, 1)
+
+        # ax1 = fig.add_subplot(2, 1, 1)
+        #
+        # ax2 = fig.add_subplot(4, 1, 3,sharex=ax1)
+        # pl.plotter_layout(ax2, 0, 1)
+        #
+        # ax3 = fig.add_subplot(4, 1, 4,sharex=ax1)
+        # pl.plotter_optics(ax3, ['BETX', 'DX'])
+        # return fig, ax1
+
+        # ax1 = fig.add_subplot(3, 1, 1, rowspan=2)
+        ax1 = plt.subplot(gs1[:2])
+        # ax2 = fig.add_subplot(3, 1, 3,sharex=ax1)
+        ax2 = plt.subplot(gs1[2:],sharex=ax1)
+
+        pl.plotter_layout(ax2, 0, 1)
+
+        # ax3 = fig.add_subplot(4, 1, 4,sharex=ax1)
+        # pl.plotter_optics(ax3, ['BETX', 'DX'])
+        return plt, ax1
+
+
 
 
     def plot_normalized_dose(self, blms, blm_summing_func, normalization_func):
@@ -45,7 +69,7 @@ class BLMsPlotter(IPlotter):
         integrated_intensity = normalization_func(blms[0])
         logging.info('Integrated intensity={}'.format(integrated_intensity))
 
-        blm_positions, integrated_doses = self.get_sorted_blm_data(blms, blm_summing_func)
+        blm_positions, integrated_doses, blm_types = self.get_sorted_blm_data(blms, blm_summing_func)
         start, end = self.get_plot_dates(blms)
 
         dcum_start, dcum_end = self.get_plot_xlim(blm_positions)
@@ -60,39 +84,80 @@ class BLMsPlotter(IPlotter):
 
         # self.show()
         self.save_plot(os.path.join(PLOT_DIR, 'nTID{}_{}.pdf'.format(start.strftime(self.date_format), end.strftime(self.date_format))))
+        return zip(blm_positions, integrated_doses)
+
 
     def get_plot_xlim(self, blm_positions):
         dcum_start = blm_positions[0] - (blm_positions[-1] - blm_positions[0]) * 0.01
         dcum_end = blm_positions[-1] + (blm_positions[-1] - blm_positions[0]) * 0.01
+        print(dcum_start, dcum_end)
         return dcum_start, dcum_end
 
     def get_sorted_blm_data(self, blms, blm_summing_func):
         integrated_doses = np.zeros(len(blms), dtype=np.float)
         blm_positions = np.zeros(len(blms), dtype=np.float)
+        blm_types = np.zeros(len(blms), dtype=np.float)
         for index, blm in enumerate(blms):
             integrated_doses[index] = blm_summing_func(blm)
-            blm_positions[index] = blm.position / 1e2
+            blm_positions[index] = blm.position
+            blm_types[index] = self.get_blm_type(blm)
+        if -1 in blm_types:
+            raise Exception('Wrong recognized BLM type')
         order = blm_positions.argsort()
-        return blm_positions[order], integrated_doses[order]
+        return blm_positions[order], integrated_doses[order], blm_types[order]
 
     def plot_total_dose(self, blms, blm_summing_func):
         # it's sufficient to calculate normalization factor for one blm only, since intensity data are the same for all BLMs
 
-        blm_positions, integrated_doses = self.get_sorted_blm_data(blms, blm_summing_func)
-        start, end = self.get_plot_dates(blms)
+        # blm_positions, integrated_doses, blm_types = self.get_sorted_blm_data(blms, blm_summing_func)
+        # integrated_doses_valid = np.logical_not(np.isnan(integrated_doses))
+        # blm_positions = blm_positions[integrated_doses_valid]
+        # integrated_doses = integrated_doses[integrated_doses_valid]
+        # blm_types = blm_types[integrated_doses_valid]
+        # start, end = self.get_plot_dates(blms)
+        # dcum_start, dcum_end = self.get_plot_xlim(blm_positions)
+        # f, ax = self.build_blm_layout(dcum_start, dcum_end)
+        # f.suptitle(r'Total integrated dose for [{} : {}]'.format(start.strftime(self.date_format), end.strftime(self.date_format)))
+        # ax.grid(True)
+        #
+        # ax.set_ylabel(r'TID [$Gy$]')
+        # ax.semilogy(blm_positions[blm_types==1], integrated_doses[blm_types==1], 'r.-', linewidth=0.1, markersize=10, label='B1')
+        # ax.semilogy(blm_positions[blm_types==2], integrated_doses[blm_types==2], 'b.-', linewidth=0.1, markersize=10, label='B2')
+        # ax.semilogy(blm_positions[blm_types==0], integrated_doses[blm_types==0], 'g.-', linewidth=0.1, markersize=10, label='B0')
+        # ax.legend()
+        #
+        # # self.show()
+        # self.save_plot(os.path.join(PLOT_DIR, 'TID{}_{}.pdf'.format(start.strftime(self.date_format), end.strftime(self.date_format))))
+        # return zip(blm_positions, integrated_doses)
 
+
+
+
+
+
+
+        blm_positions, integrated_doses, blm_types = self.get_sorted_blm_data(blms, blm_summing_func)
+        integrated_doses_valid = np.logical_not(np.isnan(integrated_doses))
+        blm_positions = blm_positions[integrated_doses_valid]
+        integrated_doses = integrated_doses[integrated_doses_valid] * 3000/44.
+        blm_types = blm_types[integrated_doses_valid]
+        start, end = self.get_plot_dates(blms)
         dcum_start, dcum_end = self.get_plot_xlim(blm_positions)
         f, ax = self.build_blm_layout(dcum_start, dcum_end)
-        f.suptitle(r'Total integrated dose for [{} : {}]'.format(start.strftime(self.date_format), end.strftime(self.date_format)))
+        f.suptitle(r'Extrapolated TID for HL LHC (3000 fb-1) based on BLM data from {} until {} normalized with luminosity (44 fb-1)'.format(start.strftime(self.date_format), end.strftime(self.date_format)),fontsize = 12)
+        ax.grid(True)
+        f.text(self.pl.start+.5*self.pl.ran, 12, 'PRELIMINARY',fontsize=100,va='center',ha='center', color='gray', alpha=0.5,rotation=45)
+        f.text(self.pl.start+.9*self.pl.ran,-7, 'Courtesy MCWG ',fontsize=12,va='bottom',ha='right', color='gray', alpha=0.5,rotation=0)
 
-        ax.set_ylabel(r'TID [$Gy$]')
-        ax.plot(blm_positions, integrated_doses, '.-', linewidth=0.1, markersize=10, label='BLM data')
+        ax.set_ylabel(r'Extrapolated TID [$Gy$]')
+        ax.semilogy(blm_positions[blm_types==1], integrated_doses[blm_types==1], 'r.-', linewidth=0.1, markersize=10, label='B1')
+        ax.semilogy(blm_positions[blm_types==2], integrated_doses[blm_types==2], 'b.-', linewidth=0.1, markersize=10, label='B2')
+        # ax.semilogy(blm_positions[blm_types==0], integrated_doses[blm_types==0], 'g.-', linewidth=0.1, markersize=10, label='B0')
         ax.legend()
 
         # self.show()
         self.save_plot(os.path.join(PLOT_DIR, 'TID{}_{}.pdf'.format(start.strftime(self.date_format), end.strftime(self.date_format))))
-
-
+        return zip(blm_positions, integrated_doses)
     # def heat_map_plot(self, blms):
     #     dates = pd.date_range(datetime.utcfromtimestamp(blms[0].blm_intervals[0].start), datetime.utcfromtimestamp(blms[0].blm_intervals[-1].end), freq='1D')
     #     num_of_days = len(dates)
@@ -131,6 +196,17 @@ class BLMsPlotter(IPlotter):
             return blm_timber_query_splitted[0]
         else:
             return blm_timber_query
+
+    def get_blm_type(self, blm):
+        blm_type = -1
+        if '.B0' in blm.name:
+            blm_type = 0
+        elif '.B1' in blm.name:
+            blm_type = 1
+        elif '.B2' in blm.name:
+            blm_type = 2
+        return blm_type
+
 
 
 if __name__ == '__main__':

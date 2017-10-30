@@ -80,6 +80,11 @@ class IntegrationResultBelowZero(Exception, ExceptionLogging):
         super(self.__class__, self).__init__(msg)
     pass
 
+class IntegrationResultIsNan(Exception, ExceptionLogging):
+    def __init__(self, msg):
+        self.logging_func = logging.warning
+        super(self.__class__, self).__init__(msg)
+    pass
 
 class IntensityIntervalNotCoveredByBLMData(Exception, ExceptionLogging):
     def __init__(self, msg):
@@ -104,18 +109,18 @@ class BLMLoaderWrongNumberOfColumns(Exception, ExceptionLogging):
 
 class BLMDataEmpty(Exception, ExceptionLogging):
     def __init__(self, msg):
-        self.logging_func = logging.warning
+        self.logging_func = logging.critical
         super(self.__class__, self).__init__(msg)
     pass
 
 
 class BLMIntervalsEmpty(Exception, ExceptionLogging):
     def __init__(self, msg):
-        self.logging_func = logging.warning
+        self.logging_func = logging.critical
         super(self.__class__, self).__init__(msg)
     pass
 
-class BLMNoRawData(Exception, ExceptionLogging):
+class BLMInvalidRawData(Exception, ExceptionLogging):
     def __init__(self, msg):
         self.logging_func = logging.error
         super(self.__class__, self).__init__(msg)

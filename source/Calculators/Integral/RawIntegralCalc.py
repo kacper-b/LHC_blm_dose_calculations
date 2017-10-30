@@ -21,8 +21,6 @@ class RawIntegralCalc(IntegralCalc):
     def __integrate(self, data, col_name, blm_interval):
         if not data.empty:
             integral = np.trapz(y=data[data.columns[0]], x=data.index)
-            # if integral < 0:
-            #     raise IntegrationResultBelowZero('{} integrated dose < 0: {}'.format(col_name, blm_interval))
             return integral
         else:
             raise NoBLMDataForIntensityInterval(
