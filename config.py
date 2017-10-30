@@ -28,3 +28,4 @@ IPs = [[0, 1, 'IP1', 1],
        [19994.162, 7, 'IP7', 1],
        [23315.302, 8, 'IP8', 1],]
 LHC_LENGTH = 26658.883 #in meters
+TIMBER_LOGGING_FREQ = 84
