@@ -51,7 +51,6 @@ def is_blm_in_ip_neighbourhood(blm, ip_num, left_offset=700, right_offset=700):
         return True
     return False
 
-
 if __name__ == '__main__':
     number_of_simultaneous_processes = 8
     calculators = [PreOffsetCalc(), PreOffsetCorrectedIntegralCalc(),
