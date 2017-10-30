@@ -18,3 +18,12 @@ INTENSITY_INTERVALS_FILES_REGEX_PATTERN = re.compile(r".*_(\d{8})\d*_(\d{8})\d*\
 BLM_DATE_FORMAT = '%Y_%m_%d'
 PICKLE_BLM_INTERVALS_DIR = os.path.join(DATA_DIRs_NAMES['pickles'], 'analysed_blm')
 BLM_INTERVALS_PLOTS_DIR = PICKLE_BLM_INTERVALS_DIR
+IPs = [[0, 1, 'IP1', 1],
+       [3332.360, 2, 'IP2', 1],
+       [6664.720, 3, 'IP3', 0],
+       [9997.081, 4, 'IP4', 1],
+       [13329.441, 5, 'IP5', 1],
+       [16661.802, 6, 'IP6', 1],
+       [19994.162, 7, 'IP7', 1],
+       [23315.302, 8, 'IP8', 1],]
+LHC_LENGTH = 26658.883 #in meters
