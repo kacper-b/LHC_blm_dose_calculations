@@ -19,6 +19,7 @@ class PreOffsetCorrectedIntegralCalc(IntegralCalc):
             except NoBLMDataForIntensityInterval as e:
                 if (blm_interval.end - blm_interval.start) > TIMBER_LOGGING_FREQ:
                     e.logging_func('{}'.format(str(e)))
+                integral_offset_corrected = 0
             finally:
                 blm_interval.integral_pre_offset_corrected = integral_offset_corrected
 

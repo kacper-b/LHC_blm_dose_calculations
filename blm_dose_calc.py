@@ -28,7 +28,7 @@ import pandas as pd
 from config import IPs, LHC_LENGTH
 
 
-logging.basicConfig(level=logging.CRITICAL)
+logging.basicConfig(level=logging.WARNING)
 
 def get_IP_position(IP_num):
     df_ips = pd.DataFrame(IPs, columns=['dcum', 'ipn', 'ip', 'pos'])
@@ -58,22 +58,21 @@ if __name__ == '__main__':
                    PostOffsetCalc(), PostOffsetCorrectedIntegralCalc(),
                    # PlotCalc(BLM_INTERVALS_PLOTS_DIR)
                    ]
-    start = datetime(year=2017, month=5, day=1)
-    end = datetime(year=2017, month=10, day=16)
+    start = datetime(year=2016, month=3, day=28)
+    end = datetime(year=2016, month=12, day=8)
     field = 'LOSS_RS12'
     blm_list_file_path = os.path.join(BLM_LIST_DIR, 'allblm_20161013.csv')
-
     iil = IntensityIntervalsLoader()
     iil.set_files_paths(PICKLE_INTENSITY_INTERVALS_DIR, start, end)
     iil.load_pickles()
     iil.filter_interval_by_dates(start, end)
     iil.filter_interval_by_valid_flag()
-    IP_num = 7 #if is_blm_in_ip_neighbourhood(blm, IP_num,1200,0)
+    IP_num = 5 #if is_blm_in_ip_neighbourhood(blm, IP_num,1200,0)
 
     blm_csv_content = {blm.raw_name: blm.position for blm in BLMsParser.read(blm_list_file_path)
-                       if is_blm_in_ip_neighbourhood(blm, IP_num, 300, 300)}# or True}
+                       if is_blm_in_ip_neighbourhood(blm, IP_num, 300, 300) or True}# or True}
     factory = BLMFactory()
-    blm_process = BLMProcess(start, end, field, calculators, should_return_blm=True)
+    blm_process = BLMProcess(start, end, field, calculators, should_return_blm=False)
 
     with Pool(processes=number_of_simultaneous_processes) as pool:
         blms = pool.map(blm_process.run, factory.build(iil.data, blm_csv_content))
@@ -83,4 +82,4 @@ if __name__ == '__main__':
             print(blm.name, blm.get_pre_oc_dose())
 
         p = BLMsPlotter('.')
-        p.plot_total_dose(blms, lambda blm: blm.get_pre_oc_dose())
+        print('\n'.join(map(lambda xy: ','.join(map(str, xy)), p.plot_total_dose(blms, lambda blm: blm.get_pre_oc_dose()))))

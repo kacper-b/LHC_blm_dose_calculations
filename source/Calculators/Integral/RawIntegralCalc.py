@@ -12,13 +12,16 @@ class RawIntegralCalc(IntegralCalc):
         for blm_interval in blm_intervals:
             blm_beam_on_data = blm_interval.get_integrated_data(data)
             try:
-                blm_interval.integral_raw = self.__integrate(blm_beam_on_data, col_name, blm_interval)
+                integral_raw = self.__integrate(blm_beam_on_data, col_name, blm_interval)
             except (IntegrationResultBelowZero, IntensityIntervalNotCoveredByBLMData) as e:
-                blm_interval.integral_raw = 0
+                integral_raw = 0
                 e.logging_func('{}'.format(str(e)))
             except NoBLMDataForIntensityInterval as e:
                 if (blm_interval.end - blm_interval.start) > TIMBER_LOGGING_FREQ:
                     e.logging_func('{}'.format(str(e)))
+                integral_raw = 0
+            finally:
+                blm_interval.integral_raw = integral_raw
 
     def __integrate(self, data, col_name, blm_interval):
         if not data.empty:

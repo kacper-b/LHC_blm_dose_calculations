@@ -156,7 +156,9 @@ class BLMsPlotter(IPlotter):
         ax.legend()
 
         # self.show()
-        self.save_plot(os.path.join(PLOT_DIR, 'TID{}_{}.pdf'.format(start.strftime(self.date_format), end.strftime(self.date_format))))
+        file_path_name_without_extension = os.path.join(PLOT_DIR, 'TID{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format)))
+        self.save_plot(file_path_name_without_extension + '.png')
+        self.save_plot(file_path_name_without_extension + '.pdf')
         return zip(blm_positions, integrated_doses)
     # def heat_map_plot(self, blms):
     #     dates = pd.date_range(datetime.utcfromtimestamp(blms[0].blm_intervals[0].start), datetime.utcfromtimestamp(blms[0].blm_intervals[-1].end), freq='1D')

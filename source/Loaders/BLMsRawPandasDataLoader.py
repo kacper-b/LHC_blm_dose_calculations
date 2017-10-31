@@ -54,8 +54,9 @@ class BLMsRawPandasDataLoader(IBLMsLoader):
             blm_name_data_dict[blm.columns[0]] = blm_name_data_dict.setdefault(blm.columns[0], pd.DataFrame()).append(blm)
         for blm in blm_name_data_dict.values():
             blm.sort_index(inplace=True)
-            blm.fillna(method='pad', inplace=True)
-            blm.fillna(method='bfill', inplace=True)
+            blm.dropna(axis=0, how='any', inplace=True)
+            # blm.fillna(method='pad', inplace=True)
+            # blm.fillna(method='bfill', inplace=True)
         return blm_name_data_dict
 
     def get_blms(self):
