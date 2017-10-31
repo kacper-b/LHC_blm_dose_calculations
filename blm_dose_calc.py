@@ -59,7 +59,7 @@ if __name__ == '__main__':
                    # PlotCalc(BLM_INTERVALS_PLOTS_DIR)
                    ]
     start = datetime(year=2016, month=3, day=28)
-    end = datetime(year=2016, month=12, day=8)
+    end = datetime(year=2016, month=10, day=31)
     field = 'LOSS_RS12'
     blm_list_file_path = os.path.join(BLM_LIST_DIR, 'allblm_20161013.csv')
     iil = IntensityIntervalsLoader()
@@ -67,12 +67,12 @@ if __name__ == '__main__':
     iil.load_pickles()
     iil.filter_interval_by_dates(start, end)
     iil.filter_interval_by_valid_flag()
-    IP_num = 5 #if is_blm_in_ip_neighbourhood(blm, IP_num,1200,0)
+    IP_num = 1 #if is_blm_in_ip_neighbourhood(blm, IP_num,1200,0)
 
     blm_csv_content = {blm.raw_name: blm.position for blm in BLMsParser.read(blm_list_file_path)
-                       if is_blm_in_ip_neighbourhood(blm, IP_num, 300, 300) or True}# or True}
+                       if is_blm_in_ip_neighbourhood(blm, IP_num, 400, 400)}# or True}
     factory = BLMFactory()
-    blm_process = BLMProcess(start, end, field, calculators, should_return_blm=False)
+    blm_process = BLMProcess(start, end, field, calculators, should_return_blm=True)
 
     with Pool(processes=number_of_simultaneous_processes) as pool:
         blms = pool.map(blm_process.run, factory.build(iil.data, blm_csv_content))
@@ -82,4 +82,5 @@ if __name__ == '__main__':
             print(blm.name, blm.get_pre_oc_dose())
 
         p = BLMsPlotter('.')
-        print('\n'.join(map(lambda xy: ','.join(map(str, xy)), p.plot_total_dose(blms, lambda blm: blm.get_pre_oc_dose()))))
+        p.plot_luminosity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), 39.31)
+        # p.plot_intensity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), lambda blm: blm.get_oc_intensity_integral())

@@ -14,6 +14,9 @@ class IPlotter(ABC):
         plt.legend(loc='best')
         plt.savefig(file_path, bbox_inches='tight')
 
+    def save_plot_data(self, file_path, x, y):
+        np.savetxt(file_path, np.column_stack((x,y)),delimiter='\t')
+
     def clear(self):
         plt.clf()
         plt.cla()
