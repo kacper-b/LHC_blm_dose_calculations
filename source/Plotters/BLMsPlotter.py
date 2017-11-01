@@ -3,6 +3,9 @@ import re
 from datetime import datetime
 import config
 import matplotlib.gridspec as gridspec
+import matplotlib.dates as md
+import matplotlib.colors as colors
+import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from projects.Plotting.python.plotting_layout import plotter_layout, PLOT_DIR
@@ -47,7 +50,7 @@ class BLMsPlotter(IPlotter):
         return plt, ax1
 
     def plot_luminosity_normalized_dose(self, blms, blm_summing_func, luminosity):
-        blm_positions, integrated_doses, blm_types, f, ax, dcum_start, dcum_end, start, end = self.run_common_functions(blm_summing_func, blms)
+        blm_positions, integrated_doses, blm_types, blm_names, f, ax, dcum_start, dcum_end, start, end = self.run_common_functions(blm_summing_func, blms)
 
         f.suptitle(r'Total integrated dose for [{} : {}] normalized with luminosity: {} fb${{^-1}}$'.
                    format(start.strftime(self.date_format), end.strftime(self.date_format), luminosity), fontsize=25)
@@ -58,14 +61,14 @@ class BLMsPlotter(IPlotter):
 
         file_name = 'n_lum_TID{}_{}_dcum_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), int(dcum_start), int(dcum_end))
         file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
-        self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses / luminosity)
+        self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses / luminosity, blm_names)
 
 
     def plot_intensity_normalized_dose(self, blms, blm_summing_func, normalization_func):
         # it's sufficient to calculate normalization factor for one blm only, since intensity data are the same for all BLMs
         integrated_intensity = normalization_func(blms[0])
 
-        blm_positions, integrated_doses, blm_types, f, ax, dcum_start, dcum_end, start, end = self.run_common_functions(blm_summing_func, blms)
+        blm_positions, integrated_doses, blm_types, blm_names, f, ax, dcum_start, dcum_end, start, end = self.run_common_functions(blm_summing_func, blms)
 
         f.suptitle(r'Total integrated dose for [{} : {}] normalized with intensity: {:.2e} ps'.
                    format(start.strftime(self.date_format), end.strftime(self.date_format), integrated_intensity), fontsize=25)
@@ -76,10 +79,10 @@ class BLMsPlotter(IPlotter):
 
         file_name = 'n_int_TID{}_{}_dcum_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), int(dcum_start), int(dcum_end))
         file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
-        self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses / integrated_intensity)
+        self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses / integrated_intensity, blm_names)
 
     def plot_total_dose(self, blms, blm_summing_func):
-        blm_positions, integrated_doses, blm_types, f, ax, dcum_start, dcum_end, start, end = self.run_common_functions(blm_summing_func, blms)
+        blm_positions, integrated_doses, blm_types, blm_names, f, ax, dcum_start, dcum_end, start, end = self.run_common_functions(blm_summing_func, blms)
 
         f.suptitle(r'Total integrated dose for [{} : {}]'.format(start.strftime(self.date_format), end.strftime(self.date_format)), fontsize=25)
 
@@ -89,10 +92,31 @@ class BLMsPlotter(IPlotter):
 
         file_name = 'TID{}_{}_dcum_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), int(dcum_start), int(dcum_end))
         file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
-        self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses)
+        self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses, blm_names)
+
+    def plot_total_cumulated_dose(self, blms, blm_summing_func):
+        for blm in blms:
+            self.clear()
+            dates = pd.date_range(datetime.utcfromtimestamp(blm.blm_intervals[0].start), datetime.utcfromtimestamp(blm.blm_intervals[-1].end),freq='1D')
+            num_of_days = len(dates)
+            intensity = np.array([0] + [blm_summing_func(blm, dates[i], dates[i + 1]) for i in range(num_of_days - 1)])
+            dates = pd.to_datetime(np.array((dates - datetime(1970, 1, 1)).total_seconds()), unit='s')
+            f, ax = plt.subplots(1, 1, figsize=[24, 16])
+            xfmt = md.DateFormatter('%Y-%m-%d')
+            ax.xaxis.set_major_formatter(xfmt)
+            f.autofmt_xdate()
+            plt.xlabel(r'date')
+            ax.grid(True)
+            plt.title(r'{} - total integrated cumulated dose for [{} : {}]'.format(blm.name, dates[0].strftime(self.date_format), dates[-1].strftime(self.date_format)), fontsize=14)
+            plt.ylabel(r'Total integrated cumulated dose [Gy]')
+            plt.plot(dates, np.cumsum(intensity), label='BLM data')
+            file_name = 'TICD_{}_{}_{}'.format(dates[0].strftime(self.date_format), dates[-1].strftime(self.date_format), blm.name.replace('.','_'))
+            file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
+            self.save_plot(file_path_name_without_extension)
+
 
     def plot_total_dose_extrapolated(self, blms, blm_summing_func):
-        blm_positions, integrated_doses, blm_types, f, ax, dcum_start, dcum_end, start, end = self.run_common_functions(blm_summing_func, blms)
+        blm_positions, integrated_doses, blm_types, blm_names, f, ax, dcum_start, dcum_end, start, end = self.run_common_functions(blm_summing_func, blms)
 
         f.suptitle(r'Extrapolated TID for HL LHC (3000 fb$^{{-1}}$) based on BLM data from {} until {} normalized with luminosity (44 fb^${{-1}}$)'.
                    format(start.strftime(self.date_format), end.strftime(self.date_format)), fontsize=25)
@@ -103,23 +127,25 @@ class BLMsPlotter(IPlotter):
 
         file_name = 'extrapolated_TID_{}_{}_dcum_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), int(dcum_start), int(dcum_end))
         file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
-        self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses)
+        self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses, blm_names)
 
     def get_sorted_blm_data(self, blms, blm_summing_func):
         integrated_doses = np.zeros(len(blms), dtype=np.float)
         blm_positions = np.zeros(len(blms), dtype=np.float)
         blm_types = np.zeros(len(blms), dtype=np.float)
+        blm_names = np.zeros(len(blms), dtype=np.dtype('a64'))
         for index, blm in enumerate(blms):
             integrated_doses[index] = blm_summing_func(blm)
             blm_positions[index] = blm.position
+            blm_names[index] = blm.name
             blm_types[index] = self.get_blm_type(blm)
         if -1 in blm_types:
             raise Exception('Wrong recognized BLM type')
         order = blm_positions.argsort()
-        return blm_positions[order], integrated_doses[order], blm_types[order]
+        return blm_positions[order], integrated_doses[order], blm_types[order], blm_names[order]
 
     def run_common_functions(self, blm_summing_func, blms):
-        blm_positions, integrated_doses, blm_types = self.remove_nans(*self.get_sorted_blm_data(blms, blm_summing_func))
+        blm_positions, integrated_doses, blm_types, blm_names = self.remove_nans(*self.get_sorted_blm_data(blms, blm_summing_func))
         start, end = self.get_plot_dates(blms)
         dcum_start, dcum_end = self.get_plot_xlim(blm_positions)
         f, ax = self.build_blm_layout(dcum_start, dcum_end)
@@ -130,11 +156,11 @@ class BLMsPlotter(IPlotter):
                  'Courtesy MCWG: {}'.format(datetime.today().strftime('%Y-%m-%d %H:%M')), fontsize=12, va='bottom', ha='right', color='gray', alpha=0.5, rotation=0)
         ax.grid(True)
         ax.legend()
-        return blm_positions, integrated_doses, blm_types, f,ax, dcum_start, dcum_end, start, end
+        return blm_positions, integrated_doses, blm_types, blm_names, f,ax, dcum_start, dcum_end, start, end
 
-    def remove_nans(self, blm_positions, integrated_doses, blm_types):
+    def remove_nans(self, blm_positions, integrated_doses, blm_types,blm_names):
         integrated_doses_valid = np.logical_not(np.isnan(integrated_doses))
-        return blm_positions[integrated_doses_valid], integrated_doses[integrated_doses_valid], blm_types[integrated_doses_valid]
+        return blm_positions[integrated_doses_valid], integrated_doses[integrated_doses_valid], blm_types[integrated_doses_valid], blm_names[integrated_doses_valid]
 
     def get_plot_dates(self, blms):
         return datetime.utcfromtimestamp(blms[0].blm_intervals[0].start), datetime.utcfromtimestamp(blms[0].blm_intervals[-1].end)
@@ -169,6 +195,31 @@ class BLMsPlotter(IPlotter):
         func(blm_positions[blm_types == 2], integrated_doses[blm_types == 2], 'b.-', linewidth=0.1, markersize=10, label='Beam 2')
         func(blm_positions[blm_types == 0], integrated_doses[blm_types == 0], 'g.-', linewidth=0.1, markersize=10, label='Top BLMs')
 
+    def heat_map_plot(self, blms):
+        dates = pd.date_range(datetime.utcfromtimestamp(blms[0].blm_intervals[0].start), datetime.utcfromtimestamp(blms[0].blm_intervals[-1].end), freq='1D')
+        num_of_days = len(dates)
+        intens = np.zeros((len(blms), num_of_days - 1))
+        blms_pos = np.zeros((len(blms), 1))
+
+        for j, blm in enumerate(blms):
+            intens[j] = np.array([blm.get_pre_oc_dose(dates[i], dates[i + 1]) for i in range(len(dates) - 1)])
+            blms_pos[j] = blm.position
+        x, y = np.meshgrid(np.array((dates - datetime(1970, 1, 1)).total_seconds()[:-1]), blms_pos)
+        dates = pd.to_datetime(x.flatten(), unit='s')
+        x = np.array(dates).reshape(y.shape)
+
+        f, ax = plt.subplots(1, 1, figsize=[15, 9])
+        xfmt = md.DateFormatter('%Y-%m-%d')
+        ax.xaxis.set_major_formatter(xfmt)
+        f.autofmt_xdate()
+        plt.xlabel(r'date')
+        plt.ylabel(r'position [m]')
+        plt.pcolormesh(x, y, intens, label='dose', norm=colors.SymLogNorm(linthresh=0.03,vmin=intens.min(), vmax=intens.max()),  cmap='RdBu_r')
+        plt.colorbar()
+        self.legend()
+        file_name = 'heatmap_TID_{}_{}_dcum_{}_{}'.format(x[0], x[-1], int(y[0]), int(y[-1]))
+        file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
+        self.save_plot(file_path_name_without_extension)
 
 if __name__ == '__main__':
     p = BLMsPlotter(None)

@@ -8,7 +8,7 @@ from config import BLM_DATE_FORMAT
 class BLMsCalculatedLoader(IBLMsLoader):
     def __init__(self, names, remove_raw_data=False):
         super(BLMsCalculatedLoader, self).__init__(names)
-        self.remove_raw_data = False
+        self.remove_raw_data = remove_raw_data
 
     def is__file_name_valid(self, filename, start, end, field):
         """

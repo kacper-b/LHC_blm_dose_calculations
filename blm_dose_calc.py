@@ -42,6 +42,8 @@ def is_blm_in_ip_neighbourhood(blm, ip_num, left_offset=700, right_offset=700):
     interval_end = ip_position + right_offset
     lhc_len = LHC_LENGTH
     blm.position = blm.position / 100 #convert cm to m
+    if blm.position < 0:
+        blm.position+=lhc_len
     if interval_end <= lhc_len and interval_start >=0 and interval_start < blm.position < interval_end:
         return True
     elif interval_end <= lhc_len and interval_start < 0 and blm.position >= (lhc_len + interval_start):
@@ -51,8 +53,18 @@ def is_blm_in_ip_neighbourhood(blm, ip_num, left_offset=700, right_offset=700):
         return True
     return False
 
+def is_blm_in_arc_after_ip(blm, ip_num, left_offset=700, right_offset=700):
+    ip_next = ip_num + 1  if ip_num != 8 else 1
+    ip1_position = get_IP_position(ip_num)
+    ip2_position = get_IP_position(ip_next)
+    if ip_next != 1:
+        return is_blm_in_ip_neighbourhood(blm, ip_num, -left_offset, ip2_position - ip1_position - right_offset)
+    else:
+        return is_blm_in_ip_neighbourhood(blm, ip_num, -left_offset, LHC_LENGTH - ip1_position - right_offset)
+
+
 if __name__ == '__main__':
-    number_of_simultaneous_processes = 8
+    number_of_simultaneous_processes = 4
     calculators = [PreOffsetCalc(), PreOffsetCorrectedIntegralCalc(),
                    RawIntegralCalc(),
                    PostOffsetCalc(), PostOffsetCorrectedIntegralCalc(),
@@ -60,6 +72,9 @@ if __name__ == '__main__':
                    ]
     start = datetime(year=2016, month=3, day=28)
     end = datetime(year=2016, month=10, day=31)
+    # start = datetime(year=2017, month=5, day=1)
+    # end = datetime(year=2017, month=10, day=16)
+
     field = 'LOSS_RS12'
     blm_list_file_path = os.path.join(BLM_LIST_DIR, 'allblm_20161013.csv')
     iil = IntensityIntervalsLoader()
@@ -67,10 +82,13 @@ if __name__ == '__main__':
     iil.load_pickles()
     iil.filter_interval_by_dates(start, end)
     iil.filter_interval_by_valid_flag()
-    IP_num = 1 #if is_blm_in_ip_neighbourhood(blm, IP_num,1200,0)
+    IP_num = 3
 
     blm_csv_content = {blm.raw_name: blm.position for blm in BLMsParser.read(blm_list_file_path)
-                       if is_blm_in_ip_neighbourhood(blm, IP_num, 400, 400)}# or True}
+                       # if True}
+                       if is_blm_in_ip_neighbourhood(blm, IP_num, 100, 100)}
+                       # if is_blm_in_arc_after_ip(blm, IP_num, 400, 400)}
+
     factory = BLMFactory()
     blm_process = BLMProcess(start, end, field, calculators, should_return_blm=True)
 
@@ -84,4 +102,6 @@ if __name__ == '__main__':
         p = BLMsPlotter('.')
         # p.plot_luminosity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), 39.31)
         # p.plot_intensity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), lambda blm: blm.get_oc_intensity_integral())
-        p.plot_total_dose(blms, lambda blm: blm.get_pre_oc_dose())
+        # p.plot_total_cumulated_dose(blms, lambda blm, start, end: blm.get_pre_oc_dose(start, end))
+        # p.plot_total_dose(blms, lambda blm: blm.get_pre_oc_dose())
+        # p.heat_map_plot(blms)
