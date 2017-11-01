@@ -1,12 +1,6 @@
-from source.Calculators.Calc import Calc
-from datetime import datetime
-import os
 import numpy as np
-import matplotlib.dates as md
 import matplotlib.pyplot as plt
-import pandas as pd
-import re
-from abc import ABC, abstractmethod
+from abc import ABC
 
 
 class IPlotter(ABC):
@@ -15,7 +9,12 @@ class IPlotter(ABC):
         plt.savefig(file_path, bbox_inches='tight')
 
     def save_plot_data(self, file_path, x, y):
-        np.savetxt(file_path, np.column_stack((x,y)),delimiter='\t')
+        np.savetxt(file_path, np.column_stack((x,y)), delimiter='\t', header='x\ty')
+
+    def save_plot_and_data(self, file_path_name_without_extension, blm_positions, integrated_doses):
+        self.save_plot(file_path_name_without_extension + '.png')
+        self.save_plot(file_path_name_without_extension + '.pdf')
+        self.save_plot_data(file_path_name_without_extension + '.txt', blm_positions, integrated_doses)
 
     def clear(self):
         plt.clf()

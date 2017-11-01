@@ -82,5 +82,6 @@ if __name__ == '__main__':
             print(blm.name, blm.get_pre_oc_dose())
 
         p = BLMsPlotter('.')
-        p.plot_luminosity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), 39.31)
+        # p.plot_luminosity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), 39.31)
         # p.plot_intensity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), lambda blm: blm.get_oc_intensity_integral())
+        p.plot_total_dose(blms, lambda blm: blm.get_pre_oc_dose())
