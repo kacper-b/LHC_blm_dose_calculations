@@ -1,9 +1,10 @@
+import logging
+
 import numpy as np
 
 from source.BLM_dose_calculation_exceptions import PostOffsetNan, PostOffsetEmpty, PostOffsetNotSetDueToNeighbourhood, \
     PostOffsetStdevOverThreshold, PreOffsetEmpty
 from source.Calculators.Offset.OffsetCalc import OffsetCalc
-
 
 class PostOffsetCalc(OffsetCalc):
     def __init__(self, offset_length=5 * 60, post_offset_shift=85, std_dev_threshold=0.5):
@@ -29,10 +30,10 @@ class PostOffsetCalc(OffsetCalc):
             offset_period_start = offset_data.index[0]
             offset_period_end = offset_data.index[-1]
         except (PostOffsetNan, PostOffsetEmpty, PostOffsetNotSetDueToNeighbourhood) as e:
-            # print(e)
+            e.logging_func('{}'.format(str(e)))
             pass
         except PostOffsetStdevOverThreshold as e:
-            # print(e)
+            e.logging_func('{}'.format(str(e)))
             pass
         finally:
             blm_intervals[current_blm_idx].offset_post = current_offset_val

@@ -6,8 +6,9 @@ import matplotlib.dates as md
 import matplotlib.pyplot as plt
 import pandas as pd
 import re
+from source.Plotters.IPlotter import IPlotter
 
-class PlotCalc(Calc):
+class PlotCalc(Calc, IPlotter):
     regex_name_pattern = re.compile(r"([\w\.]+):(\w+)")
     date_format = '%Y_%m_%d_%H%M'
 
@@ -46,11 +47,9 @@ class PlotCalc(Calc):
         plotted_data = self.__blm_data_plot(blm_name, blm_interval, data)
         plotted_pre_oc = self.__pre_offset(blm_name, blm_interval, data)
         plotted_post_oc = self.__post_offset(blm_name, blm_interval, data)
-        # self.__offset_level_plot(interval)
-        # self.__info_box_plot(interval, ax)
         if plotted_data and plotted_pre_oc and plotted_post_oc:
-            self.__save_plot(plot_file_path)
-        self.__clear()
+            self.save_plot(plot_file_path)
+        self.clear()
 
 
     def __pre_offset(self,blm_name, blm_interval, data):
@@ -73,29 +72,3 @@ class PlotCalc(Calc):
             plt.plot(pd.to_datetime(data_to_plot.index, unit='s'), data_to_plot[blm_name], 'b-', label='raw data')
             return True
         return False
-
-    # def __offset_level_plot(self, interval):
-    #     plt.plot([datetime.datetime.utcfromtimestamp(interval.start), datetime.datetime.utcfromtimestamp(interval.end)],
-    #              interval.offset_mean * np.ones(2), 'y--', label='offset')
-
-    # def __info_box_plot(self, interval, ax):
-    #     textstr = 'Start: {0:s}\nEnd: {5:s}\nDuration: {6:}\nFill: {1:d}\nIntensity max: {2:.1e}\nIntensity dump: {3:.2%}\nIntensity loss: {4:.2%}'. \
-    #         format(interval.get_start_date(),
-    #                interval.filling_number,
-    #                interval.max_intensity_offset_corrected,
-    #                interval.dumped_intensity_offset_corrected / interval.max_intensity_offset_corrected,
-    #                1 - interval.dumped_intensity_offset_corrected / interval.max_intensity_offset_corrected,
-    #                interval.get_end_date(),
-    #                interval.get_duration())
-    #
-    #     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-    #     ax.text(0.1, 1.25, textstr, transform=ax.transAxes, fontsize=14, verticalalignment='top', bbox=props)
-
-    def __save_plot(self, file_path):
-        plt.legend(loc='best')
-        plt.savefig(file_path, bbox_inches='tight')
-
-    def __clear(self):
-        plt.clf()
-        plt.cla()
-        plt.close()
