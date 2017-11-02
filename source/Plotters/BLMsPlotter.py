@@ -95,24 +95,43 @@ class BLMsPlotter(IPlotter):
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses, blm_names)
 
     def plot_total_cumulated_dose(self, blms, blm_summing_func):
+        f, ax = plt.subplots(1, 1, figsize=[24, 16])
+        xfmt = md.DateFormatter('%Y-%m-%d')
+        ax.xaxis.set_major_formatter(xfmt)
+        f.autofmt_xdate()
+        plt.xlabel(r'Date')
+        ax.grid(True)
+
+        plt.ylabel(r'TID [Gy]')
+
+        start_xaxis_date = None
+        end_xaxis_date = None
+
         for blm in blms:
-            self.clear()
-            dates = pd.date_range(datetime.utcfromtimestamp(blm.blm_intervals[0].start), datetime.utcfromtimestamp(blm.blm_intervals[-1].end),freq='1D')
-            num_of_days = len(dates)
-            intensity = np.array([0] + [blm_summing_func(blm, dates[i], dates[i + 1]) for i in range(num_of_days - 1)])
+            blm_intervals_start = datetime.utcfromtimestamp(blm.blm_intervals[0].start)
+            blm_intervals_end = datetime.utcfromtimestamp(blm.blm_intervals[-1].end)
+
+            if start_xaxis_date is None and end_xaxis_date is None:
+                start_xaxis_date = blm_intervals_start
+                end_xaxis_date = blm_intervals_end
+            elif start_xaxis_date > blm_intervals_start:
+                start_xaxis_date = blm_intervals_start
+            elif end_xaxis_date < blm_intervals_end:
+                end_xaxis_date = blm_intervals_end
+
+            dates = pd.date_range(blm_intervals_start, blm_intervals_end, freq='1D')
+            num_of_days_between_start_and_end = len(dates)
+            intensity = np.array([0] + [blm_summing_func(blm, dates[i], dates[i + 1]) for i in range(num_of_days_between_start_and_end - 1)])
             dates = pd.to_datetime(np.array((dates - datetime(1970, 1, 1)).total_seconds()), unit='s')
-            f, ax = plt.subplots(1, 1, figsize=[24, 16])
-            xfmt = md.DateFormatter('%Y-%m-%d')
-            ax.xaxis.set_major_formatter(xfmt)
-            f.autofmt_xdate()
-            plt.xlabel(r'date')
-            ax.grid(True)
-            plt.title(r'{} - total integrated cumulated dose for [{} : {}]'.format(blm.name, dates[0].strftime(self.date_format), dates[-1].strftime(self.date_format)), fontsize=14)
-            plt.ylabel(r'Total integrated cumulated dose [Gy]')
-            plt.plot(dates, np.cumsum(intensity), label='BLM data')
-            file_name = 'TICD_{}_{}_{}'.format(dates[0].strftime(self.date_format), dates[-1].strftime(self.date_format), blm.name.replace('.','_'))
-            file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
-            self.save_plot(file_path_name_without_extension)
+            plt.plot(dates, np.cumsum(intensity), label=blm.name)
+        plt.legend()
+
+        plt.title(r'Total ionizing dose - cumulative sum for [{} : {}]'.format(start_xaxis_date.strftime(self.date_format), end_xaxis_date.strftime(self.date_format)), fontsize=14)
+        file_name = 'TID_cumsum_{}_{}'.format(start_xaxis_date.strftime(self.date_format), end_xaxis_date.strftime(self.date_format))
+        file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
+
+        self.save_plot(file_path_name_without_extension + '.png')
+        self.save_plot(file_path_name_without_extension + '.pdf')
 
 
     def plot_total_dose_extrapolated(self, blms, blm_summing_func):

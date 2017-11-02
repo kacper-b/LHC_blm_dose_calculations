@@ -102,6 +102,6 @@ if __name__ == '__main__':
         p = BLMsPlotter('.')
         # p.plot_luminosity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), 39.31)
         # p.plot_intensity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), lambda blm: blm.get_oc_intensity_integral())
-        # p.plot_total_cumulated_dose(blms, lambda blm, start, end: blm.get_pre_oc_dose(start, end))
+        p.plot_total_cumulated_dose(blms[:3], lambda blm, start, end: blm.get_pre_oc_dose(start, end))
         # p.plot_total_dose(blms, lambda blm: blm.get_pre_oc_dose())
         # p.heat_map_plot(blms)
