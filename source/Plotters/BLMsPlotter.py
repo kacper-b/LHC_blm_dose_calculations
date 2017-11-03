@@ -21,7 +21,7 @@ class BLMsPlotter(IPlotter):
     Tools to plot dose and normalized dose for specific blms.
     """
     regex_name_pattern = re.compile(r"([\w\.]+):(\w+)")
-    date_format = '%Y-%m-%d'
+    date_format = '%Y%m%d'
 
     def __init__(self, output_directory):
         self.output_directory = output_directory
@@ -81,7 +81,7 @@ class BLMsPlotter(IPlotter):
             ax.set_ylim(config.INTENSITY_NORMALIZED_PLOT_YRANGE)
         self.__plot_blms(blm_positions, integrated_doses / integrated_intensity, blm_types, ax.semilogy)
 
-        file_name = 'n_int_TID{}_{}{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
+        file_name = 'n_int_TID_{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
         file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses / integrated_intensity, blm_names)
     def check_intensity_normalized_plot_range(self, normalized_doses):
@@ -101,7 +101,7 @@ class BLMsPlotter(IPlotter):
 
         self.__plot_blms(blm_positions, integrated_doses, blm_types, ax.semilogy)
 
-        file_name = 'TID{}_{}{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
+        file_name = 'TID_{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
         file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses, blm_names)
 
@@ -160,7 +160,7 @@ class BLMsPlotter(IPlotter):
 
         self.__plot_blms(blm_positions, integrated_doses * 3000 / 44., blm_types, ax.semilogy)
 
-        file_name = 'extrapolated_TID_{}_{}{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
+        file_name = 'extrapolated_TID_{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
         file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses, blm_names)
 
