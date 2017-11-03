@@ -2,12 +2,24 @@ import matplotlib.pyplot as plt
 from abc import ABC
 import pandas as pd
 import config
+from config import ARC_DISTANCE_OFFSET, IPs,LHC_LENGTH
+
 class IPlotter(ABC):
-    lhc_elements = sorted([[(ip[0], ip[0])] + ip[1:] for ip in config.IPs] + [
-        [(config.ARC_DISTANCE_OFFSET + (config.IPs[ip[1] - 1][0] if ip[1] != 8 else ip[0]),
-          -config.ARC_DISTANCE_OFFSET + (config.IPs[ip[1]][0] if ip[1] != 8 else config.LHC_LENGTH)),
+    lhc_elements = sorted([[(ip[0] - ARC_DISTANCE_OFFSET, ip[0] + ARC_DISTANCE_OFFSET)] + ip[1:2]+[ip[2].replace('P','R')]+ip[3:] for ip in IPs] + [
+        [(ARC_DISTANCE_OFFSET + (IPs[ip[1] - 1][0] if ip[1] != 8 else ip[0]),
+          -ARC_DISTANCE_OFFSET + (IPs[ip[1]][0] if ip[1] != 8 else LHC_LENGTH)),
          8 + ip[1],
-         'arc_{}{}'.format(ip[1], config.IPs[ip[1] if ip[1] != 8 else 0][1]), None] for ip in config.IPs], key=lambda x: x[0][0])
+         'arc{}{}'.format(ip[1], IPs[ip[1] if ip[1] != 8 else 0][1]), None] for ip in IPs], key=lambda x: x[0][0])
+
+    lhc_el = list([i[0][0], i[0][1]] + i[1:] for i in lhc_elements)
+    df_lhc_el = pd.DataFrame(lhc_el, columns=['start', 'end', 'wtf1', 'info', 'wtf2'])
+
+    df_lhc_el_n = df_lhc_el.copy()
+    df_lhc_el_n['start'] = df_lhc_el_n['start'] - [LHC_LENGTH]
+    df_lhc_el_n['end'] = df_lhc_el_n['end'] - [LHC_LENGTH]
+
+    df_lhc_el_c = pd.concat([df_lhc_el_n, df_lhc_el])
+    # df_lhc_el_c
 
     def save_plot(self, file_path):
         plt.legend(loc='best')
@@ -35,34 +47,47 @@ class IPlotter(ABC):
         plt.legend()
 
     def get_fully_covered_lhc_section(self, dcum_start, dcum_end):
-        if dcum_start < 0:
-            dcum_start+=config.LHC_LENGTH
-        start, end = '', ''
-
-        for index, section in enumerate(self.lhc_elements):
-            element_position_end = section[0][1]
-            if element_position_end > dcum_end:
-                end = self.lhc_elements[index - 1][2]
-                break
-        if dcum_end >= dcum_start:
-            for index, section in enumerate(self.lhc_elements):
-                element_position_start = section[0][0]
-                if element_position_start >= dcum_start:
-                    start = self.lhc_elements[index][2]
-                    break
+        df_part = self.df_lhc_el_c[(self.df_lhc_el_c['end'] >= dcum_start) & (self.df_lhc_el_c['start'] <= dcum_end)]
+        if len(df_part['info']) <= 2:
+            out = '_'.join(df_part['info']) + '_{:+06d}_{:+06d}'.format(int(dcum_start), int(dcum_end))
         else:
-            lhc_elements_reversed = list(reversed(self.lhc_elements))
-            for index, section in enumerate(lhc_elements_reversed):
-                element_position_start = section[0][0]
-                if dcum_start > element_position_start:
-                    start = lhc_elements_reversed[index-1][2]
-                    break
-        if start == end:
-            out = '_' + start
-        elif start:
-            out = '_' + start + '-' + end
-        else:
-            out = ''
-
-        out+= '_dcum_{}_{}'.format(int(dcum_start), int(dcum_end))
+            out = '{}_{}_{:+06d}_{:+06d}'.format(df_part['info'].iloc[0], df_part['info'].iloc[-1], int(dcum_start),
+                                                 int(dcum_end))
+        # if dcum_start < 0:
+        #     dcum_start+=config.LHC_LENGTH
+        # start, end = '', ''
+        #
+        # for index, section in enumerate(self.lhc_elements):
+        #     element_position_end = section[0][1]
+        #     if element_position_end > dcum_end:
+        #         end = self.lhc_elements[index - 1][2]
+        #         break
+        # if dcum_end >= dcum_start:
+        #     for index, section in enumerate(self.lhc_elements):
+        #         element_position_start = section[0][0]
+        #         if element_position_start >= dcum_start:
+        #             start = self.lhc_elements[index][2]
+        #             break
+        # else:
+        #     lhc_elements_reversed = list(reversed(self.lhc_elements))
+        #     for index, section in enumerate(lhc_elements_reversed):
+        #         element_position_start = section[0][0]
+        #         if dcum_start > element_position_start:
+        #             start = lhc_elements_reversed[index-1][2]
+        #             break
+        # if start == end:
+        #     out = '_' + start
+        # elif start:
+        #     out = '_' + start + '-' + end
+        # else:
+        #     out = ''
+        #
+        # out+= '_dcum_{}_{}'.format(int(dcum_start), int(dcum_end))
         return out
+    
+    
+    lhc_elements = sorted([[(ip[0], ip[0])] + ip[1:] for ip in IPs] + [
+        [(ARC_DISTANCE_OFFSET + (IPs[ip[1] - 1][0] if ip[1] != 8 else ip[0]),
+          -ARC_DISTANCE_OFFSET + (IPs[ip[1]][0] if ip[1] != 8 else LHC_LENGTH)),
+         8 + ip[1],
+         'arc_{}{}'.format(ip[1], IPs[ip[1] if ip[1] != 8 else 0][1]), None] for ip in IPs], key=lambda x: x[0][0])
