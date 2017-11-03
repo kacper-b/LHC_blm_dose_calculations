@@ -29,22 +29,6 @@ SCHEDULE_PATH = os.path.join(DATA_DIR_PATH,'schedules')
 # from source.Plotters.IPlotter import IPlo
 
 
-schedule_file = 'LHC_schedule_2017.csv'
-with open(os.path.join(SCHEDULE_PATH,schedule_file),'r') as f:
-    df_schedule = pd.read_csv(f)
-
-blm_intervals_start = datetime.strptime('2017-05-01 00:00:00', '%Y-%m-%d %H:%M:%S')
-blm_intervals_end = datetime.strptime('2017-11-30 00:00:00', '%Y-%m-%d %H:%M:%S')
-
-f, ax = plt.subplots(1, 1, figsize=[24, 16])
-xfmt = md.DateFormatter('%Y-%m-%d')
-ax.xaxis.set_major_formatter(xfmt)
-ax.xaxis_date()
-ax.set_xlim(blm_intervals_start, blm_intervals_end)
-ax.set_ylim(0, 10)
-f.autofmt_xdate()
-plt.xlabel(r'Date')
-ax.grid(True)
 
 
 class schedule():
@@ -84,7 +68,7 @@ class schedule():
 
 if __name__ == "__main__":
 
-    
+
     sc = schedule(2017)
 
     blm_intervals_start = datetime.strptime('2017-05-01 00:00:00', '%Y-%m-%d %H:%M:%S')
