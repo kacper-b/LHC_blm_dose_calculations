@@ -10,7 +10,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from projects.Plotting.python.plotting_layout import plotter_layout, PLOT_DIR
 
+from source.BLM_dose_calculation_exceptions import NormalizedIntensityPlotRangeTooSmall
 from source.Plotters.IPlotter import IPlotter
+from config import LHC_LENGTH, INTENSITY_NORMALIZED_PLOT_YRANGE
+from source.Plotters.schedule_plotter import schedule
 
 
 class BLMsPlotter(IPlotter):
@@ -59,7 +62,7 @@ class BLMsPlotter(IPlotter):
 
         self.__plot_blms(blm_positions, integrated_doses / luminosity, blm_types, ax.semilogy)
 
-        file_name = 'n_lum_TID{}_{}_dcum_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), int(dcum_start), int(dcum_end))
+        file_name = 'n_lum_TID{}_{}{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
         file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses / luminosity, blm_names)
 
@@ -74,12 +77,20 @@ class BLMsPlotter(IPlotter):
                    format(start.strftime(self.date_format), end.strftime(self.date_format), integrated_intensity), fontsize=25)
 
         ax.set_ylabel(r'normalized TID [Gy/ps]', fontsize=12)
-
+        if self.check_intensity_normalized_plot_range(integrated_doses / integrated_intensity):
+            ax.set_ylim(config.INTENSITY_NORMALIZED_PLOT_YRANGE)
         self.__plot_blms(blm_positions, integrated_doses / integrated_intensity, blm_types, ax.semilogy)
 
-        file_name = 'n_int_TID{}_{}_dcum_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), int(dcum_start), int(dcum_end))
+        file_name = 'n_int_TID{}_{}{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
         file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses / integrated_intensity, blm_names)
+    def check_intensity_normalized_plot_range(self, normalized_doses):
+        if np.max(normalized_doses) > config.INTENSITY_NORMALIZED_PLOT_YRANGE[1]:
+            NormalizedIntensityPlotRangeTooSmall('There is at least one value ({}) higher than plot yrange.'.format(np.max(normalized_doses)))
+        elif np.min(normalized_doses) < config.INTENSITY_NORMALIZED_PLOT_YRANGE[0]:
+            NormalizedIntensityPlotRangeTooSmall('There is at least one value ({}) lower than plot yrange.'.format(np.min(normalized_doses)))
+        else:
+            return True
 
     def plot_total_dose(self, blms, blm_summing_func):
         blm_positions, integrated_doses, blm_types, blm_names, f, ax, dcum_start, dcum_end, start, end = self.run_common_functions(blm_summing_func, blms)
@@ -90,7 +101,7 @@ class BLMsPlotter(IPlotter):
 
         self.__plot_blms(blm_positions, integrated_doses, blm_types, ax.semilogy)
 
-        file_name = 'TID{}_{}_dcum_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), int(dcum_start), int(dcum_end))
+        file_name = 'TID{}_{}{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
         file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses, blm_names)
 
@@ -98,14 +109,17 @@ class BLMsPlotter(IPlotter):
         f, ax = plt.subplots(1, 1, figsize=[24, 16])
         xfmt = md.DateFormatter('%Y-%m-%d')
         ax.xaxis.set_major_formatter(xfmt)
+        ax.xaxis_date()
         f.autofmt_xdate()
         plt.xlabel(r'Date')
         ax.grid(True)
-
+        sc = schedule(2017)
         plt.ylabel(r'TID [Gy]')
+        ax.set_ylim(0,)
 
         start_xaxis_date = None
         end_xaxis_date = None
+
 
         for blm in blms:
             blm_intervals_start = datetime.utcfromtimestamp(blm.blm_intervals[0].start)
@@ -124,6 +138,8 @@ class BLMsPlotter(IPlotter):
             intensity = np.array([0] + [blm_summing_func(blm, dates[i], dates[i + 1]) for i in range(num_of_days_between_start_and_end - 1)])
             dates = pd.to_datetime(np.array((dates - datetime(1970, 1, 1)).total_seconds()), unit='s')
             plt.plot(dates, np.cumsum(intensity), label=blm.name)
+        ax.set_xlim(blm_intervals_start, blm_intervals_end)
+        sc.schedule_plotter(ax)
         plt.legend()
 
         plt.title(r'Total ionizing dose - cumulative sum for [{} : {}]'.format(start_xaxis_date.strftime(self.date_format), end_xaxis_date.strftime(self.date_format)), fontsize=14)
@@ -144,7 +160,7 @@ class BLMsPlotter(IPlotter):
 
         self.__plot_blms(blm_positions, integrated_doses * 3000 / 44., blm_types, ax.semilogy)
 
-        file_name = 'extrapolated_TID_{}_{}_dcum_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), int(dcum_start), int(dcum_end))
+        file_name = 'extrapolated_TID_{}_{}{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
         file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses, blm_names)
 
@@ -236,10 +252,13 @@ class BLMsPlotter(IPlotter):
         plt.pcolormesh(x, y, intens, label='dose', norm=colors.SymLogNorm(linthresh=0.03,vmin=intens.min(), vmax=intens.max()),  cmap='RdBu_r')
         plt.colorbar()
         self.legend()
-        file_name = 'heatmap_TID_{}_{}_dcum_{}_{}'.format(x[0], x[-1], int(y[0]), int(y[-1]))
+        file_name = 'heatmap_TID_{}_{}{}'.format(x[0], x[-1], self.get_fully_covered_lhc_section(y[0], y[-1]))
         file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
         self.save_plot(file_path_name_without_extension)
 
+
+
+
 if __name__ == '__main__':
     p = BLMsPlotter(None)
-    p.plot(None)
+    print(p.get_fully_covered_lhc_section(26658,26658))

@@ -125,3 +125,16 @@ class BLMInvalidRawData(Exception, ExceptionLogging):
         self.logging_func = logging.error
         super(self.__class__, self).__init__(msg)
     pass
+
+
+class BLMTypeNotRecognized(Exception, ExceptionLogging):
+    def __init__(self, msg):
+        self.logging_func = logging.critical
+        super(self.__class__, self).__init__(msg)
+    pass
+
+class NormalizedIntensityPlotRangeTooSmall(Exception, ExceptionLogging):
+    def __init__(self, msg):
+        self.logging_func = logging.critical
+        super(self.__class__, self).__init__(msg)
+    pass

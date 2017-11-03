@@ -41,7 +41,6 @@ def is_blm_in_ip_neighbourhood(blm, ip_num, left_offset=700, right_offset=700):
     interval_start = ip_position - left_offset
     interval_end = ip_position + right_offset
     lhc_len = LHC_LENGTH
-    blm.position = blm.position / 100 #convert cm to m
     if blm.position < 0:
         blm.position+=lhc_len
     if interval_end <= lhc_len and interval_start >=0 and interval_start < blm.position < interval_end:
@@ -72,11 +71,13 @@ if __name__ == '__main__':
                    ]
     start = datetime(year=2016, month=3, day=28)
     end = datetime(year=2016, month=10, day=31)
-    # start = datetime(year=2017, month=5, day=1)
-    # end = datetime(year=2017, month=10, day=16)
+    start = datetime(year=2017, month=5, day=1)
+    end = datetime(year=2017, month=10, day=16)
 
     field = 'LOSS_RS12'
-    blm_list_file_path = os.path.join(BLM_LIST_DIR, 'allblm_20161013.csv')
+    blm_list_file_path = os.path.join(BLM_LIST_DIR, 'all_blms_dcum_meters.csv')
+    # blm_list_file_path = os.path.join(BLM_LIST_DIR, '15_16_17-L2-B0.csv')
+
     iil = IntensityIntervalsLoader()
     iil.set_files_paths(PICKLE_INTENSITY_INTERVALS_DIR, start, end)
     iil.load_pickles()
@@ -86,7 +87,7 @@ if __name__ == '__main__':
 
     blm_csv_content = {blm.raw_name: blm.position for blm in BLMsParser.read(blm_list_file_path)
                        # if True}
-                       if is_blm_in_ip_neighbourhood(blm, IP_num, 100, 100)}
+                       if is_blm_in_ip_neighbourhood(blm, IP_num, 350, 350)}
                        # if is_blm_in_arc_after_ip(blm, IP_num, 400, 400)}
 
     factory = BLMFactory()
@@ -97,11 +98,13 @@ if __name__ == '__main__':
 
     if blm_process.should_return_blm:
         for blm in blms:
-            print(blm.name, blm.get_pre_oc_dose())
-
+            messg = '{}\t{}'.format(blm.name, blm.get_pre_oc_dose())
+            logging.info(messg)
+        blm_types = set(blm.get_blm_type() for blm in blms)
+        logging.info('Analysed BLM types: {}'.format(', '.join(blm_types)))
         p = BLMsPlotter('.')
         # p.plot_luminosity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), 39.31)
-        # p.plot_intensity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), lambda blm: blm.get_oc_intensity_integral())
-        p.plot_total_cumulated_dose(blms[:3], lambda blm, start, end: blm.get_pre_oc_dose(start, end))
+        p.plot_intensity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), lambda blm: blm.get_oc_intensity_integral())
+        p.plot_total_cumulated_dose(blms[:6], lambda blm, start, end: blm.get_pre_oc_dose(start, end))
         # p.plot_total_dose(blms, lambda blm: blm.get_pre_oc_dose())
         # p.heat_map_plot(blms)

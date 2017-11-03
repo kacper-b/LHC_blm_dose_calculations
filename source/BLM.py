@@ -1,8 +1,10 @@
 import re
+
+from config import BLM_TYPE_REGEX_PATERN
 from source.BLMInterval import BLMInterval
 import _pickle as pickle
 import os
-from source.BLM_dose_calculation_exceptions import BLMIntervalsEmpty, BLMDataEmpty
+from source.BLM_dose_calculation_exceptions import BLMIntervalsEmpty, BLMDataEmpty, BLMTypeNotRecognized
 from sortedcontainers import SortedSet
 
 
@@ -86,3 +88,11 @@ class BLM:
     def __str__(self):
         if self.blm_intervals is not None:
             return self.name + '\n' + '\n'.join(map(str, self.blm_intervals))
+
+    def get_blm_type(self):
+        blm_type = re.match(BLM_TYPE_REGEX_PATERN, self.name)
+        if blm_type:
+            return blm_type.group(1)
+        else:
+            raise BLMTypeNotRecognized('Could not recognize {} type.'.format(self.name))
+
