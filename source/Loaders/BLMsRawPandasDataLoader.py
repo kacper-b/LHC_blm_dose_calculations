@@ -13,14 +13,11 @@ class BLMsRawPandasDataLoader(IBLMsLoader):
     def __init__(self, names=[]):
         super(BLMsRawPandasDataLoader, self).__init__(names)
 
-    def is__file_name_valid(self, file_path, start, end, field):
+    def is_file_name_valid(self, file_path, start, end, field):
         dt = self.dt
-        start_end_date = re.match(self.regex, file_path)
-        if start_end_date:
-            blm_name = start_end_date.group(1)
-            start_file_date = datetime.strptime(start_end_date.group(2), BLM_DATE_FORMAT)
-            end_file_date = datetime.strptime(start_end_date.group(3), BLM_DATE_FORMAT)
-            field_in_file = start_end_date.group(4)
+        regex_match = re.match(self.regex, file_path)
+        if regex_match:
+            blm_name, end_file_date, field_in_file, start_file_date = self.extract_blm_dates_fied_from_filename(regex_match)
             is_field_right = field == field_in_file
             is_blm_right = blm_name in self.names
             if not (is_blm_right and is_field_right):
@@ -28,6 +25,11 @@ class BLMsRawPandasDataLoader(IBLMsLoader):
             is_between = (start - dt <= start_file_date and end_file_date <= end + dt)
             is_end_covers = start_file_date < end < end_file_date + dt
             is_beginning_covers = start_file_date - dt < start < end_file_date
+            if (is_between or is_end_covers or is_beginning_covers) != self.is_file_dates_cover_analysed_time_period(start, end, start_file_date,
+                                                                                                                     end_file_date):
+                print('between{} end{} beg{} oliv{} start{} end{} fname_st{} fname_end{}'.format(is_between, is_end_covers, is_beginning_covers, self.is_file_dates_cover_analysed_time_period(start, end, start_file_date,
+                                                                                                                     end_file_date), start, end, start_file_date, end_file_date))
+                raise Exception('DATESS! blm raw')
             return is_between or is_end_covers or is_beginning_covers
         return False
 

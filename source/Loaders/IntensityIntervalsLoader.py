@@ -18,7 +18,7 @@ class IntensityIntervalsLoader(ILoader):
     def set_files_paths(self, directory, start, end):
         super(IntensityIntervalsLoader, self).set_files_paths(directory, start, end, None)
 
-    def is__file_name_valid(self, filename, start, end, field):
+    def is_file_name_valid(self, filename, start, end, field):
         start_end_date = re.match(self.regex, filename)
         dt = self.dt
         if start_end_date:
@@ -27,6 +27,9 @@ class IntensityIntervalsLoader(ILoader):
             is_between = (start - dt <= start_file_date and end_file_date <= end + dt)
             is_end_covers = start_file_date < end < end_file_date + dt
             is_beginning_covers = start_file_date - dt < start < end_file_date
+            if (is_between or is_end_covers or is_beginning_covers) != self.is_file_dates_cover_analysed_time_period(start, end, start_file_date,
+                                                                                                                     end_file_date):
+                raise Exception('DATESS! int')
             if is_between or is_end_covers or is_beginning_covers:
                 return True
         return False
