@@ -32,7 +32,14 @@ class ILoader(ABC):
         self.data = []
 
     def is_file_dates_cover_analysed_time_period(self, period_start, period_end, file_date_start, file_date_end):
-        return period_start < file_date_end - self.dt and file_date_start + self.dt < period_end
+        dt = self.dt
+        result = (period_start < file_date_end - self.dt) and (file_date_start + self.dt < period_end)
+        is_between = (period_start - dt <= file_date_start) and (file_date_end <= period_end + dt)
+        is_end_covers = file_date_start < period_end < file_date_end + dt
+        is_beginning_covers = file_date_start - dt < period_start < file_date_end
+        if (is_between or is_end_covers or is_beginning_covers) != result:
+            raise Exception('TEST: DATESS!')
+        return result
 
 
     @abstractmethod

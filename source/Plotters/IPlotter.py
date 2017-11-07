@@ -23,7 +23,7 @@ class IPlotter(ABC):
 
     def save_plot(self, file_path):
         plt.legend(loc='best')
-        plt.savefig(file_path, bbox_inches='tight')
+        plt.savefig(file_path, bbox_inches='tight', dpi=300)
 
     def save_plot_data(self, file_path, x, y, blm_names):
         results = pd.DataFrame(list(zip(x,y)), columns=['dcum', 'y'], index=map(lambda blm_name: blm_name.decode('UTF-8'),blm_names))
@@ -53,41 +53,11 @@ class IPlotter(ABC):
         else:
             out = '{}_{}_{:+06d}_{:+06d}'.format(df_part['info'].iloc[0], df_part['info'].iloc[-1], int(dcum_start),
                                                  int(dcum_end))
-        # if dcum_start < 0:
-        #     dcum_start+=config.LHC_LENGTH
-        # start, end = '', ''
-        #
-        # for index, section in enumerate(self.lhc_elements):
-        #     element_position_end = section[0][1]
-        #     if element_position_end > dcum_end:
-        #         end = self.lhc_elements[index - 1][2]
-        #         break
-        # if dcum_end >= dcum_start:
-        #     for index, section in enumerate(self.lhc_elements):
-        #         element_position_start = section[0][0]
-        #         if element_position_start >= dcum_start:
-        #             start = self.lhc_elements[index][2]
-        #             break
-        # else:
-        #     lhc_elements_reversed = list(reversed(self.lhc_elements))
-        #     for index, section in enumerate(lhc_elements_reversed):
-        #         element_position_start = section[0][0]
-        #         if dcum_start > element_position_start:
-        #             start = lhc_elements_reversed[index-1][2]
-        #             break
-        # if start == end:
-        #     out = '_' + start
-        # elif start:
-        #     out = '_' + start + '-' + end
-        # else:
-        #     out = ''
-        #
-        # out+= '_dcum_{}_{}'.format(int(dcum_start), int(dcum_end))
         return out
     
-    
-    lhc_elements = sorted([[(ip[0], ip[0])] + ip[1:] for ip in IPs] + [
-        [(ARC_DISTANCE_OFFSET + (IPs[ip[1] - 1][0] if ip[1] != 8 else ip[0]),
-          -ARC_DISTANCE_OFFSET + (IPs[ip[1]][0] if ip[1] != 8 else LHC_LENGTH)),
-         8 + ip[1],
-         'arc_{}{}'.format(ip[1], IPs[ip[1] if ip[1] != 8 else 0][1]), None] for ip in IPs], key=lambda x: x[0][0])
+    #
+    # lhc_elements = sorted([[(ip[0], ip[0])] + ip[1:] for ip in IPs] + [
+    #     [(ARC_DISTANCE_OFFSET + (IPs[ip[1] - 1][0] if ip[1] != 8 else ip[0]),
+    #       -ARC_DISTANCE_OFFSET + (IPs[ip[1]][0] if ip[1] != 8 else LHC_LENGTH)),
+    #      8 + ip[1],
+    #      'arc_{}{}'.format(ip[1], IPs[ip[1] if ip[1] != 8 else 0][1]), None] for ip in IPs], key=lambda x: x[0][0])

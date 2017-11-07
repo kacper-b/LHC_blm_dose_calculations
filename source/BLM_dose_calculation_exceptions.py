@@ -138,3 +138,8 @@ class NormalizedIntensityPlotRangeTooSmall(Exception, ExceptionLogging):
         self.logging_func = logging.critical
         super(self.__class__, self).__init__(msg)
     pass
+class NormalizedLuminosityPlotRangeTooSmall(Exception, ExceptionLogging):
+    def __init__(self, msg):
+        self.logging_func = logging.critical
+        super(self.__class__, self).__init__(msg)
+    pass
