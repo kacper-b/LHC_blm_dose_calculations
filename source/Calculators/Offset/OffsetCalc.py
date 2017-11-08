@@ -86,13 +86,13 @@ class OffsetCalc(Calc):
                 if self.is_stdev_lower_than_threshold(offset_data, offset):
                     return offset
                 else:
-                    return self.remove_the_biggest_value_and_try_again(offset_data, blm_interval, col_name)
+                    return self.remove_the_biggest_value_and_check_stdev(offset_data, blm_interval, col_name)
             else:
                 raise self.OffsetNan('{} calculated offset is nan:\n\tinterval: {}'.format(col_name, blm_interval))
         else:
             raise self.OffsetEmpty('{} dataframe for offset calculation is empty:\n\tinterval: {}'.format(col_name, blm_interval))
 
-    def remove_the_biggest_value_and_try_again(self, offset_data, blm_interval, col_name):
+    def remove_the_biggest_value_and_check_stdev(self, offset_data, blm_interval, col_name):
         offset_data_without_biggest_value = self.drop_the_biggest_abs_value(offset_data)
         offset = np.average(offset_data_without_biggest_value)
         if self.is_stdev_lower_than_threshold(offset_data_without_biggest_value, offset):

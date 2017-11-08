@@ -10,6 +10,7 @@ DATA_DIR_PATH = os.path.join(PARENT_DIR_PATH, 'data')
 __dirs = os.listdir(DATA_DIR_PATH)
 __DATA_DIR_NAME = 'data'
 __RESULT_DIR_NAME = 'results'
+RESULT_DIR_PATH = os.path.join(PARENT_DIR_PATH, __RESULT_DIR_NAME,'plots')
 DATA_DIRs_NAMES = {dir_name: os.path.join(DATA_DIR_PATH, dir_name) for dir_name in __dirs}
 PICKLE_INTENSITY_INTERVALS_DIR = os.path.join(DATA_DIRs_NAMES['pickles'], 'intensity_intervals')
 BLM_DATA_DIR = DATA_DIRs_NAMES['blm_data_2017']

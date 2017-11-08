@@ -9,11 +9,9 @@ import matplotlib.colors as colors
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from projects.Plotting.python.plotting_layout import plotter_layout, PLOT_DIR
-
+from projects.Plotting.python.plotting_layout import plotter_layout
 from source.BLM_dose_calculation_exceptions import NormalizedIntensityPlotRangeTooSmall, NormalizedLuminosityPlotRangeTooSmall
 from source.Plotters.IPlotter import IPlotter
-from config import LHC_LENGTH, INTENSITY_NORMALIZED_PLOT_YRANGE
 from source.Plotters.schedule_plotter import schedule
 
 
@@ -25,7 +23,7 @@ class BLMsPlotter(IPlotter):
     date_format = '%Y%m%d'
 
     def __init__(self, output_directory):
-        self.output_directory = output_directory
+        self.plot_directory = output_directory
         self.layout_plotter = plotter_layout()
 
     def build_blm_layout(self, dcum_start, dcum_end):
@@ -66,7 +64,7 @@ class BLMsPlotter(IPlotter):
         if self.check_luminosity_normalized_plot_range(integrated_doses / luminosity):
             ax.set_ylim(config.LUMINOSITY_NORMALIZED_PLOT_YRANGE)
         file_name = 'n_lum_TID{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
-        file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
+        file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses / luminosity, blm_names)
 
 
@@ -86,7 +84,7 @@ class BLMsPlotter(IPlotter):
             ax.set_ylim(config.INTENSITY_NORMALIZED_PLOT_YRANGE)
 
         file_name = 'n_int_TID_{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
-        file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
+        file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses / integrated_intensity, blm_names)
     def check_intensity_normalized_plot_range(self, normalized_doses):
         if np.max(normalized_doses) > config.INTENSITY_NORMALIZED_PLOT_YRANGE[1]:
@@ -114,7 +112,7 @@ class BLMsPlotter(IPlotter):
         self.__plot_blms(blm_positions, integrated_doses, blm_types, ax.semilogy)
         ax.legend()
         file_name = 'TID_{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
-        file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
+        file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses, blm_names)
 
     def plot_total_cumulated_dose(self, blms, blm_summing_func):
@@ -130,10 +128,11 @@ class BLMsPlotter(IPlotter):
         start_xaxis_date = None
         end_xaxis_date = None
 
-
+        positions = []
         for blm in blms:
             blm_intervals_start = datetime.utcfromtimestamp(blm.blm_intervals[0].start)
             blm_intervals_end = datetime.utcfromtimestamp(blm.blm_intervals[-1].end)
+            positions.append(blm.position)
 
             if start_xaxis_date is None and end_xaxis_date is None:
                 start_xaxis_date = blm_intervals_start
@@ -156,8 +155,8 @@ class BLMsPlotter(IPlotter):
         ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.16), fancybox=True, shadow=True, ncol=3)
 
         plt.title(r'Total ionizing dose - cumulative sum for [{} : {}]'.format(start_xaxis_date.strftime(self.date_format), end_xaxis_date.strftime(self.date_format)), fontsize=16, weight='bold')
-        file_name = 'TID_cumsum_{}_{}'.format(start_xaxis_date.strftime(self.date_format), end_xaxis_date.strftime(self.date_format))
-        file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
+        file_name = 'TID_cumsum_{}_{}_dcum-range_{}_{}'.format(start_xaxis_date.strftime(self.date_format), end_xaxis_date.strftime(self.date_format), int(min(positions)), int(max(positions)))
+        file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
 
         self.save_plot(file_path_name_without_extension + '.png')
         self.save_plot(file_path_name_without_extension + '.pdf')
@@ -175,7 +174,7 @@ class BLMsPlotter(IPlotter):
         ax.legend()
 
         file_name = 'extrapolated_TID_{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
-        file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
+        file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses, blm_names)
 
     def get_sorted_blm_data(self, blms, blm_summing_func):
@@ -267,7 +266,7 @@ class BLMsPlotter(IPlotter):
         plt.colorbar()
         self.legend()
         file_name = 'heatmap_TID_{}_{}{}'.format(x[0], x[-1], self.get_fully_covered_lhc_section(y[0], y[-1]))
-        file_path_name_without_extension = os.path.join(PLOT_DIR, file_name)
+        file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
         self.save_plot(file_path_name_without_extension)
 
 
