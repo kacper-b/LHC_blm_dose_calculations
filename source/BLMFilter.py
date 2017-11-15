@@ -7,8 +7,8 @@ from source.BLM_dose_calculation_exceptions import WrongBLMFunctionName
 class BLMFilter:
     def __init__(self):
         self.df_ips = self.get_ips()
-        self.filter_functions = {'arc': lambda IP_num, left_offset, right_offset: lambda blm: blm_filter.is_blm_in_arc_after_ip(blm, IP_num, left_offset, right_offset),
-                                 'ir': lambda IP_num, left_offset, right_offset: lambda blm: blm_filter.is_blm_in_ip_neighbourhood(blm, IP_num, left_offset, right_offset),
+        self.filter_functions = {'arc': lambda IP_num, left_offset, right_offset: lambda blm: self.is_blm_in_arc_after_ip(blm, IP_num, left_offset, right_offset),
+                                 'ir': lambda IP_num, left_offset, right_offset: lambda blm: self.is_blm_in_ip_neighbourhood(blm, IP_num, left_offset, right_offset),
                                  'all': lambda IP_num, left_offset, right_offset: lambda blm: True}
 
     def filter_blms(self, blms, func=lambda blm: True):

@@ -6,11 +6,23 @@ from config import BLM_DATE_FORMAT
 
 
 class BLMsCalculatedLoader(IBLMsLoader):
+    """
+
+    """
     def __init__(self, names, remove_raw_data=False):
+        """
+
+        :param names:
+        :param remove_raw_data:
+        """
         super(BLMsCalculatedLoader, self).__init__(names)
         self.remove_raw_data = remove_raw_data
 
     def load_pickles(self):
+        """
+
+        :return:
+        """
         blm = None
         for file_path in self.file_paths:
             with open(file_path, 'rb') as blm_pickle:

@@ -11,6 +11,7 @@ from config import PICKLE_BLM_INTERVALS_DIR, BLM_DATA_DIR, BLM_LIST_DIR
 from config import PICKLE_INTENSITY_INTERVALS_DIR, BLM_INTERVALS_PLOTS_DIR
 from source.BLMFilter import BLMFilter
 from source.BLM_dose_calculation_exceptions import BLMDataEmpty, BLMIntervalsEmpty
+from source.Calculators.Integral.BeamModeSubIntervalsCalc import BeamModeSubIntervalsCalc
 from source.Calculators.Integral.PostOffsetCorrectedIntegralCalc import PostOffsetCorrectedIntegralCalc
 from source.Calculators.Integral.PreOffsetCorrectedIntegralCalc import PreOffsetCorrectedIntegralCalc
 from source.Calculators.Integral.RawIntegralCalc import RawIntegralCalc
@@ -33,6 +34,7 @@ if __name__ == '__main__':
 
     parser = build_blm_dose_calc_parser()
     args = parser.parse_args()
+    # print(args)
 
 ####################################################################################
 
@@ -51,7 +53,8 @@ if __name__ == '__main__':
     field = args.field_name
     IP_num = args.ir if args.ir else args.arc
 
-    blm_filter_function_name = args.ir if args.ir else args.arc
+    blm_filter_function_name = 'ir' if args.ir else None
+    blm_filter_function_name = 'arc' if args.arc else None
     if not blm_filter_function_name:
         blm_filter_function_name = 'all'
 
@@ -65,6 +68,7 @@ if __name__ == '__main__':
     calculators = [PreOffsetCalc(), PreOffsetCorrectedIntegralCalc(),
                    RawIntegralCalc(),
                    PostOffsetCalc(), PostOffsetCorrectedIntegralCalc(),
+                   BeamModeSubIntervalsCalc()
                    # PlotCalc(BLM_INTERVALS_PLOTS_DIR)
                    ]
 
@@ -74,7 +78,6 @@ if __name__ == '__main__':
     iil.load_pickles()
     iil.filter_interval_by_dates(start, end)
     iil.filter_interval_by_valid_flag()
-
     blm_filter = BLMFilter()
     blms = BLMsParser.read(blm_list_file_path)
     filtered_blms = blm_filter.filter_blms(blms, func=blm_filter.get_filter_function(blm_filter_function_name, IP_num, left_offset, right_offset))

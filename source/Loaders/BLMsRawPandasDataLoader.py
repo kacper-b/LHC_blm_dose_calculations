@@ -8,9 +8,21 @@ from source.BLM_dose_calculation_exceptions import BLMLoaderWrongNumberOfColumns
 
 class BLMsRawPandasDataLoader(IBLMsLoader):
     def __init__(self, names=[]):
+        """
+
+        :param names:
+        """
         super(BLMsRawPandasDataLoader, self).__init__(names)
 
     def set_files_paths(self, directory, start, end, field):
+        """
+
+        :param directory:
+        :param start:
+        :param end:
+        :param field:
+        :return:
+        """
         for blm_name in self.names:
             super(IBLMsLoader, self).set_files_paths(os.path.join(directory, blm_name), start, end, field)
 

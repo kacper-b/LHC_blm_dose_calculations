@@ -92,6 +92,12 @@ class IntensityIntervalNotCoveredByBLMData(Exception, ExceptionLogging):
         super(self.__class__, self).__init__(msg)
     pass
 
+class IntensitySubIntervalNotCoveredByBLMData(Exception, ExceptionLogging):
+    def __init__(self, msg):
+        self.logging_func = logging.warning
+        super(self.__class__, self).__init__(msg)
+    pass
+
 
 class NoBLMDataForIntensityInterval(Exception, ExceptionLogging):
     def __init__(self, msg):
@@ -99,6 +105,12 @@ class NoBLMDataForIntensityInterval(Exception, ExceptionLogging):
         super(self.__class__, self).__init__(msg)
     pass
 
+
+class NoBLMDataForIntensitySubInterval(Exception, ExceptionLogging):
+    def __init__(self, msg):
+        self.logging_func = logging.error
+        super(self.__class__, self).__init__(msg)
+    pass
 
 class BLMLoaderWrongNumberOfColumns(Exception, ExceptionLogging):
     def __init__(self, msg):

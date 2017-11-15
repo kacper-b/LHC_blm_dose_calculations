@@ -52,6 +52,13 @@ class BLMsPlotter(IPlotter):
         return plt, ax1
 
     def plot_luminosity_normalized_dose(self, blms, blm_summing_func, luminosity):
+        """
+
+        :param list blms:
+        :param lambda blm_summing_func:
+        :param float luminosity: Luminosity
+        :return:
+        """
         blm_positions, integrated_doses, blm_types, blm_names, f, ax, dcum_start, dcum_end, start, end = self.run_common_functions(blm_summing_func, blms)
 
         f.suptitle(r'Total integrated dose for [{} : {}] normalized with luminosity: {} fb${{^-1}}$'.
@@ -86,6 +93,7 @@ class BLMsPlotter(IPlotter):
         file_name = 'n_int_TID_{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
         file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses / integrated_intensity, blm_names)
+
     def check_intensity_normalized_plot_range(self, normalized_doses):
         if np.max(normalized_doses) > config.INTENSITY_NORMALIZED_PLOT_YRANGE[1]:
             raise NormalizedIntensityPlotRangeTooSmall('There is at least one value ({}) higher than plot yrange.'.format(np.max(normalized_doses)))
@@ -114,6 +122,25 @@ class BLMsPlotter(IPlotter):
         file_name = 'TID_{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
         file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses, blm_names)
+
+    def plot_beam_modes(self, blm):
+        # Pie chart, where the slices will be ordered and plotted counter-clockwise:
+        beam_modes = list(range(23))
+        labels = list(map(str,beam_modes))
+        norm = 1 / blm.get_pre_oc_dose()
+        sizes = {beam_mode:blm.get_pre_oc_dose_for_beam_mode([beam_mode])*norm for beam_mode in beam_modes}
+        print(blm.name, sizes)
+        explode = (0.1, 0.1, 0, 0)  # only "explode" the 2nd slice (i.e. 'Hogs')
+        # explode=explode
+        # fig1, ax1 = plt.subplots()
+        # # print(sizes)
+        # items = list(sizes.items())
+        # labels = [str(beam_mode) for beam_mode, val in items if val > 0.01]
+        # ax1.pie([val for beam_mode, val in items if val > 0.005], labels=labels, explode=len(labels)*[0.2], autopct='%1.1f%%',
+        #         shadow=False, startangle=90)
+        # ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+        #
+        # plt.show()
 
     def plot_total_cumulated_dose(self, blms, blm_summing_func):
         f, ax = plt.subplots(1, 1, figsize=[15, 15/1.618034])

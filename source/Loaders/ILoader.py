@@ -28,10 +28,22 @@ class ILoader(ABC):
         logging.info('{}\n\t{}'.format(self.__class__.__name__,'\n\t'.join(self.file_paths)))
 
     def clean(self):
+        """
+
+        :return:
+        """
         self.file_paths = []
         self.data = []
 
     def is_file_dates_cover_analysed_time_period(self, period_start, period_end, file_date_start, file_date_end):
+        """
+
+        :param period_start:
+        :param period_end:
+        :param file_date_start:
+        :param file_date_end:
+        :return:
+        """
         dt = self.dt
         result = (period_start < file_date_end - self.dt) and (file_date_start + self.dt < period_end)
         is_between = (period_start - dt <= file_date_start) and (file_date_end <= period_end + dt)
@@ -44,8 +56,20 @@ class ILoader(ABC):
 
     @abstractmethod
     def load_pickles(self):
+        """
+
+        :return:
+        """
         pass
 
     @abstractmethod
     def is_file_name_valid(self, filename, start, end, field):
+        """
+
+        :param filename:
+        :param start:
+        :param end:
+        :param field:
+        :return:
+        """
         pass

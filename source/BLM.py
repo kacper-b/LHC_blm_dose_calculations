@@ -1,5 +1,6 @@
+import logging
 import re
-
+import copy
 from config import BLM_TYPE_REGEX_PATERN
 from source.BLMInterval import BLMInterval
 import _pickle as pickle
@@ -19,9 +20,14 @@ class BLM:
         self.blm_intervals = None
 
     def create_blm_intervals(self, intensity_intervals):
-        self.blm_intervals = SortedSet(BLMInterval(ii.start, ii.end, ii.integrated_intensity_offset_corrected) for ii in intensity_intervals)
+        self.blm_intervals = SortedSet(BLMInterval(ii.start, ii.end, ii.integrated_intensity_offset_corrected, self.get_blm_subintervals(ii)) for ii in intensity_intervals)
         return self.blm_intervals
 
+    def get_blm_subintervals(self, intensity_interval):
+        try:
+            return intensity_interval.beam_modes_subintervals
+        except AttributeError as e:
+            logging.warning('Intensity interval: {}\n\thas no subintervals'.format(intensity_interval))
     def get_missing_blm_intervals(self, intervals_set_container_to_check):
         if self.blm_intervals is not None:
             z = self.blm_intervals - intervals_set_container_to_check
@@ -37,16 +43,22 @@ class BLM:
                 raise BLMDataEmpty('No data for {}'.format(self.name))
 
     def get_post_oc_dose(self, start=None, end=None):
-        return self.__get_dose(lambda blm: blm.integral_post_offset_corrected, start, end)
+        return self.get_dose(lambda blm: blm.integral_post_offset_corrected, start, end)
 
     def get_oc_intensity_integral(self, start=None, end=None):
-        return self.__get_dose(lambda blm: blm.integrated_intensity_offset_corrected, start, end)
+        return self.get_dose(lambda blm: blm.integrated_intensity_offset_corrected, start, end)
 
     def get_pre_oc_dose(self, start=None, end=None):
-        return self.__get_dose(lambda blm: blm.integral_pre_offset_corrected, start, end)
+        return self.get_dose(lambda blm: blm.integral_pre_offset_corrected, start, end)
+
+    def get_pre_oc_dose_for_beam_mode(self, beam_modes, start=None, end=None):
+        if isinstance(beam_modes, int):
+            beam_modes = [beam_modes]
+        is_beam_mode = lambda beam_mode: beam_mode in beam_modes
+        return self.get_dose(lambda blm: sum(sub.get_integration_result() for sub in blm.beam_modes_subintervals if is_beam_mode(sub.beam_mode)), start, end)
 
     def get_raw_dose(self, start=None, end=None):
-        return self.__get_dose(lambda blm: blm.integral_raw, start, end)
+        return self.get_dose(lambda blm: blm.integral_raw, start, end)
 
     def get_file_name(self, start, end):
         name_field = re.match(BLM.regex_name_pattern, self.name)
@@ -70,19 +82,19 @@ class BLM:
         if clean_blm_data:
             self.data = None
 
-    def __get_dose(self, func, start, end):
+    def get_dose(self, func, start, end):
         if not start or not end:
             return sum(func(blm_int) for blm_int in self.blm_intervals)
         else:
             start_in_sec = start.timestamp()
             end_in_sec = end.timestamp()
             return sum(func(blm_int) for blm_int in self.blm_intervals
-                       if self.__is_interval_between_dates(blm_int, start_in_sec, end_in_sec))
+                       if self.is_interval_between_dates(blm_int, start_in_sec, end_in_sec))
 
-    def __is_interval_between_dates(self, blm_interval, start, end):
+    def is_interval_between_dates(self, blm_interval, start, end):
         return start <= blm_interval.start and blm_interval.end <= end
 
-    def __sort_blm_intervals_by_starting_date(self, blm_intervals):
+    def sort_blm_intervals_by_starting_date(self, blm_intervals):
         return sorted(blm_intervals, key=(lambda blm_interval: blm_interval.start))
 
     def __str__(self):

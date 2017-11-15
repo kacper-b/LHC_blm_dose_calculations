@@ -17,18 +17,18 @@ class PreOffsetCalc(OffsetCalc):
     def get_blm_intervals_iterator(self, blm_intervals):
         return range(len(blm_intervals))
 
-    def get_offset_period(self, blm_intervals, col_name, data, current_blm_idx):
+    def get_offset_period(self, blm_intervals, col_name, data, current_blm_interval_idx):
         """
-
+        Finds and returns bool mask for a given data. True values are assignees to datapoints which are used to pre
         :param blm_intervals:
         :param col_name:
         :param data:
-        :param current_blm_idx:
+        :param current_blm_interval_idx:
         :return:
         """
         # START: definitions of variables
-        interval_start = blm_intervals[current_blm_idx].start
-        interval_end = blm_intervals[current_blm_idx].end
+        interval_start = blm_intervals[current_blm_interval_idx].start
+        interval_end = blm_intervals[current_blm_interval_idx].end
 
         post_offset_period_start = interval_end + self.post_offset_shift
         post_offset_period_end = post_offset_period_start + self.offset_length
@@ -38,9 +38,9 @@ class PreOffsetCalc(OffsetCalc):
 
         available_data_start = data.index[0]
 
-        is_the_first_interval = current_blm_idx == 0
+        is_the_first_interval = current_blm_interval_idx == 0
         is_enough_data_before = available_data_start < pre_offset_period_start
-        is_enough_space_between_prev_interval = (not is_the_first_interval and blm_intervals[current_blm_idx-1].end < pre_offset_period_start) or is_the_first_interval
+        is_enough_space_between_prev_interval = (not is_the_first_interval and blm_intervals[current_blm_interval_idx-1].end < pre_offset_period_start) or is_the_first_interval
         is_enough_data_after = None
         is_enough_space_between_next_interval = None
         # END: definitions of variables
@@ -48,11 +48,11 @@ class PreOffsetCalc(OffsetCalc):
         # if the interval beginning is too close to the beginning of data or to a previous interval check if there is enough space after the interval
         if not (is_enough_data_before and is_enough_space_between_prev_interval):
             available_data_end = data.index[-1]
-            next_blm_idx = current_blm_idx + 1
+            next_blm_idx = current_blm_interval_idx + 1
             is_interval_after_current = next_blm_idx < len(blm_intervals)
             is_enough_data_after = post_offset_period_end < available_data_end
             is_enough_space_between_next_interval = (is_interval_after_current and post_offset_period_end < blm_intervals[next_blm_idx].start) or not is_interval_after_current
-
+        # if there is
         if is_enough_data_before and is_enough_space_between_prev_interval:
             return (pre_offset_period_start <= data.index) & (data.index < pre_offset_period_end)
 
@@ -60,7 +60,8 @@ class PreOffsetCalc(OffsetCalc):
             return (post_offset_period_start < data.index) & (data.index <= post_offset_period_end)
 
         else:
-            raise self.OffsetNotSetDueToNeighbourhood('{} PreOffset neighbourhood is too small:\n\tinterval: {}'.format(col_name, blm_intervals[current_blm_idx]))
+            # Keep old offset
+            raise self.OffsetNotSetDueToNeighbourhood('{} PreOffset neighbourhood is too small:\n\tinterval: {}'.format(col_name, blm_intervals[current_blm_interval_idx]))
 
 
 if __name__  == '__main__':
