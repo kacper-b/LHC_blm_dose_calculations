@@ -4,6 +4,9 @@ from projects.LHC_intensity_calculations.source.IInterval import IInterval
 
 
 class BLMInterval(IInterval):
+    """
+    The class represents a single period, in which beam was continuously turned on.
+    """
     date_str_format = '%Y-%m-%d %X'
 
     def __init__(self, start, end, integrated_intensity_offset_corrected=None, beam_modes_subintervals=None):

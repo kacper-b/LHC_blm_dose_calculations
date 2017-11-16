@@ -5,6 +5,9 @@ class ExceptionLogging:
         self.logging_func = logging_func
 
 class PreOffsetEmpty(Exception, ExceptionLogging):
+    """
+    This exception occurs when a data that should be used to pre offset calculation is empty.
+    """
     def __init__(self, msg):
         self.logging_func = logging.debug
         super(self.__class__, self).__init__(msg)
@@ -12,6 +15,9 @@ class PreOffsetEmpty(Exception, ExceptionLogging):
 
 
 class PostOffsetNan(Exception, ExceptionLogging):
+    """
+    This exception occurs when a calculated post offset isn't valid number.
+    """
     def __init__(self, msg):
         self.logging_func = logging.debug
         super(self.__class__, self).__init__(msg)
@@ -19,6 +25,9 @@ class PostOffsetNan(Exception, ExceptionLogging):
 
 
 class PreOffsetNan(Exception, ExceptionLogging):
+    """
+    This exception occurs when a calculated pre offset isn't valid number.
+    """
     def __init__(self, msg):
         self.logging_func = logging.debug
         super(self.__class__, self).__init__(msg)
@@ -26,6 +35,9 @@ class PreOffsetNan(Exception, ExceptionLogging):
 
 
 class PreOffsetStdevOverThreshold(Exception, ExceptionLogging):
+    """
+    This exception occurs when a data that should be used to pre offset calculation has stddev above threshold.
+    """
     def __init__(self, msg):
         self.logging_func = logging.debug
         super(self.__class__, self).__init__(msg)
@@ -33,6 +45,9 @@ class PreOffsetStdevOverThreshold(Exception, ExceptionLogging):
 
 
 class PostOffsetStdevOverThreshold(Exception, ExceptionLogging):
+    """
+    This exception occurs when a data that should be used to post offset calculation has stddev above threshold.
+    """
     def __init__(self, msg):
         self.logging_func = logging.debug
         super(self.__class__, self).__init__(msg)
@@ -40,20 +55,9 @@ class PostOffsetStdevOverThreshold(Exception, ExceptionLogging):
 
 
 class PostOffsetEmpty(Exception, ExceptionLogging):
-    def __init__(self, msg):
-        self.logging_func = logging.debug
-        super(self.__class__, self).__init__(msg)
-    pass
-
-
-class PreOffsetBelowZero(Exception, ExceptionLogging):
-    def __init__(self, msg):
-        self.logging_func = logging.debug
-        super(self.__class__, self).__init__(msg)
-    pass
-
-
-class PostOffsetBelowZero(Exception, ExceptionLogging):
+    """
+    This exception occurs when a data that should be used to post offset calculation is empty.
+    """
     def __init__(self, msg):
         self.logging_func = logging.debug
         super(self.__class__, self).__init__(msg)
@@ -61,6 +65,9 @@ class PostOffsetBelowZero(Exception, ExceptionLogging):
 
 
 class PreOffsetNotSetDueToNeighbourhood(Exception, ExceptionLogging):
+    """
+    This exception occurs when a data that should be used to the pre offset calculation overlaps period when the beam was on.
+    """
     def __init__(self, msg):
         self.logging_func = logging.debug
         super(self.__class__, self).__init__(msg)
@@ -68,6 +75,9 @@ class PreOffsetNotSetDueToNeighbourhood(Exception, ExceptionLogging):
 
 
 class PostOffsetNotSetDueToNeighbourhood(Exception, ExceptionLogging):
+    """
+    This exception occurs when a data that should be used to the post offset calculation overlaps period when the beam was on.
+    """
     def __init__(self, msg):
         self.logging_func = logging.debug
         super(self.__class__, self).__init__(msg)
@@ -75,31 +85,27 @@ class PostOffsetNotSetDueToNeighbourhood(Exception, ExceptionLogging):
 
 
 class IntegrationResultBelowZero(Exception, ExceptionLogging):
+    """
+    This exception occurs when an integrated value (ex. dose) is below 0.
+    """
     def __init__(self, msg):
         self.logging_func = logging.debug
         super(self.__class__, self).__init__(msg)
     pass
 
 class IntegrationResultIsNan(Exception, ExceptionLogging):
+    """
+    This exception occurs when an integrated value (ex. dose) is Nan.
+    """
     def __init__(self, msg):
         self.logging_func = logging.warning
         super(self.__class__, self).__init__(msg)
     pass
-
-class IntensityIntervalNotCoveredByBLMData(Exception, ExceptionLogging):
-    def __init__(self, msg):
-        self.logging_func = logging.warning
-        super(self.__class__, self).__init__(msg)
-    pass
-
-class IntensitySubIntervalNotCoveredByBLMData(Exception, ExceptionLogging):
-    def __init__(self, msg):
-        self.logging_func = logging.warning
-        super(self.__class__, self).__init__(msg)
-    pass
-
 
 class NoBLMDataForIntensityInterval(Exception, ExceptionLogging):
+    """
+    This exception occurs when an intensity interval is not covered by a BLM data.
+    """
     def __init__(self, msg):
         self.logging_func = logging.error
         super(self.__class__, self).__init__(msg)
@@ -107,12 +113,18 @@ class NoBLMDataForIntensityInterval(Exception, ExceptionLogging):
 
 
 class NoBLMDataForIntensitySubInterval(Exception, ExceptionLogging):
+    """
+    This exception occurs when an intensity subinterval is not covered by a BLM data.
+    """
     def __init__(self, msg):
         self.logging_func = logging.error
         super(self.__class__, self).__init__(msg)
     pass
 
 class BLMLoaderWrongNumberOfColumns(Exception, ExceptionLogging):
+    """
+    This exception occurs when an loaded raw BLM data has too many columns.
+    """
     def __init__(self, msg):
         self.logging_func = logging.error
         super(self.__class__, self).__init__(msg)
@@ -120,6 +132,9 @@ class BLMLoaderWrongNumberOfColumns(Exception, ExceptionLogging):
 
 
 class BLMDataEmpty(Exception, ExceptionLogging):
+    """
+    This exception occurs when there is no needed BLM data.
+    """
     def __init__(self, msg):
         self.logging_func = logging.critical
         super(self.__class__, self).__init__(msg)
@@ -127,35 +142,54 @@ class BLMDataEmpty(Exception, ExceptionLogging):
 
 
 class BLMIntervalsEmpty(Exception, ExceptionLogging):
+    """
+    This exception occurs when there is no BLM intervals.
+    """
     def __init__(self, msg):
         self.logging_func = logging.critical
         super(self.__class__, self).__init__(msg)
     pass
 
 class BLMInvalidRawData(Exception, ExceptionLogging):
+    """
+    This exception occurs when a raw BLM data are duplicated.
+    """
     def __init__(self, msg):
         self.logging_func = logging.error
         super(self.__class__, self).__init__(msg)
     pass
 
-
 class BLMTypeNotRecognized(Exception, ExceptionLogging):
+    """
+    This exception occurs when a type of a BLM can't be recognized.
+    """
     def __init__(self, msg):
         self.logging_func = logging.critical
         super(self.__class__, self).__init__(msg)
     pass
 
 class NormalizedIntensityPlotRangeTooSmall(Exception, ExceptionLogging):
+    """
+    This exception occurs when an intensity normalized plot range does not cover all plot points.
+    """
     def __init__(self, msg):
         self.logging_func = logging.critical
         super(self.__class__, self).__init__(msg)
     pass
+
 class NormalizedLuminosityPlotRangeTooSmall(Exception, ExceptionLogging):
+    """
+    This exception occurs when an luminosity normalized plot range does not cover all plot points.
+    """
     def __init__(self, msg):
         self.logging_func = logging.critical
         super(self.__class__, self).__init__(msg)
     pass
+
 class WrongBLMFunctionName(Exception, ExceptionLogging):
+    """
+    This exception occurs when user provides an unexpected function name.
+    """
     def __init__(self, msg):
         self.logging_func = logging.critical
         super(self.__class__, self).__init__(msg)

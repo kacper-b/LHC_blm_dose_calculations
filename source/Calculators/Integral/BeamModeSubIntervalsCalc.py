@@ -8,13 +8,13 @@ from source.Calculators.Integral.IntegralCalc import IntegralCalc
 
 class BeamModeSubIntervalsCalc(IntegralCalc):
     """
-    Class which integrates BLM data in subintervals (intervals split by beam mode changes). It also produces some extra BLM data (using interpolation)
+    The class which integrates a BLM data in subintervals (intervals split by beam mode changes). It also produces some extra BLM data (using the interpolation)
     in order to make the integration more accurate.
     """
 
     def fill_missing_integration_points(self, offset_corrected_data_for_blm_interval, new_indices):
         """
-        Fill missing points. Intensity data were used to creation of subintervals. Due to the fact, that intensity data are stored with much higher frequency,
+        Fill missing points. An intensity data were used to creation of subintervals. Due to the fact, that intensity data are stored with much higher frequency,
         beginnings and ends of subintervals don't covers with actual BLM data, so during integration it is possible to miss some dose.
         The goal is to add extra points to our data using interpolation. Extra points have timestamps equal to beginnings of subintervals, therefore during
         integration any small parts of subinterval won't be lost and the sum of doses in subintervals will be equal to the dose in the interval.
@@ -26,10 +26,10 @@ class BeamModeSubIntervalsCalc(IntegralCalc):
         # Adds starts of subintervals to our data
         new_data = pd.concat([offset_corrected_data_for_blm_interval, pd.DataFrame(index=new_indices)])
         # if only one readout is available, it can be assumed that dose is constant in our subinterval
-        if len(offset_corrected_data_for_blm_interval) == 1:
+        if len(offset_corrected_data_for_blm_interval.index) == 1:
             return new_data[~new_data.index.duplicated(keep='first')].sort_index().fillna(method='bfill').fillna(method='pad')
         # fills new added points with values using the linear interpolation
-        elif len(offset_corrected_data_for_blm_interval) > 1:
+        elif len(offset_corrected_data_for_blm_interval.index) > 1:
             return new_data[~new_data.index.duplicated(keep='first')].sort_index().interpolate(method='slinear').dropna()
         return offset_corrected_data_for_blm_interval
 
@@ -71,7 +71,7 @@ class BeamModeSubIntervalsCalc(IntegralCalc):
             subinterval_data = subinterval.get_integrated_data(offset_corrected_data_for_blm_interval)
             integrated_dose = self.integrate(subinterval_data, blm_name, subinterval)
             self.check_if_integration_result_is_positive(integrated_dose, subinterval, blm_name)
-        except (IntegrationResultBelowZero, IntensitySubIntervalNotCoveredByBLMData, IntegrationResultIsNan) as e:
+        except (IntegrationResultBelowZero, IntegrationResultIsNan) as e:
             integrated_dose = 0
             e.logging_func('{}\t{} {}'.format(self, blm_name, str(e)))
         except NoBLMDataForIntensitySubInterval as e:

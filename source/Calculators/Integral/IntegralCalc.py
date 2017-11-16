@@ -32,7 +32,7 @@ class IntegralCalc(Calc):
         try:
             integration_result = self.integrate(blm_interval_beam_on_data, blm_name, blm_interval)
             self.check_if_integration_result_is_positive(integration_result, blm_interval, blm_name)
-        except (IntegrationResultBelowZero, IntensityIntervalNotCoveredByBLMData, IntegrationResultIsNan) as e:
+        except (IntegrationResultBelowZero, IntegrationResultIsNan) as e:
             e.logging_func('{}'.format(str(e)))
             integration_result = 0
         except NoBLMDataForIntensityInterval as e:

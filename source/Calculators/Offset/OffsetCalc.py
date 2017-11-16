@@ -5,13 +5,13 @@ import numpy as np
 
 class OffsetCalc(Calc):
     """
-
+    Abstract class - inheriting classes should calculate an offset.
     """
     @property
     @abstractmethod
     def OffsetNan(self):
         """
-        In child classes this c
+        In a child class that property should be assigned with an exception that occurs when the calculated offset is Nan.
         """
         pass
 
@@ -19,8 +19,7 @@ class OffsetCalc(Calc):
     @abstractmethod
     def OffsetEmpty(self):
         """
-
-        :return:
+        In a child class that property should be assigned with an exception that occurs when the data used to an offset calculation is empty.
         """
         pass
 
@@ -28,8 +27,7 @@ class OffsetCalc(Calc):
     @abstractmethod
     def OffsetStdevOverThreshold(self):
         """
-
-        :return:
+        In a child class that property should be assigned with an exception that occurs when the data's standard deviation is above a threshold.
         """
         pass
 
@@ -37,8 +35,8 @@ class OffsetCalc(Calc):
     @abstractmethod
     def OffsetNotSetDueToNeighbourhood(self):
         """
-
-        :return:
+        In a child class that property should be assigned with an exception that occurs when the data used to an offset calculation is not huge enough.
+        It can happen when a required offset range is not covered by a BLM data or when it consists a period when the beam was on.
         """
         pass
 
@@ -46,16 +44,17 @@ class OffsetCalc(Calc):
     @abstractmethod
     def blm_interval_offset_fields(self):
         """
-
-        :return:
+        In a child class that property should be assigned with a dict which maps variables used in this class onto fields in an BLM interval:
+        Example (for post-offset):
+        {'offset':None, 'offset_start':None, 'offset_end':None} --> {'offset': 'offset_post', 'offset_start': 'offset_post_start', 'offset_end': 'offset_post_end'}
         """
         return {'offset':None, 'offset_start':None, 'offset_end':None}
 
     @abstractmethod
     def get_blm_intervals_iterator(self, blm_intervals):
         """
-
-        :param blm_intervals:
+        It returns iterator which provides blm_intervals' indices in a needed order.
+        :param blm_intervals: iterable BLM intervals' collection
         :return:
         """
         pass
@@ -71,6 +70,18 @@ class OffsetCalc(Calc):
         :return:
         """
         pass
+
+    def __init__(self, offset_length=5 * 60, post_offset_shift=85, std_dev_threshold=0.5):
+        """
+        Initializes the offset calculator with calculations' parameters.
+        :param offset_length: an offset period's duration - in seconds
+        :param post_offset_shift: a post offset's delay. If a post offset calculation is needed, the offset's beginning range would be delayed
+         #post_offset_shift seconds (with reference to the end of a BLM interval)
+        :param std_dev_threshold: offset's standard deviation relative value - if an offset data have a higher stddev, exception will occur.
+        """
+        self.offset_length = offset_length
+        self.post_offset_shift = post_offset_shift
+        self.std_dev_threshold = std_dev_threshold
 
     def fill_interval_with_offset(self, blm_intervals, col_name, current_blm_interval_idx, current_offset_val, data, offset_period_start, offset_period_end):
         """
