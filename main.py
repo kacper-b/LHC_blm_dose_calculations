@@ -36,7 +36,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     # print(args)
 
-####################################################################################
+############################## Parsed command line arguments assignment ########
 
     start = args.start_date
     end = args.end_date
@@ -72,12 +72,15 @@ if __name__ == '__main__':
                    # PlotCalc(BLM_INTERVALS_PLOTS_DIR)
                    ]
 
-    blm_list_file_path = os.path.join(BLM_LIST_DIR, blm_csv_list_filename)
+    # Intensity files loading
     iil = IntensityIntervalsLoader()
     iil.set_files_paths(PICKLE_INTENSITY_INTERVALS_DIR, start, end)
     iil.load_pickles()
     iil.filter_interval_by_dates(start, end)
     iil.filter_interval_by_valid_flag()
+
+    # B
+    blm_list_file_path = os.path.join(BLM_LIST_DIR, blm_csv_list_filename)
     blm_filter = BLMFilter()
     blms = BLMsParser.read(blm_list_file_path)
     filtered_blms = blm_filter.filter_blms(blms, func=blm_filter.get_filter_function(blm_filter_function_name, IP_num, left_offset, right_offset))
@@ -85,6 +88,7 @@ if __name__ == '__main__':
     should_return_blm = should_plot_total or should_plot_cumsum or should_plot_intensity_norm or should_plot_luminosity_norm
     blm_process = BLMProcess(start, end, field, calculators, should_return_blm,blm_raw_data_dir, pickled_blm_dir)
 
+    # Reading and processing BLMs data
     with Pool(processes=number_of_simultaneous_processes) as pool:
         blms = pool.map(blm_process.run, BLMFactory.build(iil.data, filtered_blms))
 
@@ -92,6 +96,7 @@ if __name__ == '__main__':
 
         logging.info('Analysed BLM types: {}'.format(', '.join(set(blm.get_blm_type() for blm in blms))))
 
+        # Plotting
         p = BLMsPlotter(config.RESULT_DIR_PATH)
         if should_plot_luminosity_norm:
             p.plot_luminosity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), luminosity)

@@ -1,8 +1,10 @@
 import logging
 
+
 class ExceptionLogging:
     def __init__(self, logging_func):
         self.logging_func = logging_func
+
 
 class PreOffsetEmpty(Exception, ExceptionLogging):
     """
@@ -93,6 +95,7 @@ class IntegrationResultBelowZero(Exception, ExceptionLogging):
         super(self.__class__, self).__init__(msg)
     pass
 
+
 class IntegrationResultIsNan(Exception, ExceptionLogging):
     """
     This exception occurs when an integrated value (ex. dose) is Nan.
@@ -101,6 +104,7 @@ class IntegrationResultIsNan(Exception, ExceptionLogging):
         self.logging_func = logging.warning
         super(self.__class__, self).__init__(msg)
     pass
+
 
 class NoBLMDataForIntensityInterval(Exception, ExceptionLogging):
     """
@@ -120,6 +124,7 @@ class NoBLMDataForIntensitySubInterval(Exception, ExceptionLogging):
         self.logging_func = logging.error
         super(self.__class__, self).__init__(msg)
     pass
+
 
 class BLMLoaderWrongNumberOfColumns(Exception, ExceptionLogging):
     """
@@ -150,6 +155,7 @@ class BLMIntervalsEmpty(Exception, ExceptionLogging):
         super(self.__class__, self).__init__(msg)
     pass
 
+
 class BLMInvalidRawData(Exception, ExceptionLogging):
     """
     This exception occurs when a raw BLM data are duplicated.
@@ -158,6 +164,7 @@ class BLMInvalidRawData(Exception, ExceptionLogging):
         self.logging_func = logging.error
         super(self.__class__, self).__init__(msg)
     pass
+
 
 class BLMTypeNotRecognized(Exception, ExceptionLogging):
     """
@@ -168,6 +175,7 @@ class BLMTypeNotRecognized(Exception, ExceptionLogging):
         super(self.__class__, self).__init__(msg)
     pass
 
+
 class NormalizedIntensityPlotRangeTooSmall(Exception, ExceptionLogging):
     """
     This exception occurs when an intensity normalized plot range does not cover all plot points.
@@ -177,6 +185,7 @@ class NormalizedIntensityPlotRangeTooSmall(Exception, ExceptionLogging):
         super(self.__class__, self).__init__(msg)
     pass
 
+
 class NormalizedLuminosityPlotRangeTooSmall(Exception, ExceptionLogging):
     """
     This exception occurs when an luminosity normalized plot range does not cover all plot points.
@@ -185,6 +194,7 @@ class NormalizedLuminosityPlotRangeTooSmall(Exception, ExceptionLogging):
         self.logging_func = logging.critical
         super(self.__class__, self).__init__(msg)
     pass
+
 
 class WrongBLMFunctionName(Exception, ExceptionLogging):
     """
