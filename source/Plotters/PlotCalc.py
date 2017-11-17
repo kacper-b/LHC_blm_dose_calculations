@@ -76,6 +76,7 @@ class PlotCalc(Calc, IPlotter):
         plotted_data = self.__blm_data_plot(blm_name, blm_interval, data)
         plotted_pre_oc = self.__pre_offset(blm_name, blm_interval, data)
         plotted_post_oc = self.__post_offset(blm_name, blm_interval, data)
+        # if anything has been plotted, save it
         if plotted_data and plotted_pre_oc and plotted_post_oc:
             self.save_plot(plot_file_path)
         self.clear()
