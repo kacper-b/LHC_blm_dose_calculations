@@ -7,8 +7,8 @@ from source.BLM_dose_calculation_exceptions import WrongBLMFunctionName
 class BLMFilter:
     def __init__(self):
         self.df_ips = self.get_ips()
-        self.filter_functions = {'arc': lambda IP_num, left_offset, right_offset: lambda blm: blm_filter.is_blm_in_arc_after_ip(blm, IP_num, left_offset, right_offset),
-                                 'ir': lambda IP_num, left_offset, right_offset: lambda blm: blm_filter.is_blm_in_ip_neighbourhood(blm, IP_num, left_offset, right_offset),
+        self.filter_functions = {'arc': lambda IP_num, left_offset, right_offset: lambda blm: self.is_blm_in_arc_after_ip(blm, IP_num, left_offset, right_offset),
+                                 'ir': lambda IP_num, left_offset, right_offset: lambda blm: self.is_blm_in_ip_neighbourhood(blm, IP_num, left_offset, right_offset),
                                  'all': lambda IP_num, left_offset, right_offset: lambda blm: True}
 
     def filter_blms(self, blms, func=lambda blm: True):
@@ -49,7 +49,9 @@ class BLMFilter:
         try:
             return self.filter_functions[what_to_plot](ip_num, left_offset, right_offset)
         except KeyError as e:
-            raise WrongBLMFunctionName('{} is not valid function name. Possible names: {}'.format(what_to_plot, ', '.join(self.filter_functions.keys())))
+            functions = ', '.join(self.filter_functions.keys())
+            exception_info = '{} is not valid function name. Possible names: {}'.format(what_to_plot, functions)
+            raise WrongBLMFunctionName(exception_info)
 
 
 if __name__ == '__main__':

@@ -43,7 +43,7 @@ if __name__ == '__main__':
     should_plot_total = args.pt
     should_plot_intensity_norm = args.pi
     should_plot_luminosity_norm = bool(args.pl)
-    luminosity = args.pl # 39.31 if start.year == 2016 else 37.83
+    luminosity = args.pl  # 39.31 if start.year == 2016 else 37.83
     should_plot_cumsum = args.pcs
     logging_level = getattr(logging, args.logging_level)
     blm_raw_data_dir = args.raw_blm_path
@@ -51,7 +51,8 @@ if __name__ == '__main__':
     field = args.field_name
     IP_num = args.ir if args.ir else args.arc
 
-    blm_filter_function_name = args.ir if args.ir else args.arc
+    blm_filter_function_name = 'ir' if args.ir else None
+    blm_filter_function_name = 'arc' if args.arc else None
     if not blm_filter_function_name:
         blm_filter_function_name = 'all'
 
@@ -73,7 +74,7 @@ if __name__ == '__main__':
     iil.set_files_paths(PICKLE_INTENSITY_INTERVALS_DIR, start, end)
     iil.load_pickles()
     iil.filter_interval_by_dates(start, end)
-    iil.filter_interval_by_valid_flag()
+    # iil.filter_interval_by_valid_flag()
 
     blm_filter = BLMFilter()
     blms = BLMsParser.read(blm_list_file_path)
