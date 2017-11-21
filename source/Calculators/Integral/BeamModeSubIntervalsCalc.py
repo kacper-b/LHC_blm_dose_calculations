@@ -1,9 +1,10 @@
 import numpy as np
 import pandas as pd
 from config import TIMBER_LOGGING_FREQ
-from source.BLM_dose_calculation_exceptions import IntegrationResultBelowZero, IntensitySubIntervalNotCoveredByBLMData, NoBLMDataForIntensitySubInterval, \
+from source.BLM_dose_calculation_exceptions import IntegrationResultBelowZero, NoBLMDataForIntensitySubInterval, \
     IntegrationResultIsNan
 from source.Calculators.Integral.IntegralCalc import IntegralCalc
+from source.Plotters.PlotCalc2 import PlotCalc
 
 
 class BeamModeSubIntervalsCalc(IntegralCalc):
@@ -25,26 +26,35 @@ class BeamModeSubIntervalsCalc(IntegralCalc):
         """
         # Adds starts of subintervals to our data
         new_data = pd.concat([offset_corrected_data_for_blm_interval, pd.DataFrame(index=new_indices)])
+        # return new_data.fillna(0)
         # if only one readout is available, it can be assumed that dose is constant in our subinterval
-        if len(offset_corrected_data_for_blm_interval.index) == 1:
+        if len(offset_corrected_data_for_blm_interval.index) == 1 and False:
             return new_data[~new_data.index.duplicated(keep='first')].sort_index().fillna(method='bfill').fillna(method='pad')
         # fills new added points with values using the linear interpolation
         elif len(offset_corrected_data_for_blm_interval.index) > 1:
-            return new_data[~new_data.index.duplicated(keep='first')].sort_index().interpolate(method='slinear').dropna()
+            new_data = new_data[~new_data.index.duplicated(keep='first')].sort_index().interpolate(method='slinear').dropna()
+            # new_data = new_data.sort_index().interpolate(method='slinear').dropna()
+
+            # new_data = new_data.fillna(0)
+            # print(len(new_data), len(offset_corrected_data_for_blm_interval.index))
+            return new_data
         return offset_corrected_data_for_blm_interval
 
-    def run(self, data, blm_intervals):
+    def run(self, data1, blm_intervals):
         """
         The base class method implementation. See the IntegralCalc for the description.
         :param data:
         :param blm_intervals:
         :return:
         """
-        col_name = data.columns[0]
+        # p = PlotCalc('/media/sf_monitoring_analysis/data/pickles/analysed_blm_2017_with_beam_mode2')
+        col_name = data1.columns[0]
         for blm_interval in blm_intervals:
-            offset_corrected_data_for_blm_interval = self.get_data_to_integrate(data, blm_interval)
+            data = self.get_data_to_integrate(data1, blm_interval)
             for subinterval in blm_interval.beam_modes_subintervals:
-                self.integrate_single_blm_interval(subinterval, offset_corrected_data_for_blm_interval, col_name)
+                self.integrate_single_blm_interval(subinterval, data, col_name)
+            # p.run(data, [blm_interval])
+
 
     def get_data_to_integrate(self, data, blm_interval):
         """
@@ -53,9 +63,9 @@ class BeamModeSubIntervalsCalc(IntegralCalc):
         :param blm_interval:
         :return:
         """
-        offset_corrected_data_for_blm_interval = blm_interval.get_integrated_data(data) - blm_interval.offset_pre
+        offset_corrected_data_for_blm_interval1 = data - blm_interval.offset_pre
         timestamps = (sub.start for sub in blm_interval.beam_modes_subintervals)
-        offset_corrected_data_for_blm_interval = self.fill_missing_integration_points(offset_corrected_data_for_blm_interval, timestamps)
+        offset_corrected_data_for_blm_interval = self.fill_missing_integration_points(offset_corrected_data_for_blm_interval1, timestamps)
         return offset_corrected_data_for_blm_interval
 
     def integrate_single_blm_interval(self, subinterval, offset_corrected_data_for_blm_interval, blm_name):
@@ -72,12 +82,10 @@ class BeamModeSubIntervalsCalc(IntegralCalc):
             integrated_dose = self.integrate(subinterval_data, blm_name, subinterval)
             self.check_if_integration_result_is_positive(integrated_dose, subinterval, blm_name)
         except (IntegrationResultBelowZero, IntegrationResultIsNan) as e:
-            integrated_dose = 0
             e.logging_func('{}\t{} {}'.format(self, blm_name, str(e)))
         except NoBLMDataForIntensitySubInterval as e:
             if subinterval.get_duration() > TIMBER_LOGGING_FREQ:
                 e.logging_func('{}\t{} {}'.format(self, blm_name, str(e)))
-            integrated_dose = 0
         finally:
             self.set_integration_result(subinterval, integrated_dose)
 

@@ -52,6 +52,8 @@ class BLMProcess:
             if is_any_already_calculated_blm_exists:
                 loaded_blm_intervals = self.load_calculated_blm(blm_scratch, calculated_blm_loader).blm_intervals
                 missing_blm_intervals = blm_scratch.get_missing_blm_intervals(loaded_blm_intervals)
+                print(len(loaded_blm_intervals), len(blm_scratch.blm_intervals), len(missing_blm_intervals))
+                # print()
                 blm_scratch.blm_intervals = self.get_only_needed_blm_intervals(blm_scratch, loaded_blm_intervals)
 
                 if not missing_blm_intervals:
@@ -132,7 +134,7 @@ class BLMProcess:
         blm_already_calculated_blm_intervals = blm_scratch.blm_intervals
         blm_scratch.blm_intervals = missing_intervals
         self.set_blm_calculators(blm_scratch)
-        blm_scratch.blm_intervals = self.merge_already_and_new_calculated_blm_intervals(blm.blm_intervals, blm_already_calculated_blm_intervals)
+        blm_scratch.blm_intervals = self.merge_already_and_new_calculated_blm_intervals(blm_scratch.blm_intervals, blm_already_calculated_blm_intervals)
 
     def merge_already_and_new_calculated_blm_intervals(self, blm_new_calculated_intervals, blm_already_calculated_blms):
         """

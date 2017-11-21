@@ -7,6 +7,7 @@ import _pickle as pickle
 import os
 from source.BLM_dose_calculation_exceptions import BLMIntervalsEmpty, BLMDataEmpty, BLMTypeNotRecognized
 from sortedcontainers import SortedSet
+import pandas as pd
 
 
 class BLM:
@@ -44,7 +45,7 @@ class BLM:
         :return:
         """
         try:
-            return intensity_interval.beam_modes_subintervals
+            return copy.deepcopy(intensity_interval.beam_modes_subintervals)
         except AttributeError as e:
             logging.warning('Intensity interval: {}\n\thas no subintervals'.format(intensity_interval))
 
@@ -197,6 +198,13 @@ class BLM:
     def __str__(self):
         if self.blm_intervals is not None:
             return self.name + '\t\n' + '\t\n'.join(map(str, self.blm_intervals))
+
+    def get_beam_mode_doses_as_dataframe(self, beam_modes=list(range(1,23)), start=None, end=None):
+        columns = ['total dose'] + beam_modes
+        total_dose = self.get_pre_oc_dose(start, end)
+        values = [[self.get_pre_oc_dose_for_beam_mode(beam_mode, start, end)/total_dose for beam_mode in beam_modes]]
+        values[0].insert(0, total_dose)
+        return pd.DataFrame(values, columns=columns, index=[self.name])
 
     def get_blm_type(self):
         """
