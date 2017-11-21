@@ -20,7 +20,7 @@ BLM_FILES_REGEX_PATTERN = re.compile(
 INTENSITY_INTERVALS_FILES_REGEX_PATTERN = re.compile(r".*_(\d{8})\d*_(\d{8})\d*\.p")
 BLM_DATE_FORMAT = '%Y_%m_%d'
 PICKLE_BLM_INTERVALS_DIR = os.path.join(DATA_DIRs_NAMES['pickles'], 'analysed_blm_2017')
-BLM_INTERVALS_PLOTS_DIR = '/media/sf_monitoring_analysis/data/pickles/analysed_blm_2017_with_beam_mode2'
+BLM_INTERVALS_PLOTS_DIR = PICKLE_BLM_INTERVALS_DIR
 INTENSITY_INTERVALS_DATE_FORMAT = '%Y%m%d'
 IPs = [[0, 1, 'IP1', 1],
        [3332.360, 2, 'IP2', 1],

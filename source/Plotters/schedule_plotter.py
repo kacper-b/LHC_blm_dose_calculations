@@ -32,7 +32,6 @@ SCHEDULE_PATH = os.path.join(DATA_DIR_PATH,'schedules')
 
 
 class schedule():
-    # TODO: Needs to be cleaned up & commented
     def __init__(self,year = 2017):
         SCHEDULE_PATH = os.path.join(DATA_DIR_PATH, 'schedules')
         schedule_dict = {2017: 'LHC_schedule_2017.csv',

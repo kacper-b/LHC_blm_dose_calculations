@@ -1,46 +1,32 @@
+import numpy as np
+
+from config import TIMBER_LOGGING_FREQ
+from source.BLM_dose_calculation_exceptions import IntegrationResultBelowZero, IntensityIntervalNotCoveredByBLMData, \
+    NoBLMDataForIntensityInterval
 from source.Calculators.Integral.IntegralCalc import IntegralCalc
 
 
 class RawIntegralCalc(IntegralCalc):
-    """
-    Integrates raw data.
-    """
     def run(self, data, blm_intervals):
-        """
-        The base class method implementation. See the IntegralCalc for the description.
-        :param data:
-        :param blm_intervals:
-        :return:
-        """
         col_name = data.columns[0]
         for blm_interval in blm_intervals:
-            blm_beam_on_data = self.get_data_to_integrate(data, blm_interval)
-            self.integrate_single_blm_interval(blm_interval, blm_beam_on_data, col_name)
+            blm_beam_on_data = blm_interval.get_integrated_data(data)
+            try:
+                integral_raw = self.__integrate(blm_beam_on_data, col_name, blm_interval)
+            except (IntegrationResultBelowZero, IntensityIntervalNotCoveredByBLMData) as e:
+                integral_raw = 0
+                e.logging_func('{}'.format(str(e)))
+            except NoBLMDataForIntensityInterval as e:
+                if (blm_interval.end - blm_interval.start) > TIMBER_LOGGING_FREQ:
+                    e.logging_func('{}'.format(str(e)))
+                integral_raw = 0
+            finally:
+                blm_interval.integral_raw = integral_raw
 
-    def get_data_to_integrate(self, data, blm_interval):
-        """
-        The base class method implementation. See the IntegralCalc for the description.
-        :param data:
-        :param blm_interval:
-        :return:
-        """
-        return blm_interval.get_integrated_data(data)
-
-    def set_integration_result(self, blm_interval, integration_result):
-        """
-        The base class method implementation. See the IntegralCalc for the description.
-        :param blm_interval:
-        :param integration_result:
-        :return:
-        """
-        blm_interval.integral_raw = integration_result
-
-    def check_if_integration_result_is_positive(self, integration_result, blm_interval, col_name):
-        """
-        The base class method implementation. See the IntegralCalc for the description.
-        :param integration_result:
-        :param blm_interval:
-        :param col_name:
-        :return:
-        """
-        pass # It does nothing when the integration_result < 0
+    def __integrate(self, data, col_name, blm_interval):
+        if not data.empty:
+            integral = np.trapz(y=data[data.columns[0]], x=data.index)
+            return integral
+        else:
+            raise NoBLMDataForIntensityInterval(
+                '{}\t{} dataframe for given intensity interval is empty: {}'.format(self.__class__.__name__,col_name, blm_interval))
