@@ -52,10 +52,11 @@ class BeamModeSubIntervalsCalc(IntegralCalc):
         col_name = data_old.columns[0]
         for blm_interval in blm_intervals:
             data = self.get_data_to_integrate(data_old, blm_interval)
-            # if blm_interval.
             for subinterval in blm_interval.beam_modes_subintervals:
-                self.integrate_single_blm_interval(subinterval, data, col_name)
-            # p.run(data, [blm_interval])
+                if blm_interval.integral_pre_offset_corrected == 0:
+                    self.set_integration_result(subinterval, 0)
+                else:
+                    self.integrate_single_blm_interval(subinterval, data, col_name)
 
 
     def get_data_to_integrate(self, data, blm_interval):
