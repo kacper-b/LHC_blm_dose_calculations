@@ -1,4 +1,7 @@
 from abc import abstractmethod
+
+import sys
+
 from source.Calculators.Calc import Calc
 import numpy as np
 from config import TIMBER_LOGGING_FREQ
@@ -29,15 +32,16 @@ class IntegralCalc(Calc):
         :param blm_name:
         :return:
         """
-        integration_result = 0
         try:
             integration_result = self.integrate(blm_interval_beam_on_data, blm_name, blm_interval)
             self.check_if_integration_result_is_positive(integration_result, blm_interval, blm_name)
         except (IntegrationResultBelowZero, IntegrationResultIsNan) as e:
             e.logging_func('{}'.format(str(e)))
+            integration_result = 0
         except NoBLMDataForIntensityInterval as e:
             if blm_interval.get_duration() > TIMBER_LOGGING_FREQ:
                 e.logging_func('{}'.format(str(e)))
+            integration_result = 0
         finally:
             self.set_integration_result(blm_interval, integration_result)
 

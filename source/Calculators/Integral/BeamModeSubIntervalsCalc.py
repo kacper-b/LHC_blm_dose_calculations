@@ -76,16 +76,17 @@ class BeamModeSubIntervalsCalc(IntegralCalc):
         :param blm_name:
         :return:
         """
-        integrated_dose = 0
         try:
             subinterval_data = subinterval.get_integrated_data(offset_corrected_data_for_blm_interval)
             integrated_dose = self.integrate(subinterval_data, blm_name, subinterval)
             self.check_if_integration_result_is_positive(integrated_dose, subinterval, blm_name)
         except (IntegrationResultBelowZero, IntegrationResultIsNan) as e:
             e.logging_func('{}\t{} {}'.format(self, blm_name, str(e)))
+            integrated_dose = 0
         except NoBLMDataForIntensitySubInterval as e:
             if subinterval.get_duration() > TIMBER_LOGGING_FREQ:
                 e.logging_func('{}\t{} {}'.format(self, blm_name, str(e)))
+            integrated_dose = 0
         finally:
             self.set_integration_result(subinterval, integrated_dose)
 
