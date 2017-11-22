@@ -14,32 +14,6 @@ class BeamModeSubIntervalsCalc(IntegralCalc):
     The class which integrates a BLM data in subintervals (intervals split by beam mode changes). It also produces some extra BLM data (using the interpolation)
     in order to make the integration more accurate.
     """
-    # def fill_missing_integration_points(self, offset_corrected_data_for_blm_interval, new_indices):
-    #     """
-    #     Fill missing points. An intensity data were used to creation of subintervals. Due to the fact, that intensity data are stored with much higher frequency,
-    #     beginnings and ends of subintervals don't covers with actual BLM data, so during integration it is possible to miss some dose.
-    #     The goal is to add extra points to our data using interpolation. Extra points have timestamps equal to beginnings of subintervals, therefore during
-    #     integration any small parts of subinterval won't be lost and the sum of doses in subintervals will be equal to the dose in the interval.
-    #
-    #     :param offset_corrected_data_for_blm_interval: Offset corrected data for a blm interval
-    #     :param new_indices: start timestaps of subintervals
-    #     :return:
-    #     """
-    #     # Adds starts of subintervals to our data
-    #     new_data = pd.concat([offset_corrected_data_for_blm_interval, pd.DataFrame(index=new_indices)])
-    #     # return new_data.fillna(0)
-    #     # if only one readout is available, it can be assumed that dose is constant in our subinterval
-    #     if len(offset_corrected_data_for_blm_interval.index) == 1:
-    #         return new_data[~new_data.index.duplicated(keep='first')].sort_index().fillna(method='bfill').fillna(method='pad')
-    #     # fills new added points with values using the linear interpolation
-    #     elif len(offset_corrected_data_for_blm_interval.index) > 1:
-    #         new_data = new_data[~new_data.index.duplicated(keep='first')].sort_index().interpolate(method='slinear').dropna()
-    #         # new_data = new_data.sort_index().interpolate(method='slinear').dropna()
-    #
-    #         # new_data = new_data.fillna(0)
-    #         # print(len(new_data), len(offset_corrected_data_for_blm_interval.index))
-    #         return new_data
-    #     return offset_corrected_data_for_blm_interval
 
     def run(self, data_old, blm_intervals):
         """
@@ -48,7 +22,6 @@ class BeamModeSubIntervalsCalc(IntegralCalc):
         :param blm_intervals:
         :return:
         """
-        # p = PlotCalc('/media/sf_monitoring_analysis/data/pickles/analysed_blm_2017_with_beam_mode2')
         col_name = data_old.columns[0]
         for blm_interval in blm_intervals:
             data = self.get_data_to_integrate(data_old, blm_interval)
@@ -67,12 +40,6 @@ class BeamModeSubIntervalsCalc(IntegralCalc):
         :return:
         """
         return data - blm_interval.offset_pre
-        # offset_corrected_data_for_blm_interval1 = data - blm_interval.offset_pre
-        # prev_len = len(data.index)
-        # timestamps = (sub.start for sub in blm_interval.beam_modes_subintervals)
-        # offset_corrected_data_for_blm_interval = self.fill_missing_integration_points(offset_corrected_data_for_blm_interval1, timestamps)
-        # logging.warning(str(len(offset_corrected_data_for_blm_interval.index) - prev_len))
-        # return offset_corrected_data_for_blm_interval
 
     def integrate_single_blm_interval(self, subinterval, offset_corrected_data_for_blm_interval, blm_name):
         """
