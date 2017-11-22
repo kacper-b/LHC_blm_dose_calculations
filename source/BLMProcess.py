@@ -45,6 +45,7 @@ class BLMProcess:
         try:
             # Load pickled BLM raw data
             blm_scratch.data = self.load_pickled_raw_blm_data(blm_name)
+            blm_scratch.interpolate_data()
             # Load the pickled BLM if it exists
             calculated_blm_loader = BLMsCalculatedLoader(names=[blm_name], remove_raw_data=True)
             is_any_already_calculated_blm_exists = self.check_if_blm_already_calculated(calculated_blm_loader)

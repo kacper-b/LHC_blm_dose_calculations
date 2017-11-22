@@ -29,6 +29,20 @@ class BLM:
         self.data = data
         self.blm_intervals = None
 
+    def interpolate_data(self):
+        """
+        The function adds new points to a BLM data. Due to differences in the data storing frequency between an intensity and  a BLM data, usually beginning of
+         a subinterval (or a normal interval) is not covered by a readout in the BLM data. To make integration more accurate, those missing points are added
+         using linear interpolation.
+        :return:
+        """
+        # get all subintervals' beginnings
+        subintervals_starts = sum(([sub.start for sub in blm_int.beam_modes_subintervals] for blm_int in self.blm_intervals), [])
+        intervals_ends = [blm_int.end for blm_int in self.blm_intervals]
+        new_indices = subintervals_starts + intervals_ends
+        data = pd.concat([self.data,  pd.DataFrame(index=new_indices)])
+        self.data = data[~data.index.duplicated(keep='first')].sort_index().interpolate(method='polynomial', order=1).dropna(how='any')
+
     def create_blm_intervals(self, intensity_intervals):
         """
         Creates BLM intervals using intensity intervals.
@@ -56,8 +70,8 @@ class BLM:
         :return SortedSet: BLM
         """
         if self.blm_intervals is not None:
-            z = self.blm_intervals - intervals_set_container_to_check
-            return z
+            missing_intervals = self.blm_intervals - intervals_set_container_to_check
+            return missing_intervals
 
     def set(self, calc):
         """
