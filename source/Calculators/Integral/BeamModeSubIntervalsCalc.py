@@ -29,7 +29,7 @@ class BeamModeSubIntervalsCalc(IntegralCalc):
                 if blm_interval.integral_pre_offset_corrected == 0:
                     self.set_integration_result(subinterval, 0)
                 else:
-                    self.integrate_single_blm_interval(subinterval, data, col_name)
+                    self.set_integration_result(subinterval, self.integrate_single_blm_interval(subinterval, data, col_name))
 
 
     def get_data_to_integrate(self, data, blm_interval):
@@ -61,7 +61,7 @@ class BeamModeSubIntervalsCalc(IntegralCalc):
                 e.logging_func('{}\t{} {}'.format(self, blm_name, str(e)))
             integrated_dose = 0
         finally:
-            self.set_integration_result(subinterval, integrated_dose)
+            return integrated_dose
 
     def set_integration_result(self, blm_subinterval, integration_result):
         """

@@ -27,6 +27,13 @@ from source.BLMFactory import BLMFactory
 from source.BLMProcess import BLMProcess
 import logging
 from arguments_parser import build_blm_dose_calc_parser
+import pandas as pd
+
+def save_to_excel(blms, fname='blms'):
+    writer = pd.ExcelWriter(fname + '.xlsx')
+    for blm in blms:
+        blm.get_as_pandas_dataframe().to_excel(writer,blm.name)
+    writer.save()
 
 if __name__ == '__main__':
 
@@ -77,7 +84,7 @@ if __name__ == '__main__':
     iil.set_files_paths(PICKLE_INTENSITY_INTERVALS_DIR, start, end)
     iil.load_pickles()
     iil.filter_interval_by_dates(start, end)
-    iil.filter_interval_by_valid_flag()
+    # iil.filter_interval_by_valid_flag()
 
     # B
     blm_list_file_path = os.path.join(BLM_LIST_DIR, blm_csv_list_filename)
@@ -95,6 +102,8 @@ if __name__ == '__main__':
     if blm_process.should_return_blm:
 
         logging.info('Analysed BLM types: {}'.format(', '.join(set(blm.get_blm_type() for blm in blms))))
+
+        # save_to_excel(blms)
 
         # Plotting
         p = BLMsPlotter(config.RESULT_DIR_PATH)

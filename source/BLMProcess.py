@@ -54,11 +54,11 @@ class BLMProcess:
                 loaded_blm_intervals = self.load_calculated_blm(blm_scratch, calculated_blm_loader).blm_intervals
                 missing_blm_intervals = blm_scratch.get_missing_blm_intervals(loaded_blm_intervals)
                 print(len(loaded_blm_intervals), len(blm_scratch.blm_intervals), len(missing_blm_intervals))
-                # print()
                 blm_scratch.blm_intervals = self.get_only_needed_blm_intervals(blm_scratch, loaded_blm_intervals)
 
                 if not missing_blm_intervals:
                     logging.info('{}\t not missing anything'.format(blm_name))
+                    # return blm_scratch.get_beam_mode_doses_as_dataframe()
                     return blm_scratch if self.should_return_blm else None
                 else:
                     self.set_calculators_for_missing_intervals(blm_scratch, missing_blm_intervals)
@@ -69,6 +69,8 @@ class BLMProcess:
 
             self.update_pickled_blm(blm_scratch, loaded_blm_intervals, calculated_blm_loader.file_paths)
             logging.info('{}\t done'.format(blm_name))
+            # x= blm_scratch.get_beam_mode_doses_as_dataframe()
+            # return x
             return blm_scratch if self.should_return_blm else None
 
         except (BLMDataEmpty, BLMIntervalsEmpty) as e:

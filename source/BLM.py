@@ -220,6 +220,9 @@ class BLM:
         values[0].insert(0, total_dose)
         return pd.DataFrame(values, columns=columns, index=[self.name])
 
+    def get_as_pandas_dataframe(self):
+        return pd.concat(map(lambda blm_interval: blm_interval.get_as_pandas_dataframe(), self.blm_intervals))
+
     def get_blm_type(self):
         """
         It analyses the BLM name and returns substring, which is located after 'BLM' and before the first dot.
