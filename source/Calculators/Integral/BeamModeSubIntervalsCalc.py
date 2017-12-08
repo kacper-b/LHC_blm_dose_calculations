@@ -6,7 +6,6 @@ from config import TIMBER_LOGGING_FREQ
 from source.BLM_dose_calculation_exceptions import IntegrationResultBelowZero, NoBLMDataForIntensitySubInterval, \
     IntegrationResultIsNan
 from source.Calculators.Integral.IntegralCalc import IntegralCalc
-from source.Plotters.PlotCalc2 import PlotCalc
 
 
 class BeamModeSubIntervalsCalc(IntegralCalc):
