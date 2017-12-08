@@ -3,6 +3,7 @@ import re
 from datetime import datetime
 import time
 from config import *
+import matplotlib
 matplotlib.use('agg') 
 import matplotlib.gridspec as gridspec
 import matplotlib.dates as md
@@ -17,7 +18,6 @@ import matplotlib.dates as mdates
 import matplotlib.patches as patches
 
 import matplotlib.pyplot as plt
-# import matplotlib
 # from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
 matplotlib.style.use('ggplot')
 # %matplotlib inline
