@@ -3,6 +3,7 @@ import os
 import re
 from datetime import datetime
 import config
+import matplotlib
 matplotlib.use('agg') 
 import matplotlib.gridspec as gridspec
 import matplotlib.dates as md
