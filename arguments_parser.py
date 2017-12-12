@@ -1,21 +1,25 @@
 import argparse
-from datetime import datetime
 from config import PICKLE_BLM_INTERVALS_DIR, BLM_DATA_DIR
+import config
+from datetime import datetime
+from dateutil import tz
+from tools.workers import str2datetime
 
+utc = tz.tzutc()
 
 def build_blm_dose_calc_parser():
     """
     Function which reads
     :return argparse.ArgumentParser: command line arguments
     """
-    start = datetime(year=2016, month=3, day=28)
-    end = datetime(year=2016, month=10, day=31)
-    start = datetime(year=2017, month=5, day=1)
-    end = datetime(year=2017, month=10, day=16)
+    start = datetime(year=2016, month=3, day=28, tzinfo=utc)
+    end = datetime(year=2016, month=10, day=31, tzinfo=utc)
+    start = datetime(year=2017, month=5, day=1, tzinfo=utc )
+    end = datetime(year=2017, month=10, day=16, tzinfo=utc)
     blm_csv_list_filename = 'all_blms_dcum_meters_ti_qi_ei_bi.csv' #'151617L2_ti_qi_ei_bi.csv' #
 
     parser = argparse.ArgumentParser(description='BLM doses calculator')
-    date_parser = lambda str_date: datetime.strptime(str_date, '%d-%m-%Y')
+    date_parser = lambda str_date: str2datetime(str_date, '%d-%m-%Y')
 
     parser.add_argument("-s", "--start_date", help="provide start date of analysed period", type=date_parser, default=start)
     parser.add_argument("-e", "--end_date", help="provide end date of analysed period", type=date_parser, default=end)

@@ -1,7 +1,8 @@
 from source.Calculators.Calc import Calc
 from datetime import datetime
 import os
-
+import config
+from tools.workers import second2datetime
 import matplotlib.dates as md
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -52,8 +53,8 @@ class PlotCalc(Calc, IPlotter):
         if name_field:
             name = name_field.group(1).replace('.', '_')
             field = name_field.group(2)
-            start = datetime.utcfromtimestamp(blm_interval.start).strftime(PlotCalc.date_format)
-            end = datetime.utcfromtimestamp(blm_interval.end).strftime(PlotCalc.date_format)
+            start = second2datetime(blm_interval.start).strftime(PlotCalc.date_format)
+            end = second2datetime(blm_interval.end).strftime(PlotCalc.date_format)
             return '{0}_{1}_{2}_{3}'.format(name, start, end, field)
 
     def __plotter(self, blm_name, blm_interval,data):

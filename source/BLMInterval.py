@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta,timezone
 import config
+from tools.workers import second2str, second2datetime
 from projects.LHC_intensity_calculations.source.IInterval import IInterval
 import pandas as pd
 
@@ -119,6 +120,6 @@ class BLMInterval(IInterval):
 
     def __str__(self):
         return 'start: {}\tend: {}\tPre-offset: {:3.1e}\tPost-offset: {:3.1e}\traw integral: {:3.1e}\tintegral_pre_oc: {:3.1e}\tintegral_post_oc: {:3.1e}'. \
-            format(datetime.utcfromtimestamp(self.start).strftime(BLMInterval.date_str_format),
-                   datetime.utcfromtimestamp(self.end).strftime(BLMInterval.date_str_format),
+            format(second2str(self.start, BLMInterval.date_str_format),
+                   second2str(self.end, BLMInterval.date_str_format),
                    self.offset_pre, self.offset_post, self.integral_raw, self.integral_pre_offset_corrected, self.integral_post_offset_corrected)
