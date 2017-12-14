@@ -35,6 +35,13 @@ def save_to_excel(blms, fname='blms'):
         blm.get_as_pandas_dataframe().to_excel(writer,blm.name)
     writer.save()
 
+def save_to_excel_beam_modes(blms, fname):
+    writer = pd.ExcelWriter(fname + '.xlsx')
+    rslt = pd.concat([blm.get_beam_mode_doses_as_dataframe() for blm in blms], axis=0)
+    rslt.to_excel(writer,'data')
+    writer.save()
+
+
 if __name__ == '__main__':
 
 ####################################################################################
@@ -52,6 +59,7 @@ if __name__ == '__main__':
     should_plot_total = args.pt
     should_plot_intensity_norm = args.pi
     should_plot_luminosity_norm = bool(args.pl)
+    should_save_excel = args.save_to_excel
     luminosity = args.pl # 39.31 if start.year == 2016 else 37.83
     should_plot_cumsum = args.pcs
     logging_level = getattr(logging, args.logging_level)
@@ -92,19 +100,19 @@ if __name__ == '__main__':
     blms = BLMsParser.read(blm_list_file_path)
     filtered_blms = blm_filter.filter_blms(blms, func=blm_filter.get_filter_function(blm_filter_function_name, IP_num, left_offset, right_offset))
 
-    should_return_blm = should_plot_total or should_plot_cumsum or should_plot_intensity_norm or should_plot_luminosity_norm
-    blm_process = BLMProcess(start, end, field, calculators, should_return_blm,blm_raw_data_dir, pickled_blm_dir)
+    should_return_blm = should_plot_total or should_plot_cumsum or should_plot_intensity_norm or should_plot_luminosity_norm or should_save_excel
+    blm_process = BLMProcess(start, end, field, calculators, should_return_blm or True,blm_raw_data_dir, pickled_blm_dir)
 
     # Reading and processing BLMs data
     with Pool(processes=number_of_simultaneous_processes) as pool:
-        blms = pool.map(blm_process.run, BLMFactory.build(iil.data, filtered_blms))
+        blms = [blm for blm in pool.map(blm_process.run, BLMFactory.build(iil.data, filtered_blms)) if blm is not None]
 
     if blm_process.should_return_blm:
 
         logging.info('Analysed BLM types: {}'.format(', '.join(set(blm.get_blm_type() for blm in blms))))
 
-        # save_to_excel(blms)
-
+        if should_save_excel:
+            save_to_excel_beam_modes(blms, 'BLMs_with_beam_modes_{}_{}'.format(start.strftime('%Y%m%d'), end.strftime('%Y%m%d')))
         # Plotting
         p = BLMsPlotter(config.RESULT_DIR_PATH)
         if should_plot_luminosity_norm:

@@ -3,6 +3,7 @@ import os
 import re
 from datetime import datetime
 import config
+from config import BEAM_MODES
 from tools.workers import second2datetime
 import matplotlib
 matplotlib.use('agg') 
@@ -378,7 +379,7 @@ class BLMsPlotter(IPlotter):
         # TODO: to be removed or commented
 
         # Pie chart, where the slices will be ordered and plotted counter-clockwise:
-        beam_modes = list(range(23))
+        beam_modes = list(BEAM_MODES.keys())
         labels = list(map(str,beam_modes))
         norm = 1 / blm.get_pre_oc_dose()
         sizes = {beam_mode:blm.get_pre_oc_dose_for_beam_mode([beam_mode])*norm for beam_mode in beam_modes}

@@ -33,7 +33,8 @@ def build_blm_dose_calc_parser():
 
     parser.add_argument("-pl", help="Plot total integrated dose normalized with given luminosity", type=float)
     parser.add_argument("-pt", help="Plot total integrated dose", action="store_true")
-    parser.add_argument("-pi", help="Plot total integrated dose", action="store_true")
+    parser.add_argument("-pi", help="Plot total integrated dose normalized with the integrated intensity", action="store_true")
+    parser.add_argument("-ex", "--save_to_excel", help="Save doses to an excel file", action="store_true")
     parser.add_argument("-pcs", help="Plot cumulative sums", action="store_true")
 
     group = parser.add_mutually_exclusive_group()

@@ -8,7 +8,7 @@ import os
 from source.BLM_dose_calculation_exceptions import BLMIntervalsEmpty, BLMDataEmpty, BLMTypeNotRecognized
 from sortedcontainers import SortedSet
 import pandas as pd
-
+from config import BEAM_MODES
 
 class BLM:
     """
@@ -135,7 +135,7 @@ class BLM:
         """
         It sums offset pre corrected doses for BLM subintervals for required beam modes. If the start and the end arguments are passed, it will consider only BLM subintervals,
         which a "parent" BLM interval in are fully located in [start, end] time range.
-        :param list beam_modes: a beam modes' list, which consists integer numbers of beam modes, that will be analysed
+        :param list beam_modes_ids: a beam modes' list, which consists integer numbers of beam modes, that will be analysed
         :param datetime start: analysed time period's beginning timestamp. If None, it will analyse all available BLM subintervals
         :param datetime end:  analysed time period's ending timestamp. If None it will analyse all available BLM subintervals
         :return float: pre offset corrected integrated dose for a required time period
@@ -213,11 +213,12 @@ class BLM:
         if self.blm_intervals is not None:
             return self.name + '\t\n' + '\t\n'.join(map(str, self.blm_intervals))
 
-    def get_beam_mode_doses_as_dataframe(self, beam_modes=list(range(1,23)), start=None, end=None):
-        columns = ['total dose'] + beam_modes
+    def get_beam_mode_doses_as_dataframe(self, beam_modes_ids=list(BEAM_MODES.keys()), start=None, end=None):
+        columns = ['total dose', 'dcum'] + [BEAM_MODES[beam_mode_id] for beam_mode_id in beam_modes_ids]
         total_dose = self.get_pre_oc_dose(start, end)
-        values = [[self.get_pre_oc_dose_for_beam_mode(beam_mode, start, end)/total_dose for beam_mode in beam_modes]]
+        values = [[self.get_pre_oc_dose_for_beam_mode(beam_mode, start, end)/total_dose for beam_mode in beam_modes_ids]]
         values[0].insert(0, total_dose)
+        values[0].insert(1, self.position)
         return pd.DataFrame(values, columns=columns, index=[self.name])
 
     def get_as_pandas_dataframe(self):

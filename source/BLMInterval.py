@@ -3,8 +3,9 @@ import config
 from tools.workers import second2str, second2datetime
 from projects.LHC_intensity_calculations.source.IInterval import IInterval
 import pandas as pd
+from config import BEAM_MODES
 
-beam_modes = list(range(1,23))
+
 class BLMInterval(IInterval):
     """
     The class represents a single BLMInterval - a time period, in which beam was continuously turned on.
@@ -46,16 +47,17 @@ class BLMInterval(IInterval):
             self.__integration_data = super().get_integrated_data(data)
         return self.__integration_data
 
-    def get_duration_for_beam_modes(self, beam_modes):
+    def get_duration_for_beam_modes(self, beam_modes_ids):
         """
         Sums durations of subintervals for given beam modes
         :return:
         """
-        if isinstance(beam_modes, int):
-            beam_modes = [beam_modes]
-        return sum(sub.get_duration() for sub in filter(lambda subinterval: subinterval.beam_mode in beam_modes, self.beam_modes_subintervals))
+        if isinstance(beam_modes_ids, int):
+            beam_modes_ids = [beam_modes_ids]
+        return sum(sub.get_duration() for sub in filter(lambda subinterval: subinterval.beam_mode in beam_modes_ids, self.beam_modes_subintervals))
 
     def get_as_pandas_dataframe(self):
+        beam_modes_ids = list(BEAM_MODES.keys())
         blm_interval = {'start': self.get_start_date_as_str(),
                         'end': self.get_end_date_as_str(),
                         'duration': self.get_duration(),
@@ -71,21 +73,21 @@ class BLMInterval(IInterval):
                         'dose post-offset corrected': self.integral_post_offset_corrected}
 
         durations = {'duration ' + str(bmode): (self.get_duration_for_beam_modes(bmode) / blm_interval['duration'] if blm_interval['duration'] != 0 else None)
-                                    for bmode in beam_modes}
+                     for bmode in beam_modes_ids}
         subintensities = {str(bmode): (self.get_integrated_dose_for_beam_mode(bmode)/self.integral_pre_offset_corrected if self.integral_pre_offset_corrected != 0 else None)
-                          for bmode in beam_modes}
+                          for bmode in beam_modes_ids}
         return pd.DataFrame(dict(blm_interval, **durations, **subintensities), index=[self.start])
 
-    def get_integrated_dose_for_beam_mode(self, beam_modes):
+    def get_integrated_dose_for_beam_mode(self, beam_modes_ids):
         """
         It returns integrated dose for subinterval with specific beam modes.
-        :param list beam_modes: integers list - every subinterval with the beam_mode, which appears in the list, will be taken into account during partial doses
+        :param list beam_modes_ids: integers list - every subinterval with the beam_mode, which appears in the list, will be taken into account during partial doses
         summing
-        :return float: dose which occurred during given beam_modes
+        :return float: dose which occurred during given beam_modes_ids
         """
-        if isinstance(beam_modes, int):
-            beam_modes = [beam_modes]
-        return sum(sub.get_integration_result() for sub in self.beam_modes_subintervals if sub.beam_mode in beam_modes)
+        if isinstance(beam_modes_ids, int):
+            beam_modes_ids = [beam_modes_ids]
+        return sum(sub.get_integration_result() for sub in self.beam_modes_subintervals if sub.beam_mode in beam_modes_ids)
 
     def get_preoffset_data(self, data):
         """

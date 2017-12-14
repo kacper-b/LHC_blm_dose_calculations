@@ -37,3 +37,26 @@ BLM_TYPE_REGEX_PATERN = re.compile(r"BLM(.+?)\.")
 TIMBER_LOGGING_FREQ = 84
 INTENSITY_NORMALIZED_PLOT_YRANGE = (1e-24, 5e-17)
 LUMINOSITY_NORMALIZED_PLOT_YRANGE = (1e-3, 1e+4)
+
+BEAM_MODES = {1: 'NO MODE',
+              2: 'SETUP',
+              3: 'INJECTION PROBE BEAM',
+              4: 'INJECTION SETUP BEAM',
+              5: 'INJECTION PHYSICS BEAM',
+              6: 'PREPARE RAMP',
+              7: 'RAMP',
+              8: 'FLAT TOP',
+              9: 'SQUEEZE',
+              10: 'ADJUST',
+              11: 'STABLE BEAMS',
+              12: 'UNSTABLE BEAMS',
+              13: 'BEAM DUMP',
+              14: 'RAMP DOWN',
+              15: 'RECOVERY',
+              16: 'INJECT AND DUMP',
+              17: 'CIRCULATE AND DUMP',
+              18: 'ABORT',
+              19: 'CYCLING',
+              20: 'BEAM DUMP WARNING',
+              21: 'NO BEAM',
+              22: 'PREPARE INJECTION',}
