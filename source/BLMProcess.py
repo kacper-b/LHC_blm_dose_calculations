@@ -91,7 +91,7 @@ class BLMProcess:
             blm_to_be_saved = copy.deepcopy(blm_scratch)
             blm_to_be_saved.blm_intervals.update(all_already_calculated_intervals)
         file_path = self.save_blm_as_pickle(blm_to_be_saved)
-        self.remove_old_pickles(files_to_be_deleted, file_path)
+        # self.remove_old_pickles(files_to_be_deleted, file_path)
 
     def get_only_needed_blm_intervals(self, blm_scratch, all_calculated_blm_intervals):
         """
