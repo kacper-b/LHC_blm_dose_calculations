@@ -3,6 +3,8 @@ import re
 from datetime import datetime
 import time
 from config import *
+import matplotlib
+matplotlib.use('agg') 
 import matplotlib.gridspec as gridspec
 import matplotlib.dates as md
 import matplotlib.colors as colors
@@ -11,12 +13,12 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from projects.Plotting.python.plotting_layout import plotter_layout, PLOT_DIR
-
+import config
+from tools.workers import str2datetime
 import matplotlib.dates as mdates
 import matplotlib.patches as patches
 
 import matplotlib.pyplot as plt
-# import matplotlib
 # from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
 matplotlib.style.use('ggplot')
 # %matplotlib inline
@@ -44,8 +46,8 @@ class schedule():
 
         for i, r in self.df_schedule.iterrows():
 
-            start = datetime.strptime(r['start'], '%Y-%m-%d')
-            end = datetime.strptime(r['end'], '%Y-%m-%d')
+            start = str2datetime(r['start'], '%Y-%m-%d')
+            end = str2datetime(r['end'], '%Y-%m-%d')
             col = r['color']
             text = r['info']
             # convert to matplotlib date representation

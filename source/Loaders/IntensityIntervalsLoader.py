@@ -2,7 +2,8 @@ import pickle
 import re
 import sys
 from datetime import datetime
-
+import config
+from tools.workers import str2datetime
 from config import INTENSITY_INTERVALS_FILES_REGEX_PATTERN, INTENSITY_INTERVALS_DATE_FORMAT
 from source.Loaders.ILoader import ILoader
 
@@ -21,8 +22,8 @@ class IntensityIntervalsLoader(ILoader):
     def is_file_name_valid(self, filename, start, end, field):
         regex_match = re.match(self.regex, filename)
         if regex_match:
-            start_file_date = datetime.strptime(regex_match.group(1), self.date_format)
-            end_file_date = datetime.strptime(regex_match.group(2), self.date_format)
+            start_file_date = str2datetime(regex_match.group(1), self.date_format)
+            end_file_date = str2datetime(regex_match.group(2), self.date_format)
             return self.is_file_dates_cover_analysed_time_period(start, end, start_file_date, end_file_date)
         return False
 
