@@ -2,7 +2,7 @@ import os
 import sys
 import re
 
-PARENT_DIR_PATH = '/mnt/monitoring_analysis'
+PARENT_DIR_PATH = '/home/monitoring_analysis'
 
 sys.path.append(PARENT_DIR_PATH)
 DATA_DIR_PATH = os.path.join(PARENT_DIR_PATH, 'data')
