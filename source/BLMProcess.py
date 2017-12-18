@@ -132,7 +132,7 @@ class BLMProcess:
         :param SortedSet missing_intervals: BLM intervals, that haven't been already calculated (integrated dose + offsets are not calculated)
         :return:
         """
-        logging.info('{}\t missing {} intervals'.format(blm_scratch.name, len(missing_intervals)))
+        logging.info('{}\t missing {} intervals\n\t\t{}'.format(blm_scratch.name, len(missing_intervals), '\n\t\t'.join(missing_intervals)))
         blm_already_calculated_blm_intervals = blm_scratch.blm_intervals
         blm_scratch.blm_intervals = missing_intervals
         self.set_blm_calculators(blm_scratch)
