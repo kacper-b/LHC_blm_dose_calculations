@@ -13,7 +13,7 @@ def build_blm_dose_calc_parser():
     :return argparse.ArgumentParser: command line arguments
     """
 
-    start = datetime(year=2017, month=4, day=29, tzinfo=utc)
+    start = datetime(year=2017, month=4, day=29)
     end = datetime.today()
     blm_csv_list_filename = 'all_blms_dcum_meters_ti_qi_ei_bi.csv' #'151617L2_ti_qi_ei_bi.csv' #
 

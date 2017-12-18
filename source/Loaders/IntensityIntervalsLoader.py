@@ -42,16 +42,18 @@ class IntensityIntervalsLoader(ILoader):
             return self.is_file_dates_cover_analysed_time_period(start, end, start_file_date, end_file_date)
         return False
 
-    def filter_interval_by_dates(self, start_date, end_date):
+    def filter_interval_by_dates(self, runs):
         """
         It removes intensity intervals which are outside required time range.
         :param datetime start_date:
         :param datetime end_date:
         :return:
         """
-        start_in_sec = (start_date - datetime.utcfromtimestamp(0)).total_seconds()
-        end_in_sec = (end_date - datetime.utcfromtimestamp(0)).total_seconds()
-        func = (lambda interval: start_in_sec <= interval.start and interval.end <= end_in_sec)
+        epoch_time = datetime.utcfromtimestamp(0)
+        runs_in_sec = [((start_date - epoch_time).total_seconds(), (end_date - epoch_time).total_seconds()) for start_date, end_date in runs]
+        # start_in_sec = (start_date - epoch_time).total_seconds()
+        # end_in_sec = (end_date - epoch_time).total_seconds()
+        func = (lambda interval: any(start_in_sec <= interval.start and interval.end <= end_in_sec for start_in_sec, end_in_sec, in runs_in_sec))
         self.data = list(filter(func, self.data))
 
     def filter_interval_by_valid_flag(self):

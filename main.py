@@ -91,7 +91,8 @@ if __name__ == '__main__':
     iil = IntensityIntervalsLoader()
     iil.set_files_paths(PICKLE_INTENSITY_INTERVALS_DIR, start, end)
     iil.load_pickles()
-    iil.filter_interval_by_dates(start, end)
+    runs = [(start, end)]
+    iil.filter_interval_by_dates(runs)
     # iil.filter_interval_by_valid_flag()
 
     # B
