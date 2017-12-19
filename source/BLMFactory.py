@@ -1,4 +1,4 @@
-from source.BLM import BLM
+from Common_classes.BLM_classes.BLM import BLM
 
 
 class BLMFactory:

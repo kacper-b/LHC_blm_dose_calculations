@@ -1,9 +1,5 @@
 import logging
-
-
-class ExceptionLogging:
-    def __init__(self, logging_func):
-        self.logging_func = logging_func
+from Common_classes.Interfaces.ExceptionLogging import ExceptionLogging
 
 
 class PreOffsetEmpty(Exception, ExceptionLogging):
@@ -124,57 +120,6 @@ class NoBLMDataForIntensitySubInterval(Exception, ExceptionLogging):
         self.logging_func = logging.error
         super(self.__class__, self).__init__(msg)
     pass
-
-
-class BLMLoaderWrongNumberOfColumns(Exception, ExceptionLogging):
-    """
-    This exception occurs when an loaded raw BLM data has too many columns.
-    """
-    def __init__(self, msg):
-        self.logging_func = logging.error
-        super(self.__class__, self).__init__(msg)
-    pass
-
-
-class BLMDataEmpty(Exception, ExceptionLogging):
-    """
-    This exception occurs when there is no needed BLM data.
-    """
-    def __init__(self, msg):
-        self.logging_func = logging.critical
-        super(self.__class__, self).__init__(msg)
-    pass
-
-
-class BLMIntervalsEmpty(Exception, ExceptionLogging):
-    """
-    This exception occurs when there is no BLM intervals.
-    """
-    def __init__(self, msg):
-        self.logging_func = logging.critical
-        super(self.__class__, self).__init__(msg)
-    pass
-
-
-class BLMInvalidRawData(Exception, ExceptionLogging):
-    """
-    This exception occurs when a raw BLM data are duplicated.
-    """
-    def __init__(self, msg):
-        self.logging_func = logging.error
-        super(self.__class__, self).__init__(msg)
-    pass
-
-
-class BLMTypeNotRecognized(Exception, ExceptionLogging):
-    """
-    This exception occurs when a type of a BLM can't be recognized.
-    """
-    def __init__(self, msg):
-        self.logging_func = logging.critical
-        super(self.__class__, self).__init__(msg)
-    pass
-
 
 class NormalizedIntensityPlotRangeTooSmall(Exception, ExceptionLogging):
     """

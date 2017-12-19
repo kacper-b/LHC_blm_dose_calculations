@@ -1,0 +1,3 @@
+[submodule "Common_classes"]
+	path = Common_classes
+	url = ssh://git@gitlab.cern.ch:7999/mcwg/Common_classes.git
