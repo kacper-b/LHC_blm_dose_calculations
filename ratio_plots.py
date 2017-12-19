@@ -1,25 +1,19 @@
-import os
-import sys
-import pickle
-import pandas as pd
-
-from config import *
-import numpy as np
-
-
-
-from projects.Plotting.python.plotting_layout import *
-
-
-
+from config import PLOTS_DIR_PATH, RESULTS_DIR_PATH
+from Plotting.python.plotting_layout import *
 import matplotlib.pyplot as plt
 # import matplotlib
 # from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
 # matplotlib.style.use('ggplot')
 # %matplotlib inline
 
-_RESULTS_DIR = os.path.join(PARENT_DIR_PATH,'results')
-_TID_DATA_DIR = os.path.join(_RESULTS_DIR,'result_LHC_blm_dose_calculations')
+# Add submodules to path
+with open('.gitmodules') as f:
+    content = f.read()
+    for submodule_dir_name in re.findall(r"^\s*path\s*\=\s(\w+)$", content, re.MULTILINE):
+        sys.path.insert(0, submodule_dir_name)
+
+_TID_DATA_DIR = os.path.join(RESULTS_DIR_PATH,'result_LHC_blm_dose_calculations')
+PLOT_DIR = PLOTS_DIR_PATH
 
 def year_compare(year_info_1, year_info_2, normalizer):
     file_1 = year_info_1['file']

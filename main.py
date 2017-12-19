@@ -1,12 +1,15 @@
 import os
+import re
 import sys
-sys.path.insert(0,'Plotting')
-sys.path.insert(0,'Common_classes')
+# Add submodules to path
+with open('.gitmodules') as f:
+    content = f.read()
+    for submodule_dir_name in re.findall(r"^\s*path\s*\=\s(\w+)$", content, re.MULTILINE):
+        sys.path.insert(0, submodule_dir_name)
+
 from multiprocessing import Pool
-import config
 from Common_classes.BLM_classes.BLMsParser import BLMsParser
-from config import BLM_LIST_DIR
-from config import PICKLE_INTENSITY_INTERVALS_DIR
+from config import BLM_LIST_DIR, PICKLE_INTENSITY_INTERVALS_PATH, PLOTS_DIR_PATH
 from source.BLMFilter import BLMFilter
 from source.Calculators.Integral.BeamModeSubIntervalsCalc import BeamModeSubIntervalsCalc
 from source.Calculators.Integral.PostOffsetCorrectedIntegralCalc import PostOffsetCorrectedIntegralCalc
@@ -82,7 +85,7 @@ if __name__ == '__main__':
 
     # Intensity files loading
     iil = IntensityIntervalsLoader()
-    iil.set_files_paths(PICKLE_INTENSITY_INTERVALS_DIR, start, end)
+    iil.set_files_paths(PICKLE_INTENSITY_INTERVALS_PATH, start, end)
     iil.load_pickles()
     runs = [(start, end)]
     iil.filter_interval_by_dates(runs)
@@ -108,7 +111,7 @@ if __name__ == '__main__':
         if should_save_excel:
             save_to_excel_beam_modes(blms, 'BLMs_with_beam_modes_{}_{}'.format(start.strftime('%Y%m%d'), end.strftime('%Y%m%d')))
         # Plotting
-        p = BLMsPlotter(config.RESULT_DIR_PATH)
+        p = BLMsPlotter(PLOTS_DIR_PATH)
         if should_plot_luminosity_norm:
             p.plot_luminosity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), luminosity)
         if should_plot_intensity_norm:
