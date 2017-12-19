@@ -13,7 +13,7 @@ import matplotlib.colors as colors
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from projects.Plotting.python.plotting_layout import plotter_layout
+from Plotting.python.plotting_layout import plotter_layout
 from source.BLM_dose_calculation_exceptions import NormalizedIntensityPlotRangeTooSmall, NormalizedLuminosityPlotRangeTooSmall
 from source.Plotters.IPlotter import IPlotter
 from source.Plotters.schedule_plotter import schedule

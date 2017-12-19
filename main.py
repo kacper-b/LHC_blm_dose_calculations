@@ -1,5 +1,6 @@
 import os
 import sys
+sys.path.insert(0,'Plotting')
 sys.path.insert(0,'Common_classes')
 from multiprocessing import Pool
 import config

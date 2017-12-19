@@ -1,3 +1,6 @@
 [submodule "Common_classes"]
 	path = Common_classes
 	url = ssh://git@gitlab.cern.ch:7999/mcwg/Common_classes.git
+[submodule "Plotting"]
+	path = Plotting
+	url = ssh://git@gitlab.cern.ch:7999/mcwg/Plotting.git

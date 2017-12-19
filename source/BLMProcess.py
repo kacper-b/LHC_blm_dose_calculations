@@ -1,5 +1,7 @@
 import os
 
+import sys
+
 from config import PICKLE_BLM_INTERVALS_DIR, BLM_DATA_DIR
 from Common_classes.BLM_classes.BLM_exceptions import BLMDataEmpty, BLMIntervalsEmpty, BLMInvalidRawData
 from Common_classes.BLM_classes.BLMsRawPandasDataLoader import BLMsRawPandasDataLoader
@@ -7,6 +9,13 @@ from Common_classes.BLM_classes.BLMsCalculatedLoader import BLMsCalculatedLoader
 import logging
 import traceback
 import copy
+
+import Common_classes.BLM_classes.BLM
+import Common_classes.BLM_classes.BLMInterval
+
+sys.modules['source.BLMInterval'] = Common_classes.BLM_classes.BLMInterval
+sys.modules['source.BLM'] = Common_classes.BLM_classes.BLM
+
 
 class BLMProcess:
     """
