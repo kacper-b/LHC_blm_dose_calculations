@@ -33,11 +33,9 @@ def save_to_excel(blms, fname='blms'):
 
 def save_to_excel_beam_modes(blms, fname):
     writer = pd.ExcelWriter(fname + '.xlsx')
-    blms_results = [blm.get_beam_mode_doses_as_dataframe() for blm in blms]
-    if blms_results:
-        rslt = pd.concat(blms_results, axis=0)
-        rslt.to_excel(writer,'data')
-        writer.save()
+    rslt = pd.concat([blm.get_beam_mode_doses_as_dataframe() for blm in blms], axis=0)
+    rslt.to_excel(writer,'data')
+    writer.save()
 
 
 if __name__ == '__main__':
@@ -98,8 +96,8 @@ if __name__ == '__main__':
     blm_filter = BLMFilter()
     blms = BLMsParser.read(blm_list_file_path)
     filtered_blms = blm_filter.filter_blms(blms, func=blm_filter.get_filter_function(blm_filter_function_name, IP_num, left_offset, right_offset))
-
-    should_return_blm = should_plot_total or should_plot_cumsum or should_plot_intensity_norm or should_plot_luminosity_norm or should_save_excel
+    should_plot = should_plot_total or should_plot_cumsum or should_plot_intensity_norm or should_plot_luminosity_norm
+    should_return_blm = should_plot or should_save_excel
     blm_process = BLMProcess(start, end, field, calculators, should_return_blm or True,blm_raw_data_dir, pickled_blm_dir)
 
     # Reading and processing BLMs data
@@ -110,17 +108,19 @@ if __name__ == '__main__':
 
         logging.info('Analysed BLM types: {}'.format(', '.join(set(blm.get_blm_type() for blm in blms))))
 
-        if should_save_excel:
+        if should_save_excel and blms:
             save_to_excel_beam_modes(blms, 'BLMs_with_beam_modes_{}_{}'.format(start.strftime('%Y%m%d'), end.strftime('%Y%m%d')))
-        # Plotting
-        p = BLMsPlotter(PLOTS_DIR_PATH)
-        if should_plot_luminosity_norm:
-            p.plot_luminosity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), luminosity)
-        if should_plot_intensity_norm:
-            p.plot_intensity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), lambda blm: blm.get_oc_intensity_integral())
-        if should_plot_cumsum:
-            p.plot_total_cumulated_dose(blms, lambda blm, start, end: blm.get_pre_oc_dose(start, end))
-        if should_plot_total:
-            p.plot_total_dose(blms, lambda blm: blm.get_pre_oc_dose())
-        if should_plot_heatmap:
-            p.heat_map_plot(blms)
+
+        if should_plot:
+            # Plotting
+            p = BLMsPlotter(PLOTS_DIR_PATH)
+            if should_plot_luminosity_norm:
+                p.plot_luminosity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), luminosity)
+            if should_plot_intensity_norm:
+                p.plot_intensity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), lambda blm: blm.get_oc_intensity_integral())
+            if should_plot_cumsum:
+                p.plot_total_cumulated_dose(blms, lambda blm, start, end: blm.get_pre_oc_dose(start, end))
+            if should_plot_total:
+                p.plot_total_dose(blms, lambda blm: blm.get_pre_oc_dose())
+            if should_plot_heatmap:
+                p.heat_map_plot(blms)
