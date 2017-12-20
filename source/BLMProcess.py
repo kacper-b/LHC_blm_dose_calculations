@@ -83,7 +83,6 @@ class BLMProcess:
 
         except (BLMDataEmpty, BLMIntervalsEmpty) as e:
             e.logging_func('{} {}'.format(blm_name, e))
-            logging.critical('xxxxxxxxxxxxxxxxxxxxxxxxx')
         except Exception as e:
             logging.critical('{} {} {}'.format(blm_name, traceback.format_exc(), e))
             raise e
