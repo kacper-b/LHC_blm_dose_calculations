@@ -7,3 +7,6 @@
 [submodule "configurations"]
 	path = configurations
 	url = ssh://git@gitlab.cern.ch:7999/mcwg/configurations.git
+[submodule "LHC_runs"]
+	path = LHC_runs
+	url = ssh://git@gitlab.cern.ch:7999/mcwg/LHC_runs.git

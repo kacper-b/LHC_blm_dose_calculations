@@ -1,10 +1,9 @@
 import argparse
 from config import PICKLE_BLM_INTERVALS_DIR, BLM_DATA_DIR
-import config
 from datetime import datetime
 from dateutil import tz
 from tools.workers import str2datetime
-
+from LHC_runs.lhc_runs import runs
 utc = tz.tzutc()
 
 def build_blm_dose_calc_parser():
@@ -22,6 +21,12 @@ def build_blm_dose_calc_parser():
 
     parser.add_argument("-s", "--start_date", help="provide start date of analysed period", type=date_parser, default=start)
     parser.add_argument("-e", "--end_date", help="provide end date of analysed period", type=date_parser, default=end)
+
+    run_type_group = parser.add_mutually_exclusive_group()
+    for run in runs:
+        run_type_group.add_argument('-{}'.format(run.shortcut), '--{}'.format(run.name), help=str(run), action="store_const", const=run.dates)
+        run_type_group.add_argument_group()
+
     parser.add_argument("-var", "--field_name", help="Timber variable name", type=str, default='LOSS_RS12', choices=['LOSS_RS12', 'LOSS_RS09', 'DOSE_INT_HH'])
     parser.add_argument("-n", "--processes_num", help="Number of simultaneous processes", type=int, default=8)
     parser.add_argument("-f", "--file_name", help="BLM list file name", type=str, default=blm_csv_list_filename)

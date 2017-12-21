@@ -24,6 +24,7 @@ from source.BLMProcess import BLMProcess
 import logging
 from arguments_parser import build_blm_dose_calc_parser
 import pandas as pd
+from lhc_runs import runs as lhc_runs
 
 def save_to_excel(blms, fname='blms'):
     writer = pd.ExcelWriter(fname + '.xlsx')
@@ -37,6 +38,18 @@ def save_to_excel_beam_modes(blms, fname):
     rslt.to_excel(writer,'data')
     writer.save()
 
+def extract_runs(args, start, end):
+    # TODO: clean code + comments
+    runs = None
+    for run in lhc_runs:
+        r = getattr(args, run.name)
+        if r:
+            runs = r
+            start = r[0][0]
+            end = r[-1][1]
+    if not runs:
+        runs = [(start, end)]
+    return runs, start, end
 
 if __name__ == '__main__':
 
@@ -47,9 +60,10 @@ if __name__ == '__main__':
     # print(args)
 
 ############################## Parsed command line arguments assignment ########
-
     start = args.start_date
     end = args.end_date
+    runs, start, end = extract_runs(args, start, end)
+    print(runs, start, end)
     blm_csv_list_filename = args.file_name
     number_of_simultaneous_processes = args.processes_num
     should_plot_total = args.pt
@@ -87,7 +101,6 @@ if __name__ == '__main__':
     iil = IntensityIntervalsLoader()
     iil.set_files_paths(PICKLE_INTENSITY_INTERVALS_PATH, start, end)
     iil.load_pickles()
-    runs = [(start, end)]
     iil.filter_interval_by_dates(runs)
     # iil.filter_interval_by_valid_flag()
 
