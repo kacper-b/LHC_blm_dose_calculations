@@ -98,7 +98,7 @@ if __name__ == '__main__':
     filtered_blms = blm_filter.filter_blms(blms, func=blm_filter.get_filter_function(blm_filter_function_name, IP_num, left_offset, right_offset))
     should_plot = should_plot_total or should_plot_cumsum or should_plot_intensity_norm or should_plot_luminosity_norm
     should_return_blm = should_plot or should_save_excel
-    blm_process = BLMProcess(start, end, field, calculators, should_return_blm or True,blm_raw_data_dir, pickled_blm_dir)
+    blm_process = BLMProcess(start, end, field, calculators, should_return_blm,blm_raw_data_dir, pickled_blm_dir)
 
     # Reading and processing BLMs data
     with Pool(processes=number_of_simultaneous_processes) as pool:
