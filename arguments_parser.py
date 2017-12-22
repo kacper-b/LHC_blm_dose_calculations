@@ -3,7 +3,7 @@ from config import PICKLE_BLM_INTERVALS_DIR, BLM_DATA_DIR
 from datetime import datetime
 from dateutil import tz
 from tools.workers import str2datetime
-from LHC_runs.lhc_runs import runs
+from lhc_runs import lhc_runs
 utc = tz.tzutc()
 
 def build_blm_dose_calc_parser():
@@ -19,11 +19,11 @@ def build_blm_dose_calc_parser():
     parser = argparse.ArgumentParser(description='BLM doses calculator')
     date_parser = lambda str_date: str2datetime(str_date, '%d-%m-%Y')
 
-    parser.add_argument("-s", "--start_date", help="provide start date of analysed period", type=date_parser, default=start)
-    parser.add_argument("-e", "--end_date", help="provide end date of analysed period", type=date_parser, default=end)
+    parser.add_argument("-e", "--end_date", help="provide end date of analysed period, will be used only if START_DATE is specified", type=date_parser, default=end)
 
-    run_type_group = parser.add_mutually_exclusive_group()
-    for run in runs:
+    run_type_group = parser.add_mutually_exclusive_group(required=True)
+    run_type_group.add_argument("-s", "--start_date", help="provide start date of analysed period", type=date_parser, default=start)
+    for run in lhc_runs:
         run_type_group.add_argument('-{}'.format(run.shortcut), '--{}'.format(run.name), help=str(run), action="store_const", const=run.dates)
         run_type_group.add_argument_group()
 

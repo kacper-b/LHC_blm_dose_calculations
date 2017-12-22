@@ -24,7 +24,8 @@ from source.BLMProcess import BLMProcess
 import logging
 from arguments_parser import build_blm_dose_calc_parser
 import pandas as pd
-from lhc_runs import runs as lhc_runs
+from lhc_runs import lhc_runs, extract_runs
+
 
 def save_to_excel(blms, fname='blms'):
     writer = pd.ExcelWriter(fname + '.xlsx')
@@ -32,24 +33,13 @@ def save_to_excel(blms, fname='blms'):
         blm.get_as_pandas_dataframe().to_excel(writer,blm.name)
     writer.save()
 
+
 def save_to_excel_beam_modes(blms, fname):
     writer = pd.ExcelWriter(fname + '.xlsx')
     rslt = pd.concat([blm.get_beam_mode_doses_as_dataframe() for blm in blms], axis=0)
     rslt.to_excel(writer,'data')
     writer.save()
 
-def extract_runs(args, start, end):
-    # TODO: clean code + comments
-    runs = None
-    for run in lhc_runs:
-        r = getattr(args, run.name)
-        if r:
-            runs = r
-            start = r[0][0]
-            end = r[-1][1]
-    if not runs:
-        runs = [(start, end)]
-    return runs, start, end
 
 if __name__ == '__main__':
 
@@ -60,10 +50,10 @@ if __name__ == '__main__':
     # print(args)
 
 ############################## Parsed command line arguments assignment ########
-    start = args.start_date
-    end = args.end_date
-    runs, start, end = extract_runs(args, start, end)
-    print(runs, start, end)
+    runs = extract_runs(args)
+    start = runs[0][0]
+    end = runs[-1][1]
+
     blm_csv_list_filename = args.file_name
     number_of_simultaneous_processes = args.processes_num
     should_plot_total = args.pt
