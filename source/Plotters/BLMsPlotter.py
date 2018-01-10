@@ -18,6 +18,10 @@ from source.BLM_dose_calculation_exceptions import NormalizedIntensityPlotRangeT
 from source.Plotters.IPlotter import IPlotter
 from source.Plotters.schedule_plotter import schedule
 
+BLMs_to_be_annotated = ['BLMQI.13L1.B2E30_MQ', 'BLMEI.11L1.B2E30_LEFL', 'BLMQI.09L1.B2E10_MQM', 'BLMTI.06L1.B2E10_TCL.6L1.B2', 'BLMTI.04L1.B2E10_TANAL.4L1',
+                        'BLMQI.03L1.B2E30_MQXA', 'BLMQI.03R1.B1E30_MQXA', 'BLMTI.04R1.B1E10_TANAR.4R1', 'BLMTI.06R1.B1E10_TCL.6R1.B1', 'BLMQI.09R1.B1E10_MQM',
+                        'BLMEI.11R1.B1E21_LEHR', 'BLMQI.13R1.B1E10_MQ']
+
 
 class BLMsPlotter(IPlotter):
     """
@@ -132,6 +136,23 @@ class BLMsPlotter(IPlotter):
         else:
             return True
 
+    def add_annotations(self, ax, annotated_blm_names, blm_names, blm_positions, integrated_doses):
+        """
+
+        :param ax:
+        :param annotated_blm_names:
+        :param blm_names:
+        :param blm_positions:
+        :param integrated_doses:
+        :return:
+        """
+        counter = 0
+        for index, blm_name in enumerate(blm_names):
+            if blm_name in annotated_blm_names:
+                counter += 1
+                ax.annotate(counter, (blm_positions[index], integrated_doses[index]), (0, 20), textcoords='offset points',
+                            arrowprops=dict(arrowstyle='-', linestyle="dashed", color="0"))
+
     def plot_total_dose(self, blms, blm_summing_func):
         """
         The functions plots dose (logscale), then saves plot and plot's data.
@@ -147,6 +168,9 @@ class BLMsPlotter(IPlotter):
         ax.set_ylabel(r'TID [Gy]')
 
         self.__plot_blms(blm_positions, integrated_doses, blm_types, ax.semilogy)
+
+        self.add_annotations(ax, BLMs_to_be_annotated, blm_names, blm_positions, integrated_doses)
+
         ax.legend()
         file_name = 'TID_{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
         file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
@@ -222,7 +246,7 @@ class BLMsPlotter(IPlotter):
         integrated_doses = np.zeros(len(blms), dtype=np.float)
         blm_positions = np.zeros(len(blms), dtype=np.float)
         blm_types = np.zeros(len(blms), dtype=np.float)
-        blm_names = np.zeros(len(blms), dtype=np.dtype('a64'))
+        blm_names = np.zeros(len(blms), dtype=np.dtype('a64')).astype(str)
         for index, blm in enumerate(blms):
             integrated_doses[index] = blm_summing_func(blm)
             blm_positions[index] = blm.position

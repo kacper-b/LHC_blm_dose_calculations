@@ -116,7 +116,7 @@ if __name__ == '__main__':
 
         if should_plot:
             # Plotting
-            p = BLMsPlotter(PLOTS_DIR_PATH)
+            p = BLMsPlotter('.')
             if should_plot_luminosity_norm:
                 p.plot_luminosity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), luminosity)
             if should_plot_intensity_norm:
