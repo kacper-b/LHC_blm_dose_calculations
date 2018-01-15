@@ -18,10 +18,34 @@ from source.BLM_dose_calculation_exceptions import NormalizedIntensityPlotRangeT
 from source.Plotters.IPlotter import IPlotter
 from source.Plotters.schedule_plotter import schedule
 
-BLMs_to_be_annotated = ['BLMQI.13L1.B2E30_MQ', 'BLMEI.11L1.B2E30_LEFL', 'BLMQI.09L1.B2E10_MQM', 'BLMTI.06L1.B2E10_TCL.6L1.B2', 'BLMTI.04L1.B2E10_TANAL.4L1',
-                        'BLMQI.03L1.B2E30_MQXA', 'BLMQI.03R1.B1E30_MQXA', 'BLMTI.04R1.B1E10_TANAR.4R1', 'BLMTI.06R1.B1E10_TCL.6R1.B1', 'BLMQI.09R1.B1E10_MQM',
-                        'BLMEI.11R1.B1E21_LEHR', 'BLMQI.13R1.B1E10_MQ']
+ir1 = ['BLMQI.13L1.B2E30_MQ', 'BLMEI.11L1.B2E30_LEFL', 'BLMQI.09L1.B2E10_MQM', 'BLMTI.06L1.B2E10_TCL.6L1.B2', 'BLMTI.04L1.B2E10_TANAL.4L1',
+       'BLMQI.03L1.B2E30_MQXA', 'BLMQI.03R1.B1E30_MQXA', 'BLMTI.04R1.B1E10_TANAR.4R1', 'BLMTI.06R1.B1E10_TCL.6R1.B1', 'BLMQI.09R1.B1E10_MQM',
+       'BLMEI.11R1.B1E21_LEHR', 'BLMQI.13R1.B1E10_MQ']
 
+ir2 = ["BLMQI.08L2.B1E30_MQML", "BLMQI.06L2.B1E20_MQML", "BLMTI.04L2.B1E20_TDI.4L2.B1", "BLMEI.01L2.B1E10_MBWMD", "BLMTI.04R2.B1I10_TCLIA.4R2",
+       "BLMTI.04R2.B2E10_TCTPV.4R2.B2", "BLMTI.06R2.B1I10_TCLIB.6R2.B1", "BLMQI.09R2.B1I10_MQM"]
+
+ir3 = ["BLMQI.12L3.B1I10_MQ", "BLMQI.09L3.B2E10_MQ", "BLMTI.07L3.B2E10_TCLA.7L3.B2", "BLMTI.06L3.B1I10_TCAPA.6L3.B1", "BLMEI.05L3.B1I10_TCSM.5L3.B1",
+       "BLMTI.05L3.B2E10_TCLA.B5L3.B2", "BLMEI.05L3.B2E10_TCSM.B5L3.B2", "BLMEI.05R3.B1I10_TCSM.B5R3.B1", "BLMTI.05R3.B1I10_TCLA.B5R3.B1",
+       "BLMEI.05R3.B2E10_TCSM.5R3.B2", "BLMTI.06R3.B2E10_TCAPA.6R3.B2", "BLMTI.07R3.B1I10_TCLA.7R3.B1", "BLMQI.08R3.B1I10_MQ", "BLMQI.11R3.B1I10_MQ"]
+
+ir4 = ["BLMQI.07L4.B2E10_MQM", "BLMQI.06L4.B2E10_MQY", "BLMEI.05L4.B2E10_BSRTM", "BLMEI.05R4.B1I10_BSRTM", "BLMQI.05R4.B1I30_MQY", "BLMQI.07R4.B1I10_MQM",
+       "BLMQI.11R4.B2E30_MQ"]
+
+ir5 = ['BLMQI.13L5.B2E10_MQ', 'BLMEI.11L5.B2E22_LEFL', 'BLMQI.09L5.B2E10_MQM', 'BLMTI.06L5.B2E10_TCL.6L5.B2', 'BLMTI.04L5.B2E10_TANC.4L5',
+       'BLMTI.04R5.B1E10_TANC.4R5', 'BLMTI.06R5.B1E10_TCL.6R5.B1', 'BLMQI.09R5.B1E10_MQM', 'BLMQI.11R5.B1E10_MQ', 'BLMQI.13R5.B1E10_MQ']
+
+ir6 = ["BLMQI.09L6.B2I30_MQM", "BLMQI.04L6.B2I30_MQY", "BLMTI.04L6.B2I11_TCSP.A4L6.B2", "BLMTI.04L6.B1E10_TCDSA.4L6.B1", "BLMTI.04R6.B2I10_TCDSA.4R6.B2",
+       "BLMTI.04R6.B1E10_TCSP.A4R6.B1", "BLMQI.04R6.B1E30_MQY", "BLMQI.10R6.B1E10_MQML",]
+
+ir7 = ["BLMQI.08L7.B2I30_MQ", "BLMEI.06L7.B1E10_TCP.A6L7.B1", "BLMTI.06L7.B2I10_TCLA.A6L7.B2", "BLMEI.05L7.B1E10_TCSM.A5L7.B1", "BLMEI.04L7.B1E10_TCSM.A4L7.B1",
+       "BLMEI.04R7.B1E10_TCSM.A4R7.B1", "BLMEI.05R7.B2I10_TCSM.B5R7.B2", "BLMTI.06R7.B1E10_TCLA.A6R7.B1", "BLMEI.06R7.B2I10_TCHSV.6R7.B2", "BLMQI.08R7.B1E30_MQ",]
+
+ir8 = ["BLMQI.09L8.B2I30_MQM", "BLMQI.08L8.B2I10_MQML", "BLMTI.06L8.B2I10_TCLIB.6L8.B2", "BLMQI.05L8.B2I30_MQM", "BLMTI.04L8.B1E10_TCTPV.4L8.B1",
+       "BLMQI.01L8.B1E30_MQXA", "BLMQI.01R8.B2E30_MQXA", "BLMTI.04R8.B2E10_TCTPV.4R8.B2", "BLMQI.05R8.B1I30_MQY", "BLMQI.06R8.B1I10_MQML",
+       "BLMQI.08R8.B1I10_MQML", "BLMQI.09R8.B1I30_MQM"]
+
+BLMs_to_be_annotated = ir1 + ir2 + ir3 + ir4 + ir5 + ir6 + ir7 + ir8
 
 class BLMsPlotter(IPlotter):
     """
@@ -150,6 +174,7 @@ class BLMsPlotter(IPlotter):
         for index, blm_name in enumerate(blm_names):
             if blm_name in annotated_blm_names:
                 counter += 1
+                print(blm_name, counter, blm_positions[index], integrated_doses[index])
                 ax.annotate(counter, (blm_positions[index], integrated_doses[index]), (0, 20), textcoords='offset points',
                             arrowprops=dict(arrowstyle='-', linestyle="dashed", color="0"))
 
@@ -163,7 +188,7 @@ class BLMsPlotter(IPlotter):
         """
         blm_positions, integrated_doses, blm_types, blm_names, f, ax, dcum_start, dcum_end, start, end = self.run_common_functions(blm_summing_func, blms)
 
-        f.suptitle(r'Total integrated dose for [{} : {}]'.format(start.strftime(self.date_format), end.strftime(self.date_format)), fontsize=16, weight='bold')
+        # f.suptitle(r'Total integrated dose for [{} : {}]'.format(start.strftime(self.date_format), end.strftime(self.date_format)), fontsize=16, weight='bold')
 
         ax.set_ylabel(r'TID [Gy]')
 
@@ -172,6 +197,7 @@ class BLMsPlotter(IPlotter):
         self.add_annotations(ax, BLMs_to_be_annotated, blm_names, blm_positions, integrated_doses)
 
         ax.legend()
+        ax.set_ylim((5e-3,1e6))
         file_name = 'TID_{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
         file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses, blm_names)
@@ -269,8 +295,8 @@ class BLMsPlotter(IPlotter):
         dcum_start, dcum_end = self.get_plot_xlim(blm_positions)
         plt, ax = self.build_blm_layout(dcum_start, dcum_end)
 
-        plt.text(self.layout_plotter.start + .5 * self.layout_plotter.ran, 12,
-                 'PRELIMINARY', fontsize=100, va='center', ha='center', color='gray', alpha=0.1, rotation=45)
+        # plt.text(self.layout_plotter.start + .5 * self.layout_plotter.ran, 12,
+        #          'PRELIMINARY', fontsize=100, va='center', ha='center', color='gray', alpha=0.1, rotation=45)
         plt.text(self.layout_plotter.start + .9 * self.layout_plotter.ran, -7.5,
                  'Courtesy MCWG: {}'.format(datetime.today().strftime('%Y-%m-%d %H:%M')), fontsize=12, va='bottom', ha='right', color='gray', alpha=0.5, rotation=0)
         ax.grid(True)
@@ -352,7 +378,7 @@ class BLMsPlotter(IPlotter):
         """
         func(blm_positions[blm_types == 1], integrated_doses[blm_types == 1], 'r.-', linewidth=0.4, markersize=10, label='Beam 1')
         func(blm_positions[blm_types == 2], integrated_doses[blm_types == 2], 'b.-', linewidth=0.4, markersize=10, label='Beam 2')
-        func(blm_positions[blm_types == 0], integrated_doses[blm_types == 0], 'g.-', linewidth=0.4, markersize=10, label='Top BLMs')
+        func(blm_positions[blm_types == 0], integrated_doses[blm_types == 0], 'g.', markersize=10, label='Top BLMs')
 
     def heat_map_plot(self, blms):
         # TODO: to be removed or finished + commented
