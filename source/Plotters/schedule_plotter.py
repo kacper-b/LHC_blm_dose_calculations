@@ -20,7 +20,6 @@ import matplotlib.patches as patches
 
 import matplotlib.pyplot as plt
 # from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
-matplotlib.style.use('ggplot')
 # %matplotlib inline
 
 
@@ -42,13 +41,16 @@ class schedule():
         with open(os.path.join(SCHEDULE_PATH, schedule_dict[year]), 'r') as f:
             self.df_schedule = pd.read_csv(f)
 
-    def schedule_plotter(self,ax):
+    def schedule_plotter(self,ax, plot_start, plot_end):
 
 
         for i, r in self.df_schedule.iterrows():
 
             start = str2datetime(r['start'], '%Y-%m-%d')
             end = str2datetime(r['end'], '%Y-%m-%d')
+            start_datetime = start
+            end_datetime = end
+
             col = r['color']
             text = r['info']
             # convert to matplotlib date representation
@@ -56,17 +58,21 @@ class schedule():
             end = mdates.date2num(end)
             width = end - start
             height = ax.get_ylim()[1]
+            # print(plot_start, plot_end, start_datetime, end_datetime)
 
-            ax.add_patch(
-                patches.Rectangle(
-                #             (s-length/2, -width/2),   # (x,y)
-                (start, 0),
-                end,  # width
-                height,  # height
-                color=col[:],
-                alpha=1
-                ))
-            ax.text(start, 0.95 * height, text, ha='left', va='top', color='k', fontsize=12, rotation=90)
+            if plot_start <= end_datetime and start_datetime <= plot_end:
+                ax.add_patch(
+                    patches.Rectangle(
+                    #             (s-length/2, -width/2),   # (x,y)
+                    (start, 0),
+                    end,  # width
+                    height,  # height
+                    color=col[:],
+                    alpha=1
+                    ))
+                # ax.text(start + width*0.4 if width>3. else start, 0.95 * height, text, ha='left', va='top', color='k', fontsize=8, rotation=90)
+                if start + width*0.5 < mdates.date2num(plot_end):
+                    ax.text(start + width*0.5, 0.95 * height, text, ha='center', va='top', color='k', fontsize=8, rotation=90)
 
 
 if __name__ == "__main__":
