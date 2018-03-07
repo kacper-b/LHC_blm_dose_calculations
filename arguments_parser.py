@@ -14,7 +14,7 @@ def build_blm_dose_calc_parser():
 
     start = datetime(year=2017, month=4, day=29)
     end = datetime.today()
-    blm_csv_list_filename = 'all_blms_dcum_meters_ti_qi_ei_bi.csv' #'151617L2_ti_qi_ei_bi.csv' #
+    blm_csv_list_filename = 'ruben_07032018.csv' #'151617L2_ti_qi_ei_bi.csv' #
 
     parser = argparse.ArgumentParser(description='BLM doses calculator')
     date_parser = lambda str_date: str2datetime(str_date, '%d-%m-%Y')
