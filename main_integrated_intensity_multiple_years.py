@@ -69,7 +69,13 @@ if __name__ == '__main__':
     IP_num = args.ir if args.ir else args.arc
 
     blm_filter_function_name = 'ir' if args.ir else None
-    blm_filter_function_name = 'arc' if args.arc else None
+    if args.arc:
+        blm_csv_list_filename = 'report/arc{}{}.csv'.format(IP_num, IP_num + 1 if IP_num + 1 < 9 else 1)
+    ylim = args.ptlim
+
+    blm_filter_function_name = 'ir' if args.ir else None
+    blm_filter_function_name = 'arc' if args.arc else None or True
+
     if not blm_filter_function_name:
         blm_filter_function_name = 'all'
 
@@ -102,14 +108,17 @@ if __name__ == '__main__':
         blm_list_file_path = os.path.join(BLM_LIST_DIR, blm_csv_list_filename)
         blm_filter = BLMFilter()
         blms = BLMsParser.read(blm_list_file_path)
-        filtered_blms = blm_filter.filter_blms(blms, func=blm_filter.get_filter_function(blm_filter_function_name, IP_num, left_offset, right_offset))
+        # filtered_blms = blm_filter.filter_blms(blms, func=blm_filter.get_filter_function(blm_filter_function_name, IP_num, left_offset, right_offset))
 
         blm_process = BLMProcess(start, end, field, calculators, True,blm_raw_data_dir, pickled_blm_dir)
 
         # Reading and processing BLMs data
         with Pool(processes=number_of_simultaneous_processes) as pool:
-            luminosity_blms[run.luminosity['cms']] = [blm for blm in pool.map(blm_process.run, BLMFactory.build(iil.data, filtered_blms)) if blm is not None]
+            luminosity_blms[run.intergrated_intensity] = [blm for blm in pool.map(blm_process.run, BLMFactory.build(iil.data, blms)) if blm is not None]
 
 
     p = BLMsPlotter('.')
-    p.plot_luminosity_normalized_dose_for_multiple_years(luminosity_blms, lambda blm: blm.get_pre_oc_dose(), ['#7570b3','#1b9e77', '#d95f02'])
+    p.plot_integrated_intensity_normalized_dose_for_multiple_years(luminosity_blms,
+                                                                   lambda blm: blm.get_pre_oc_dose(), ['#7570b3','#1b9e77', '#d95f02'],
+                                                                   ylim,
+                                                                   blm_csv_list_filename.replace('.csv','/'))

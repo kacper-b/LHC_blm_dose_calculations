@@ -108,8 +108,8 @@ if __name__ == '__main__':
 
         # Reading and processing BLMs data
         with Pool(processes=number_of_simultaneous_processes) as pool:
-            luminosity_blms[run.luminosity['cms']] = [blm for blm in pool.map(blm_process.run, BLMFactory.build(iil.data, filtered_blms)) if blm is not None]
+            luminosity_blms[run.injected_intensity] = [blm for blm in pool.map(blm_process.run, BLMFactory.build(iil.data, filtered_blms)) if blm is not None]
 
 
     p = BLMsPlotter('.')
-    p.plot_luminosity_normalized_dose_for_multiple_years(luminosity_blms, lambda blm: blm.get_pre_oc_dose(), ['#7570b3','#1b9e77', '#d95f02'])
+    p.plot_injected_intensity_normalized_dose_for_multiple_years(luminosity_blms, lambda blm: blm.get_pre_oc_dose(), ['#7570b3','#1b9e77', '#d95f02'])

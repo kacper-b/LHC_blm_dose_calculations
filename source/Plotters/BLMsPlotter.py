@@ -33,8 +33,8 @@ ir3 = ["BLMQI.12L3.B1I10_MQ", "BLMQI.09L3.B2E10_MQ", "BLMTI.07L3.B2E10_TCLA.7L3.
 ir4 = ["BLMQI.07L4.B2E10_MQM", "BLMQI.06L4.B2E10_MQY", "BLMEI.05L4.B2E10_BSRTM", "BLMEI.05R4.B1I10_BSRTM", "BLMQI.05R4.B1I30_MQY", "BLMQI.07R4.B1I10_MQM",
        "BLMQI.11R4.B2E30_MQ"]
 
-ir5 = ['BLMQI.13L5.B2E10_MQ', 'BLMEI.11L5.B2E22_LEFL', 'BLMQI.09L5.B2E10_MQM', 'BLMTI.06L5.B2E10_TCL.6L5.B2', 'BLMTI.04L5.B2E10_TANC.4L5',
-       'BLMTI.04R5.B1E10_TANC.4R5', 'BLMTI.06R5.B1E10_TCL.6R5.B1', 'BLMQI.09R5.B1E10_MQM', 'BLMQI.11R5.B1E10_MQ', 'BLMQI.13R5.B1E10_MQ']
+ir5 = ['BLMQI.13L5.B2E10_MQ', 'BLMEI.11L5.B2E22_LEFL', 'BLMQI.09L5.B2E10_MQM', 'BLMTI.06L5.B2E10_TCL.6L5.B2', 'BLMTI.05L5.B2E10_TCL.5L5.B2','BLMTI.04L5.B2E10_TANC.4L5',
+       'BLMTI.04R5.B1E10_TANC.4R5',  'BLMTI.05R5.B1E10_TCL.5R5.B1', 'BLMTI.06R5.B1E10_TCL.6R5.B1', 'BLMQI.09R5.B1E10_MQM', 'BLMQI.11R5.B1E10_MQ', 'BLMQI.13R5.B1E10_MQ']
 
 ir6 = ["BLMQI.09L6.B2I30_MQM", "BLMQI.04L6.B2I30_MQY", "BLMTI.04L6.B2I11_TCSP.A4L6.B2", "BLMTI.04L6.B1E10_TCDSA.4L6.B1", "BLMTI.04R6.B2I10_TCDSA.4R6.B2",
        "BLMTI.04R6.B1E10_TCSP.A4R6.B1", "BLMQI.04R6.B1E30_MQY", "BLMQI.10R6.B1E10_MQML",]
@@ -47,6 +47,20 @@ ir8 = ["BLMQI.09L8.B2I30_MQM", "BLMQI.08L8.B2I10_MQML", "BLMTI.06L8.B2I10_TCLIB.
        "BLMQI.08R8.B1I10_MQML", "BLMQI.09R8.B1I30_MQM"]
 
 BLMs_to_be_annotated = ir1 + ir2 + ir3 + ir4 + ir5 + ir6 + ir7 + ir8
+BLMs_to_be_annotated += ['BLMQI.13R1.B1E10_MQ','BLMQI.15R1.B1E10_MQ','BLMQI.17R1.B1E10_MQ','BLMQI.29R1.B1E10_MQ','BLMQI.33R1.B1E30_MQ','BLMQI.30L2.B1E10_MQ','BLMQI.29L2.B1E10_MQ','BLMQI.27L2.B1E30_MQ','BLMQI.21L2.B1E10_MQ','BLMQI.19L2.B1E10_MQ','BLMQI.16L2.B2I30_MQ','','BLMQI.16R2.B1I10_MQ','BLMQI.24R2.B1I10_MQ','BLMQI.22L3.B1I10_MQ','BLMQI.12L3.B1I10_MQ','','BLMQI.13R3.B1I10_MQ','BLMBI.34R3.B0T20_MBB-MBA_34R3','BLMBI.34L4.B0T20_MBA-MBB_34R3','BLMBI.30L4.B0T10_MBB-MBA_29L4','BLMBI.29L4.B0T20_MBB-MBA_29L4','BLMQI.18L4.B1I10_MQ','BLMBI.17L4.B0T10_MBA-MBB_16L4','BLMBI.14L4.B0T10_MBB-MBA_13L4','','BLMQI.19R4.B2E10_MQ','BLMQI.23R4.B2E30_MQ','BLMQI.29R4.B2E30_MQ','BLMBI.34L5.B0T10_MBB-MBA_33L5','BLMBI.23L5.B0T10_MBA-MBB_22L5','BLMQI.15L5.B2E10_MQ','BLMQI.13L5.B2E10_MQ','','BLMQI.13R5.B1E10_MQ','BLMQI.15R5.B1E10_MQ','BLMBI.33L6.B0T10_MBA-MBB_32L6','BLMBI.31L6.B0T10_MBA-MBB_30L6','BLMQI.23L6.B1E30_MQ','BLMQI.17L6.B2I30_MQ','','BLMBI.18R6.B0T20_MBB-MBA_18R6','BLMBI.28R6.B0T20_MBB-MBA_28R6','BLMBI.32R6.B0T20_MBB-MBA_32R6','BLMBI.33R6.B0T10_MBB-MBA_32R6','BLMBI.34L7.B0T10_MBB-MBA_33L7','BLMBI.33L7.B0T20_MBB-MBA_33L7','BLMQI.32L7.B1E10_MQ','BLMBI.31L7.B0T10_MBA-MBB_30L7','BLMBI.29L7.B0T10_MBA-MBB_28L7','BLMBI.23L7.B0T10_MBA-MBB_22L7','BLMQI.16L7.B1E10_MQ','','BLMQI.13R7.B1E10_MQ','BLMQI.18R7.B2I30_MQ','BLMQI.31R7.B1E10_MQ','BLMBI.34R7.B0T10_MBA-MBB_33R7','BLMQI.18L8.B2I10_MQ','BLMQI.16L8.B2I10_MQ','BLMQI.14L8.B2I30_MQ','','BLMQI.15R8.B2E10_MQ','BLMQI.16R8.B1I10_MQ','BLMQI.19R8.B2E10_MQ','BLMQI.22L1.B1I10_MQ','BLMQI.17L1.B2E10_MQ','BLMQI.15L1.B2E10_MQ','BLMQI.13L1.B2E30_MQ']
+
+BLMs_to_be_annotated = set(BLMs_to_be_annotated)
+
+RPL_data = np.array([(13209.000,2130),
+           (13196.792,8880),
+            (13190.492,11400),
+            (13184.550,4890),
+            (13178.712,3810)])
+
+numbers_position = None
+
+def get_position_on_logscale(ratio, ymin, ymax):
+    return np.logspace(ymin, ymax, 1000)[int(ratio*1000)]
 
 class BLMsPlotter(IPlotter):
     """
@@ -82,6 +96,7 @@ class BLMsPlotter(IPlotter):
 
         ax1 = plt.subplot(gs1[:2])
         ax2 = plt.subplot(gs1[2:], sharex=ax1)
+        plt.setp(ax1.get_xticklabels(), visible=False)
         self.layout_plotter.plotter_layout(ax2, 0, 1)
 
         # ax3 = fig.add_subplot(4, 1, 4,sharex=ax1)
@@ -112,7 +127,36 @@ class BLMsPlotter(IPlotter):
         file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses / luminosity, blm_names)
 
-    def plot_luminosity_normalized_dose_for_multiple_years(self, lum_blms, blm_summing_func):
+    def plot_luminosity_normalized_dose_for_multiple_years(self, lum_blms, blm_summing_func, colors):
+        global numbers_position
+        blm_positions, integrated_doses, blm_types, blm_names = self.remove_nans(*self.get_sorted_blm_data(list(lum_blms.values())[0], blm_summing_func))
+        # print(lum_blms)
+        dcum_start, dcum_end = self.get_plot_xlim(blm_positions)
+        plt, ax = self.build_blm_layout(dcum_start, dcum_end)
+        plt.text(self.layout_plotter.start + .9 * self.layout_plotter.ran, -7.5,
+                 'Courtesy MCWG: {}'.format(datetime.today().strftime('%Y-%m-%d %H:%M')), fontsize=12, va='bottom', ha='right', color='gray', alpha=0.5,
+                 rotation=0)
+        ax.grid(True)
+        ax.set_ylim((1e-4, 1e4))
+        numbers_position = 1e4
+
+        ax.set_ylabel(r'normalized TID (Gy/fb$^{-1}$)', fontsize=12)
+        self.add_dashed_lines(ax, BLMs_to_be_annotated, blm_names, blm_positions, integrated_doses)
+        for idx, lum_blm in enumerate(lum_blms.items()):
+            luminosity, blms = lum_blm
+            blm_positions, integrated_doses, blm_types, blm_names = self.remove_nans(*self.get_sorted_blm_data(blms, blm_summing_func))
+            start, end = self.get_plot_dates(blms)
+            ax.semilogy(blm_positions, integrated_doses / luminosity, label=r'TID for [{} : {}] normalized with luminosity: {} fb$^{{-1}}$'.
+                   format(start.strftime(self.title_date_format), end.strftime(self.title_date_format), luminosity), color=colors[idx])
+        ax.legend(loc='lower center', bbox_to_anchor=(0.5, 0),  framealpha=1)
+        # if self.check_luminosity_normalized_plot_range(integrated_doses / luminosity):
+
+        file_name = 'n_lum_TID_multip_{}'.format(self.get_fully_covered_lhc_section(dcum_start, dcum_end))
+        file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
+        self.save_plot(file_path_name_without_extension + '.png')
+        self.save_plot(file_path_name_without_extension + '.pdf')
+
+    def plot_injected_intensity_normalized_dose_for_multiple_years(self, lum_blms, blm_summing_func, colors):
         blm_positions, integrated_doses, blm_types, blm_names = self.remove_nans(*self.get_sorted_blm_data(list(lum_blms.values())[0], blm_summing_func))
         # print(lum_blms)
         dcum_start, dcum_end = self.get_plot_xlim(blm_positions)
@@ -122,22 +166,86 @@ class BLMsPlotter(IPlotter):
                  rotation=0)
         ax.grid(True)
 
-        ax.set_ylabel(r'normalized TID (Gy/fb$^{-1}$)', fontsize=12)
-        self.add_dashed_lines(ax, BLMs_to_be_annotated, blm_names, blm_positions, integrated_doses)
-        for luminosity, blms in lum_blms.items():
+        ax.set_ylabel(r'normalized TID (Gy/p)', fontsize=12)
+        # self.add_dashed_lines(ax, BLMs_to_be_annotated, blm_names, blm_positions, integrated_doses)
+        for idx, lum_blm in enumerate(lum_blms.items()):
+            luminosity, blms = lum_blm
             blm_positions, integrated_doses, blm_types, blm_names = self.remove_nans(*self.get_sorted_blm_data(blms, blm_summing_func))
             start, end = self.get_plot_dates(blms)
-            ax.semilogy(blm_positions, integrated_doses / luminosity, label=r'TID for [{} : {}] normalized with luminosity: {} fb${{^-1}}$'.
-                   format(start.strftime(self.title_date_format), end.strftime(self.title_date_format), luminosity))
-        ax.legend(framealpha=1)
+            ax.semilogy(blm_positions, integrated_doses / luminosity, label=r'TID for [{} : {}] normalized with injected intensity: {} p'.
+                        format(start.strftime(self.title_date_format), end.strftime(self.title_date_format), luminosity), color=colors[idx], marker='.')
+        ax.legend(loc='lower center', bbox_to_anchor=(0.5, 0), framealpha=1)
         # if self.check_luminosity_normalized_plot_range(integrated_doses / luminosity):
-        ax.set_ylim((1e-4, 1e4))
-        file_name = 'n_lum_TID_multip_{}'.format(self.get_fully_covered_lhc_section(dcum_start, dcum_end))
+        ax.set_ylim((1e-19, 1e-13))
+        file_name = 'n_inj_int_TID_multip_{}'.format(self.get_fully_covered_lhc_section(dcum_start, dcum_end))
         file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
         self.save_plot(file_path_name_without_extension + '.png')
         self.save_plot(file_path_name_without_extension + '.pdf')
 
-        # self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses / luminosity, blm_names)
+    def plot_integrated_intensity_normalized_dose_for_multiple_years(self, lum_blms, blm_summing_func, colors, ylim=None, dir_tree=''):
+        global numbers_position
+
+        blm_positions, integrated_doses, blm_types, blm_names = self.remove_nans(*self.get_sorted_blm_data(list(lum_blms.values())[0], blm_summing_func))
+        # print(lum_blms)
+        dcum_start, dcum_end = self.get_plot_xlim(blm_positions)
+        plt, ax = self.build_blm_layout(dcum_start, dcum_end)
+        ax.set_ylim((1e-24, 1e-19) if not ylim else ylim)
+
+        numbers_position = 2.4e-20
+        numbers_position = 2*get_position_on_logscale(0.89, *ax.get_ylim())
+        print(numbers_position/2)
+        numbers_position = 2.4e-20
+        plt.text(self.layout_plotter.start + .9 * self.layout_plotter.ran, -7.5,
+                 'Courtesy MCWG: {}'.format(datetime.today().strftime('%Y-%m-%d %H:%M')), fontsize=12, va='bottom', ha='right', color='gray', alpha=0.5,
+                 rotation=0)
+        ax.grid(True)
+
+        ax.set_ylabel(r'normalized TID (Gy/ps)', fontsize=12)
+        self.add_dashed_lines(ax, BLMs_to_be_annotated, blm_names, blm_positions, integrated_doses)
+        for idx, lum_blm in enumerate(lum_blms.items()):
+            luminosity, blms = lum_blm
+            blm_positions, integrated_doses, blm_types, blm_names = self.remove_nans(*self.get_sorted_blm_data(blms, blm_summing_func))
+            start, end = self.get_plot_dates(blms)
+            ax.semilogy(blm_positions, integrated_doses / luminosity, label=r'TID for [{} : {}] normalized with integrated intensity: {:.2e} ps'.
+                        format(start.strftime(self.title_date_format), end.strftime(self.title_date_format), luminosity), color=colors[idx])
+        ax.legend(loc='lower center', bbox_to_anchor=(0.5, 0), framealpha=1)
+       # ax.legend(loc='upper center', bbox_to_anchor=(0.5, 0), framealpha=1)
+        ax.set_ylim((ax.get_ylim()[0],ax.get_ylim()[1]))
+        # ax.legend()
+        # if self.check_luminosity_normalized_plot_range(integrated_doses / luminosity):
+        file_name = '{}/n_int_TID_multip_{}'.format(dir_tree,self.get_fully_covered_lhc_section(dcum_start, dcum_end))
+        file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
+        self.save_plot(file_path_name_without_extension + '.png')
+        self.save_plot(file_path_name_without_extension + '.pdf')
+
+    def plot_dumped_intensity_normalized_dose_for_multiple_years(self, lum_blms, blm_summing_func, colors):
+        global numbers_position
+        blm_positions, integrated_doses, blm_types, blm_names = self.remove_nans(*self.get_sorted_blm_data(list(lum_blms.values())[0], blm_summing_func))
+        # print(lum_blms)
+        dcum_start, dcum_end = self.get_plot_xlim(blm_positions)
+        plt, ax = self.build_blm_layout(dcum_start, dcum_end)
+        plt.text(self.layout_plotter.start + .9 * self.layout_plotter.ran, -7.5,
+                 'Courtesy MCWG: {}'.format(datetime.today().strftime('%Y-%m-%d %H:%M')), fontsize=12, va='bottom', ha='right', color='gray', alpha=0.5,
+                 rotation=0)
+        ax.grid(True)
+        ax.set_ylim((3e-20, 1e-13))
+
+        ax.set_ylabel(r'normalized TID (Gy/p)', fontsize=12)
+        numbers_position = 1e-13
+        self.add_dashed_lines(ax, BLMs_to_be_annotated, blm_names, blm_positions, integrated_doses)
+        for idx, lum_blm in enumerate(lum_blms.items()):
+            luminosity, blms = lum_blm
+            blm_positions, integrated_doses, blm_types, blm_names = self.remove_nans(*self.get_sorted_blm_data(blms, blm_summing_func))
+            start, end = self.get_plot_dates(blms)
+            ax.semilogy(blm_positions, integrated_doses / luminosity, label=r'TID for [{} : {}] normalized with dumped intensity: {} p'.
+                        format(start.strftime(self.title_date_format), end.strftime(self.title_date_format), luminosity), color=colors[idx])
+        # ax.legend(loc='lower center', bbox_to_anchor=(0.5, 0), framealpha=1)
+        ax.legend()
+        # if self.check_luminosity_normalized_plot_range(integrated_doses / luminosity):
+        file_name = 'n_dumped_int_TID_multip_{}'.format(self.get_fully_covered_lhc_section(dcum_start, dcum_end))
+        file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
+        self.save_plot(file_path_name_without_extension + '.png')
+        self.save_plot(file_path_name_without_extension + '.pdf')
 
     def plot_intensity_normalized_dose(self, blms, blm_summing_func, normalization_func):
         """
@@ -222,15 +330,37 @@ class BLMsPlotter(IPlotter):
         for index, blm_name in enumerate(blm_names):
             if blm_name in annotated_blm_names:
                 counter += 1
+                ax.axvline(x=blm_positions[index],ymax=0.81, linewidth=1, color='#babdb6', ls='dashed')
+                # ax.axvline(x=blm_positions[index],ymax=0.87, linewidth=1, color='#babdb6', ls='dashed')
+                ax.text(blm_positions[index], numbers_position/2,  str(counter), horizontalalignment='center', rotation=0)
+
+                print(blm_name, counter, blm_positions[index])
+                # ax.annotate(counter, (blm_positions[index], integrated_doses[index]), (0, 20), textcoords='offset points',
+                #             arrowprops=dict(arrowstyle='-', linestyle="dashed", color="0"))
+
+    def add_without_lines(self, ax, annotated_blm_names, blm_names, blm_positions, integrated_doses):
+        """
+
+        :param ax:
+        :param annotated_blm_names:
+        :param blm_names:
+        :param blm_positions:
+        :param integrated_doses:
+        :return:
+        """
+        counter = 0
+        for index, blm_name in enumerate(blm_names):
+            if blm_name in annotated_blm_names:
+                counter += 1
                 ax.axvline(x=blm_positions[index],ymax=0.94, linewidth=1, color='#babdb6', ls='dashed')
-                ax.text(blm_positions[index], 5e3,  str(counter), horizontalalignment='center', rotation=0)
+                ax.text(blm_positions[index], 5e4,  str(counter), horizontalalignment='center', rotation=0)
 
                 print(blm_name, counter, blm_positions[index])
                 # ax.annotate(counter, (blm_positions[index], integrated_doses[index]), (0, 20), textcoords='offset points',
                 #             arrowprops=dict(arrowstyle='-', linestyle="dashed", color="0"))
 
 
-    def plot_total_dose(self, blms, blm_summing_func):
+    def plot_total_dose(self, blms, blm_summing_func, ylim=None, dir_tree=''):
         """
         The functions plots dose (logscale), then saves plot and plot's data.
         :param list blms: BLM list
@@ -238,6 +368,7 @@ class BLMsPlotter(IPlotter):
         :param normalization_func: a function which takes blm as an argument and returns integrated intensity
         :return:
         """
+        global numbers_position
         blm_positions, integrated_doses, blm_types, blm_names, f, ax, dcum_start, dcum_end, start, end = self.run_common_functions(blm_summing_func, blms)
 
         # f.suptitle(r'Total integrated dose for [{} : {}]'.format(start.strftime(self.title_date_format), end.strftime(self.title_date_format)), fontsize=16, weight='bold')
@@ -246,11 +377,13 @@ class BLMsPlotter(IPlotter):
 
         self.__plot_blms(blm_positions, integrated_doses, blm_types, ax.semilogy)
 
+        ax.set_ylim((5e-3,1e3) if not ylim else ylim)
+
+        numbers_position = ax.get_ylim()[1]
         self.add_annotations(ax, BLMs_to_be_annotated, blm_names, blm_positions, integrated_doses)
 
         ax.legend()
-        ax.set_ylim((5e-3,1e6))
-        file_name = 'TID_{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
+        file_name = '{}TID_{}_{}_{}'.format(dir_tree,start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
         file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses, blm_names)
 
@@ -506,6 +639,30 @@ class BLMsPlotter(IPlotter):
         # ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
         #
         # plt.show()
+
+    def plot_total_dose_with_rpls(self, blms, blm_summing_func):
+        """
+        The functions plots dose (logscale), then saves plot and plot's data.
+        :param list blms: BLM list
+        :param lambda blm_summing_func: a function which takes blm as an argument and returns integrated dose for that blm
+        :param normalization_func: a function which takes blm as an argument and returns integrated intensity
+        :return:
+        """
+        blm_positions, integrated_doses, blm_types, blm_names, f, ax, dcum_start, dcum_end, start, end = self.run_common_functions(blm_summing_func, blms)
+
+        # f.suptitle(r'Total integrated dose for [{} : {}]'.format(start.strftime(self.title_date_format), end.strftime(self.title_date_format)), fontsize=16, weight='bold')
+
+        ax.set_ylabel(r'TID [Gy]')
+
+        self.__plot_blms(blm_positions, integrated_doses, blm_types, ax.semilogy)
+        ax.semilogy(RPL_data[:,0],RPL_data[:,1], label='RPL',  marker='x')
+        # self.add_annotations(ax, BLMs_to_be_annotated, blm_names, blm_positions, integrated_doses)
+
+        ax.legend()
+        # ax.set_ylim((5e-3,1e6))
+        file_name = 'TID_{}_{}_{}_with_rpls_log'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
+        file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
+        self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses, blm_names)
 
 
 if __name__ == '__main__':

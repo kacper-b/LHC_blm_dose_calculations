@@ -40,6 +40,7 @@ def build_blm_dose_calc_parser():
     parser.add_argument("-pi", help="Plot total integrated dose normalized with the integrated intensity", action="store_true")
     parser.add_argument("-ex", "--save_to_excel", help="Save doses to an excel file", action="store_true")
     parser.add_argument("-pcs", help="Plot cumulative sums", action="store_true")
+    parser.add_argument("-ptlim", help="Yrange for the TID plot", type=eval)
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-arc", help="Arc after given IP will be plotted", type=int, choices=list(range(1, 9)))

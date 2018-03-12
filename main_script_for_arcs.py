@@ -50,9 +50,9 @@ if __name__ == '__main__':
     # print(args)
 
 ############################## Parsed command line arguments assignment ########
-    # runs = extract_runs(args)
-    # start = runs[0][0]
-    # end = runs[-1][1]
+    runs = extract_runs(args)
+    start = runs[0][0]
+    end = runs[-1][1]
 
     blm_csv_list_filename = args.file_name
     number_of_simultaneous_processes = args.processes_num
@@ -66,13 +66,14 @@ if __name__ == '__main__':
     blm_raw_data_dir = args.raw_blm_path
     pickled_blm_dir = args.pickled_blm_path
     field = args.field_name
+    ylim = args.ptlim
     IP_num = args.ir if args.ir else args.arc
 
     blm_filter_function_name = 'ir' if args.ir else None
     blm_filter_function_name = 'arc' if args.arc else None
-    if not blm_filter_function_name:
+    if not blm_filter_function_name or True:
         blm_filter_function_name = 'all'
-
+    blm_csv_list_filename = 'report/arc{}{}.csv'.format(IP_num, IP_num+1 if IP_num+1 <9 else 1)
     should_plot_heatmap = False
     left_offset = 700
     right_offset = 700
@@ -86,30 +87,44 @@ if __name__ == '__main__':
                    BeamModeSubIntervalsCalc()
                    # PlotCalc(BLM_INTERVALS_PLOTS_DIR)
                    ]
-    luminosity_blms = {}
+
     # Intensity files loading
-    for run in lhc_runs:
-        start = run.dates[0][0]
-        end = run.dates[-1][1]
-        iil = IntensityIntervalsLoader()
+    iil = IntensityIntervalsLoader()
+    iil.set_files_paths(PICKLE_INTENSITY_INTERVALS_PATH, start, end)
+    iil.load_pickles()
+    iil.filter_interval_by_dates(runs)
+    # iil.filter_interval_by_valid_flag()
 
-        iil.set_files_paths(PICKLE_INTENSITY_INTERVALS_PATH, start, end)
-        iil.load_pickles()
-        iil.filter_interval_by_dates(run.dates)
-        # iil.filter_interval_by_valid_flag()
+    # B
+    blm_list_file_path = os.path.join(BLM_LIST_DIR, blm_csv_list_filename)
+    blm_filter = BLMFilter()
+    blms = BLMsParser.read(blm_list_file_path)
+    filtered_blms = blm_filter.filter_blms(blms, func=blm_filter.get_filter_function(blm_filter_function_name, IP_num, left_offset, right_offset))
+    should_plot = should_plot_total or should_plot_cumsum or should_plot_intensity_norm or should_plot_luminosity_norm
+    should_return_blm = should_plot or should_save_excel
+    blm_process = BLMProcess(start, end, field, calculators, should_return_blm,blm_raw_data_dir, pickled_blm_dir)
 
-        # B
-        blm_list_file_path = os.path.join(BLM_LIST_DIR, blm_csv_list_filename)
-        blm_filter = BLMFilter()
-        blms = BLMsParser.read(blm_list_file_path)
-        filtered_blms = blm_filter.filter_blms(blms, func=blm_filter.get_filter_function(blm_filter_function_name, IP_num, left_offset, right_offset))
+    # Reading and processing BLMs data
+    with Pool(processes=number_of_simultaneous_processes) as pool:
+        blms = [blm for blm in pool.map(blm_process.run, BLMFactory.build(iil.data, filtered_blms)) if blm is not None]
 
-        blm_process = BLMProcess(start, end, field, calculators, True,blm_raw_data_dir, pickled_blm_dir)
+    if blm_process.should_return_blm:
 
-        # Reading and processing BLMs data
-        with Pool(processes=number_of_simultaneous_processes) as pool:
-            luminosity_blms[run.luminosity['cms']] = [blm for blm in pool.map(blm_process.run, BLMFactory.build(iil.data, filtered_blms)) if blm is not None]
+        logging.info('Analysed BLM types: {}'.format(', '.join(set(blm.get_blm_type() for blm in blms))))
 
+        if should_save_excel and blms:
+            save_to_excel_beam_modes(blms, 'BLMs_with_beam_modes_{}_{}'.format(start.strftime('%Y%m%d'), end.strftime('%Y%m%d')))
 
-    p = BLMsPlotter('.')
-    p.plot_luminosity_normalized_dose_for_multiple_years(luminosity_blms, lambda blm: blm.get_pre_oc_dose(), ['#7570b3','#1b9e77', '#d95f02'])
+        if should_plot:
+            # Plotting
+            p = BLMsPlotter('.')
+            if should_plot_luminosity_norm:
+                p.plot_luminosity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), luminosity)
+            if should_plot_intensity_norm:
+                p.plot_intensity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), lambda blm: blm.get_oc_intensity_integral())
+            if should_plot_cumsum:
+                p.plot_total_cumulated_dose(blms, lambda blm, start, end: blm.get_pre_oc_dose(start, end))
+            if should_plot_total:
+                p.plot_total_dose(blms, lambda blm: blm.get_pre_oc_dose(), ylim, blm_csv_list_filename.replace('.csv','/'))
+            if should_plot_heatmap:
+                p.heat_map_plot(blms)
