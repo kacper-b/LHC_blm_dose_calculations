@@ -92,7 +92,7 @@ if __name__ == '__main__':
     iil.set_files_paths(PICKLE_INTENSITY_INTERVALS_PATH, start, end)
     iil.load_pickles()
     iil.filter_interval_by_dates(runs)
-    print('Integrated intensity for {} {} \t{}'.format(str(start), str(end), sum(ii.integrated_intensity_oc for ii in iil.data)))
+    print('Integrated intensity for {} {} \t{}'.format(str(start), str(end), sum(ii.integrated_intensity_offset_corrected for ii in iil.data)))
     # iil.filter_interval_by_valid_flag()
 
     # B
