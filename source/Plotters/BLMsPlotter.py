@@ -275,6 +275,7 @@ class BLMsPlotter(IPlotter):
         start_xaxis_date = None
         end_xaxis_date = None
         # colors = sns.color_palette("Set2", len(blms))
+        matplotlib.rcParams['axes.prop_cycle']  = matplotlib.cycler(color=sns.color_palette("hls", 15))
 
         positions = []
         for blm in blms:
