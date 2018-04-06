@@ -33,7 +33,7 @@ class RawIntegralCalc(IntegralCalc):
         :param integration_result:
         :return:
         """
-        blm_interval.integral_raw = integration_result
+        blm_interval.integrated_dose = integration_result
 
     def check_if_integration_result_is_positive(self, integration_result, blm_interval, col_name):
         """

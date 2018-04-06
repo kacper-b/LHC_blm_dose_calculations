@@ -278,8 +278,8 @@ class BLMsPlotter(IPlotter):
 
         positions = []
         for blm in blms:
-            blm_intervals_start = second2datetime(blm.blm_intervals[0].start)
-            blm_intervals_end = second2datetime(blm.blm_intervals[-1].end)
+            blm_intervals_start = second2datetime(blm.blm_intervals[0].start_time)
+            blm_intervals_end = second2datetime(blm.blm_intervals[-1].end_time)
             positions.append(blm.position)
 
             if start_xaxis_date is None and end_xaxis_date is None:
@@ -379,7 +379,7 @@ class BLMsPlotter(IPlotter):
         :param list blms: sorted by date BLM list
         :return tuple: first and last timestamp in the first BLM from the BLM list - blms.
         """
-        return second2datetime(blms[0].blm_intervals[0].start), second2datetime(blms[0].blm_intervals[-1].end)
+        return second2datetime(blms[0].blm_intervals[0].start_time), second2datetime(blms[0].blm_intervals[-1].end_time)
 
     def get_plot_xlim(self, blm_positions):
         """
@@ -443,7 +443,7 @@ class BLMsPlotter(IPlotter):
 
     def heat_map_plot(self, blms):
         # TODO: to be removed or finished + commented
-        dates = pd.date_range(second2datetime(blms[0].blm_intervals[0].start), second2datetime(blms[0].blm_intervals[-1].end), freq='1D')
+        dates = pd.date_range(second2datetime(blms[0].blm_intervals[0].start_time), second2datetime(blms[0].blm_intervals[-1].end_time), freq='1D')
         num_of_days = len(dates)
         intens = np.zeros((len(blms), num_of_days - 1))
         blms_pos = np.zeros((len(blms), 1))

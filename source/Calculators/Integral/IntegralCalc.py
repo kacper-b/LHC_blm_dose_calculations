@@ -19,7 +19,8 @@ class IntegralCalc(Calc):
         :param blm_intervals:
         :return:
         """
-        col_name = data.columns[0]
+        # col_name = data.columns[0]
+        col_name = str(blm_intervals[0].blm_name)
         for blm_interval in blm_intervals:
             blm_interval_beam_on_data = self.get_data_to_integrate(data, blm_interval)
             self.integrate_single_blm_interval(blm_interval, blm_interval_beam_on_data, col_name)
@@ -32,6 +33,7 @@ class IntegralCalc(Calc):
         :param blm_name:
         :return:
         """
+        integration_result = 0
         try:
             integration_result = self.integrate(blm_interval_beam_on_data, blm_name, blm_interval)
             self.check_if_integration_result_is_positive(integration_result, blm_interval, blm_name)
@@ -54,13 +56,13 @@ class IntegralCalc(Calc):
         :return:
         """
         if not data.empty:
-            integral = np.trapz(y=data[data.columns[0]], x=data.index)
+            integral = np.trapz(y=data[data.columns[0]], x=data.index.astype(np.int64) / 10**9)
             if np.isnan(integral):
                 IntegrationResultIsNan('{} integrated dose is Nan: {}'.format(col_name, blm_interval))
             return integral
         else:
             raise NoBLMDataForIntensityInterval(
-                '{}\t{} dataframe for given intensity interval is empty: {}'.format(self,col_name, blm_interval))
+                '{}\t{} dataframe for given intensity interval is empty: {}'.format(self, col_name, blm_interval))
 
     def check_if_integration_result_is_positive(self, integration_result, blm_interval, col_name):
         """

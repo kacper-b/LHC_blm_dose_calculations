@@ -24,8 +24,8 @@ class BeamModeSubIntervalsCalc(IntegralCalc):
         col_name = data_old.columns[0]
         for blm_interval in blm_intervals:
             data = self.get_data_to_integrate(data_old, blm_interval)
-            for subinterval in blm_interval.beam_modes_subintervals:
-                if blm_interval.integral_pre_offset_corrected == 0:
+            for subinterval in blm_interval.blm_subintervals:
+                if blm_interval.integrated_dose_preoc == 0:
                     self.set_integration_result(subinterval, 0)
                 else:
                     self.set_integration_result(subinterval, self.integrate_single_blm_interval(subinterval, data, col_name))
@@ -48,6 +48,7 @@ class BeamModeSubIntervalsCalc(IntegralCalc):
         :param blm_name:
         :return:
         """
+        integrated_dose = 0
         try:
             subinterval_data = subinterval.get_integrated_data(offset_corrected_data_for_blm_interval)
             integrated_dose = self.integrate(subinterval_data, blm_name, subinterval)
@@ -80,7 +81,7 @@ class BeamModeSubIntervalsCalc(IntegralCalc):
         :return:
         """
         if not data.empty:
-            integral = np.trapz(y=data[data.columns[0]], x=data.index)
+            integral = np.trapz(y=data[data.columns[0]], x=data.index.astype(np.int64) / 10**9)
             if np.isnan(integral):
                 IntegrationResultIsNan('{} integrated dose is Nan: {}'.format(col_name, blm_interval))
             return integral

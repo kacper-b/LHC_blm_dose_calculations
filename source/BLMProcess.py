@@ -2,27 +2,27 @@ import os
 
 import sys
 
-from config import PICKLE_BLM_INTERVALS_DIR, BLM_DATA_DIR
-from BLM_classes.BLM_exceptions import BLMDataEmpty, BLMIntervalsEmpty, BLMInvalidRawData
-from BLM_classes.BLMsRawPandasDataLoader import BLMsRawPandasDataLoader
-from Common_classes.BLM_classes.BLMsCalculatedLoader import BLMsCalculatedLoader
+# from config import PICKLE_BLM_INTERVALS_DIR, BLM_DATA_DIR
+import psycopg2
+
+from Common_classes.BLMClasses.BLM_exceptions import BLMDataEmpty, BLMIntervalsEmpty
+# from BLM_classes.BLMsRawPandasDataLoader import BLMsRawPandasDataLoader
+# from Common_classes.BLM_classes.BLMsCalculatedLoader import BLMsCalculatedLoader
 import logging
 import traceback
 import copy
+from datetime import timedelta
 
-import Common_classes.BLM_classes.BLM
-import Common_classes.BLM_classes.BLMInterval
+from sortedcontainers import SortedSet
 
-sys.modules['source.BLMInterval'] = Common_classes.BLM_classes.BLMInterval
-sys.modules['source.BLM'] = Common_classes.BLM_classes.BLM
-
+from Common_classes.DBConnector import BLMInterval,  SingleBeamModeBLMSubInterval
 
 class BLMProcess:
     """
     This class encapsulates whole data processing for a one BLM. It reads the data, then conducts calculations (if needed) and saves a analysed BLM class
     object to a pickle file.
     """
-    def __init__(self, start, end, field, calculators, should_return_blm=False, blm_raw_data_dir=BLM_DATA_DIR, pickled_blm_dir=PICKLE_BLM_INTERVALS_DIR):
+    def __init__(self, requested_run, field, calculators, should_return_blm, db_connector, beam_intervals):
         """
         :param datetime start: end of analysed period
         :param datetime end: beginning of analysed period
@@ -32,15 +32,15 @@ class BLMProcess:
         :param str blm_raw_data_dir: a path to the directory with a stored raw BLM data
         :param str pickled_blm_dir: a path to the directory with already calculated BLM pickles
         """
-        self.start = start
-        self.end = end
+        self.requested_run = requested_run
         self.field = field
         self.calculators = calculators
         self.should_return_blm = should_return_blm
-        self.blm_raw_data_dir = blm_raw_data_dir
-        self.pickled_blm_dir = pickled_blm_dir
+        self.db_connector = db_connector
+        self.beam_intervals = beam_intervals
 
-    def run(self, blm_scratch):
+
+    def run(self, blm):
         """
         This method is the main method for that class. It takes a raw BLM's class object (which contains name,position, not integrated blm_intervals and subintervals),
         then it checks if the BLM has already been calculated (pickle file exists). If yes, it reads the pickled BLM and compares BLM's intervals. Then calculations
@@ -48,41 +48,63 @@ class BLMProcess:
         :param BLM blm_scratch: BLM object without assigned data and calculated partial doses for subintervals
         :return:
         """
-        blm_name = blm_scratch.name
-        logging.info('{}\t start'.format(blm_name))
+
+        logging.info('{}\t start'.format(blm.name))
 
         try:
-            # Load pickled BLM raw data
-            blm_scratch.data = self.load_pickled_raw_blm_data(blm_name)
-            blm_scratch.interpolate_data()
-            # Load the pickled BLM if it exists
-            calculated_blm_loader = BLMsCalculatedLoader(names=[blm_name], remove_raw_data=True)
-            is_any_already_calculated_blm_exists = self.check_if_blm_already_calculated(calculated_blm_loader)
+            self.db_connector.connect_to_db()
 
-            if is_any_already_calculated_blm_exists:
-                loaded_blm_intervals = self.load_calculated_blm(blm_scratch, calculated_blm_loader).blm_intervals
-                missing_blm_intervals = blm_scratch.get_missing_blm_intervals(loaded_blm_intervals)
-                blm_scratch.blm_intervals = self.get_only_needed_blm_intervals(blm_scratch, loaded_blm_intervals)
+            existing_blm_intervals = SortedSet(blm.blm_intervals)
+            needed_blm_intervals = SortedSet(BLMInterval(start=bi.start_time, end=bi.end_time, variable=self.field, beam_interval_id=bi.id, blm_name=blm.name)
+                                             for bi in self.beam_intervals)
+            self.set_blm_subintervals(needed_blm_intervals)
+            missing_blm_intervals = needed_blm_intervals - existing_blm_intervals
 
-                if not missing_blm_intervals:
-                    logging.info('{}\t not missing anything'.format(blm_name))
-                    return blm_scratch if self.should_return_blm else None
-                else:
-                    self.set_calculators_for_missing_intervals(blm_scratch, missing_blm_intervals)
-
-            else:
-                loaded_blm_intervals = None
-                self.set_blm_calculators(blm_scratch)
-
-            self.update_pickled_blm(blm_scratch, loaded_blm_intervals, calculated_blm_loader.file_paths)
-            logging.info('{}\t done'.format(blm_name))
-            return blm_scratch if self.should_return_blm else None
+            if missing_blm_intervals:
+                self.set_blm_data(blm)
+                self.set_calculators_for_missing_intervals(blm, missing_blm_intervals)
+                self.update_blm_in_db(blm)
+            return blm if self.should_return_blm else None
 
         except (BLMDataEmpty, BLMIntervalsEmpty) as e:
-            e.logging_func('{} {}'.format(blm_name, e))
+            e.logging_func('{} {}'.format(blm.name, e))
         except Exception as e:
-            logging.critical('{} {} {}'.format(blm_name, traceback.format_exc(), e))
+            logging.critical('{} {} {}'.format(blm.name, traceback.format_exc(), e))
             raise e
+
+    def set_blm_subintervals(self, blm_intervals):
+        beam_subintervals = {beam_interval.start_time:beam_interval.beam_subintervals for beam_interval in self.beam_intervals}
+        for blm_interval in blm_intervals:
+            blm_interval.blm_subintervals = list(SingleBeamModeBLMSubInterval(
+                bs.start_time,
+                bs.end_time,
+                bs.beam_mode_id,
+                None,
+                bs.id,
+                blm_interval.id
+            ) for bs in beam_subintervals[blm_interval.start_time])
+    def update_blm_in_db(self, blm):
+
+        logging.info('to be updated {}'.format(str(blm)))
+
+        try:
+            self.db_connector.session.merge(blm)
+        except psycopg2.IntegrityError as e:
+            # logging.warning('{}: {} duplicated rows'.format(PyTimberIntensityDownloader.class_name, task_description))
+            raise e
+
+        else:
+            self.db_connector.session.commit()
+            logging.info('{} saved to db'.format(str(blm)))
+        finally:
+            self.db_connector.close()
+
+
+    def set_blm_data(self, blm):
+        blm.data = self.db_connector.get_raw_blm_data(self.requested_run.get_earliest_date() - timedelta(days=1),
+                                                      self.requested_run.get_latest_date() + timedelta(days=1),
+                                                      id_blm=blm.id, table_name='raw_blm_data_loss_rs12')
+        blm.interpolate_data()
 
     def update_pickled_blm(self, blm_scratch, all_already_calculated_intervals, files_to_be_deleted):
         """
@@ -121,15 +143,6 @@ class BLMProcess:
                 os.remove(file_path)
                 logging.info('{}\t removed'.format(file_path))
 
-    def save_blm_as_pickle(self, blm):
-        """
-        It saves the BLM to a pickle file.
-        :param BLM blm: a calculated BLM class object
-        :return:
-        """
-        blm.clean_blm_intervals_from_temporary_data(clean_blm_data=True)
-        blm.name = blm.name + ':' + self.field
-        return blm.to_pickle(self.pickled_blm_dir, self.start, self.end)
 
     def set_calculators_for_missing_intervals(self, blm_scratch, missing_intervals):
         """
@@ -138,11 +151,11 @@ class BLMProcess:
         :param SortedSet missing_intervals: BLM intervals, that haven't been already calculated (integrated dose + offsets are not calculated)
         :return:
         """
-        logging.info('{}\t missing {} intervals\n\t\t{}'.format(blm_scratch.name, len(missing_intervals), '\n\t\t'.join(map(str,missing_intervals))))
+        logging.info('{}\t missing {} intervals'.format(blm_scratch.name, len(missing_intervals)))
         blm_already_calculated_blm_intervals = blm_scratch.blm_intervals
-        blm_scratch.blm_intervals = missing_intervals
+        blm_scratch.blm_intervals = list(missing_intervals)
         self.set_blm_calculators(blm_scratch)
-        blm_scratch.blm_intervals = self.merge_already_and_new_calculated_blm_intervals(blm_scratch.blm_intervals, blm_already_calculated_blm_intervals)
+        blm_scratch.blm_intervals = list(self.merge_already_and_new_calculated_blm_intervals(blm_scratch.blm_intervals, blm_already_calculated_blm_intervals))
 
     def merge_already_and_new_calculated_blm_intervals(self, blm_new_calculated_intervals, blm_already_calculated_blms):
         """
@@ -151,7 +164,7 @@ class BLMProcess:
         :param SortedSet blm_already_calculated_blms:
         :return SortedSet: merged BLM intervals
         """
-        return blm_already_calculated_blms | blm_new_calculated_intervals
+        return SortedSet(blm_already_calculated_blms) | SortedSet(blm_new_calculated_intervals)
 
     def load_calculated_blm(self, blm, calculated_blm_loader):
         """
@@ -164,30 +177,7 @@ class BLMProcess:
         blm_calculated = calculated_blm_loader.load_pickles()
         return blm_calculated
 
-    def check_if_blm_already_calculated(self, calculated_blms_loader):
-        """
-        It checks if any pickle file with a calculated BLM intervals already exists.
-        :param BLMsCalculatedLoader calculated_blms_loader:
-        :return bool:
-        """
-        calculated_blms_loader.set_files_paths(self.pickled_blm_dir, self.start, self.end, self.field)
-        is_calculated_blms_existing = bool(calculated_blms_loader.file_paths)
-        return is_calculated_blms_existing
 
-    def load_pickled_raw_blm_data(self, blm_scratch_name):
-        """
-        It loads a raw (timestamp + dose readouts) data from pickle files.
-        :param blm_scratch_name: the BLM name
-        :return pandas.DataFrame: loaded data
-        """
-        blm_names_list = [blm_scratch_name]
-        blm_loader = BLMsRawPandasDataLoader(blm_names_list)
-        blm_loader.set_files_paths(self.blm_raw_data_dir, self.start, self.end, self.field)
-        blm_loader.load_pickles()
-        loaded_blms = list(blm_loader.get_blms())
-        if len(loaded_blms) != 1:
-            raise BLMInvalidRawData('No or too many files for {}'.format(blm_scratch_name))
-        return loaded_blms[0].data
 
     def set_blm_calculators(self, blm):
         """

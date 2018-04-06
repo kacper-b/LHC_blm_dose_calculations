@@ -2,17 +2,18 @@ import argparse
 from config import PICKLE_BLM_INTERVALS_DIR, BLM_DATA_DIR
 from datetime import datetime
 from dateutil import tz
-from tools.workers import str2datetime
-from lhc_runs import lhc_runs
+# from tools.workers import str2datetime
 utc = tz.tzutc()
 
-def build_blm_dose_calc_parser():
+def str2datetime(string, date_format):
+    return datetime.strptime(string, date_format)
+
+def build_blm_dose_calc_parser(lhc_runs):
     """
     Function which reads
     :return argparse.ArgumentParser: command line arguments
     """
 
-    start = datetime(year=2017, month=4, day=29)
     end = datetime.today()
     blm_csv_list_filename = 'all_blms_dcum_meters_ti_qi_ei_bi.csv' #'151617L2_ti_qi_ei_bi.csv' #
 
@@ -22,14 +23,14 @@ def build_blm_dose_calc_parser():
     parser.add_argument("-e", "--end_date", help="provide end date of analysed period, will be used only if START_DATE is specified", type=date_parser, default=end)
 
     run_type_group = parser.add_mutually_exclusive_group(required=True)
-    run_type_group.add_argument("-s", "--start_date", help="provide start date of analysed period", type=date_parser, default=start)
+    run_type_group.add_argument("-s", "--start_date", help="provide start date of analysed period", type=date_parser)
     for run in lhc_runs:
         run_type_group.add_argument('-{}'.format(run.shortcut), '--{}'.format(run.name), help=str(run), action="store_const", const=run.dates)
         run_type_group.add_argument_group()
 
     parser.add_argument("-var", "--field_name", help="Timber variable name", type=str, default='LOSS_RS12', choices=['LOSS_RS12', 'LOSS_RS09', 'DOSE_INT_HH'])
     parser.add_argument("-n", "--processes_num", help="Number of simultaneous processes", type=int, default=8)
-    parser.add_argument("-f", "--file_name", help="BLM list file name", type=str, default=blm_csv_list_filename)
+    parser.add_argument("-f", "--file_name", help="BLM list file name", type=str)
     parser.add_argument("-l", "--logging_level", help="Logging level", type=str, default='CRITICAL',
                         choices=['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'])
     parser.add_argument("-raw", "--raw_blm_path", help="Path to directory with all raw BLM data", default=BLM_DATA_DIR)
