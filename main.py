@@ -117,7 +117,7 @@ if __name__ == '__main__':
 
         if should_plot:
             # Plotting
-            p = BLMsPlotter('.', blm_csv_list_filename=blm_csv_list_filename.split(os.sep)[-1].replace('.csv',''))
+            p = BLMsPlotter('.', blm_csv_list_filename=blm_csv_list_filename.split(os.sep)[-1].replace('.csv',''), start, end)
             if should_plot_luminosity_norm:
                 p.plot_luminosity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), luminosity)
             if should_plot_intensity_norm:
