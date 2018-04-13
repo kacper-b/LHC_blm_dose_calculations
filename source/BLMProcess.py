@@ -83,6 +83,7 @@ class BLMProcess:
                 bs.id,
                 blm_interval.id
             ) for bs in beam_subintervals[blm_interval.start_time])
+
     def update_blm_in_db(self, blm):
 
         logging.info('to be updated {}'.format(str(blm)))

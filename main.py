@@ -50,7 +50,6 @@ if __name__ == '__main__':
     dbc_test.build_database()
     dbc_test.commit()
     runs = list(dbc_test.get_lhc_runs())
-
 ####################################################################################
 
     parser = build_blm_dose_calc_parser(runs)
@@ -97,26 +96,24 @@ if __name__ == '__main__':
                    ]
 
 
-    # dbc_test.connect_to_db()
-    # dbc_test.build_database()
-    # dbc_test.commit()
-    # blms_list = ['BLMQI.12R3.B2E30_MQ']
-    # blm_csv_list_filename = 'report/ir1.csv'
+    dbc_test.connect_to_db()
+    dbc_test.build_database()
+    dbc_test.commit()
+
     if blm_csv_list_filename is not None:
         blm_list_file_path = os.path.join(BLM_LIST_DIR, blm_csv_list_filename)
         blms_list = pd.read_csv(blm_list_file_path, header=None)[0].values
         filter_func = BLM.name.in_(blms_list)
     else:
         filter_func = True
-    dbc_test.connect_to_db()
 
     blms = list(dbc_test.session.query(BLM).filter(filter_func).all())
     print(len(blms))
     beam_modes = list(dbc_test.session.query(BeamMode))
 
-
     beam_intervals = list(filter(lambda beam_interval: beam_interval.start_time in requested_run, dbc_test.session.query(BeamInterval).all()))
     dbc_test.close()
+
     # dbc_test.connect_to_db()
 
     # print('\n'.join(map(str, beam_intervals)))
@@ -134,12 +131,12 @@ if __name__ == '__main__':
     # sys.exit()
 
     should_plot = should_plot_total or should_plot_cumsum or should_plot_intensity_norm or should_plot_luminosity_norm
-    should_return_blm = should_plot or should_save_excel or True
+    should_return_blm = should_plot or should_save_excel
     blm_process = BLMProcess(requested_run, field, calculators, should_return_blm, dbc_test, beam_intervals)
 
     # Reading and processing BLMs data
     with Pool(processes=number_of_simultaneous_processes) as pool:
-        blms = [blm for blm in map(blm_process.run, blms[:5]) if blm is not None]
+        blms = [blm for blm in pool.map(blm_process.run, blms[:]) if blm is not None]
 
     if blm_process.should_return_blm:
 
