@@ -102,8 +102,8 @@ if __name__ == '__main__':
     dbc_test.commit()
 
     if blm_csv_list_filename is not None:
-        blm_list_file_path = os.path.join(BLM_LIST_DIR, blm_csv_list_filename)
-        blms_list = pd.read_csv(blm_list_file_path, header=None)[0].values
+        # blm_list_file_path = os.path.join(BLM_LIST_DIR, blm_csv_list_filename)
+        blms_list = pd.read_csv(blm_csv_list_filename, header=None)[0].values
         filter_func = BLM.name.in_(blms_list)
     else:
         filter_func = True
