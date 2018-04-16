@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
     # Reading and processing BLMs data
     with Pool(processes=number_of_simultaneous_processes) as pool:
-        blms = [blm for blm in pool.map(blm_process.run, blms[1:2]) if blm is not None]
+        blms = [blm for blm in pool.map(blm_process.run, blms[:]) if blm is not None]
 
     if blm_process.should_return_blm:
 
