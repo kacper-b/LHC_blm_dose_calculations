@@ -1,21 +1,18 @@
-import os
 
-import sys
 
-# from config import PICKLE_BLM_INTERVALS_DIR, BLM_DATA_DIR
 import psycopg2
 
 from Common_classes.BLMClasses.BLM_exceptions import BLMDataEmpty, BLMIntervalsEmpty
-# from BLM_classes.BLMsRawPandasDataLoader import BLMsRawPandasDataLoader
-# from Common_classes.BLM_classes.BLMsCalculatedLoader import BLMsCalculatedLoader
+
 import logging
 import traceback
 import copy
 from datetime import timedelta
+from time import time
 
 from sortedcontainers import SortedSet
 
-from Common_classes.DBConnector import BLMInterval,  SingleBeamModeBLMSubInterval
+from Common_classes.DBConnector import BLMInterval,  SingleBeamModeBLMSubInterval, BLM
 
 class BLMProcess:
     """
@@ -53,17 +50,26 @@ class BLMProcess:
 
         try:
             self.db_connector.connect_to_db()
+            blm = self.db_connector.session.query(type(blm)).populate_existing().get(blm.name)
 
-            existing_blm_intervals = SortedSet(blm.blm_intervals)
-            needed_blm_intervals = SortedSet(BLMInterval(start=bi.start_time, end=bi.end_time, variable=self.field, beam_interval_id=bi.id, blm_name=blm.name)
+            blm_intervals = blm.blm_intervals.filter(BLMInterval.start_time >= self.requested_run.get_earliest_date()). \
+                filter(BLMInterval.start_time <= self.requested_run.get_latest_date()).all()
+            existing_blm_intervals = SortedSet(blm_intervals)
+
+            needed_blm_intervals = SortedSet(BLMInterval(start=bi.start_time,
+                                                         end=bi.end_time,
+                                                         variable=self.field,
+                                                         beam_interval_id=bi.id,
+                                                         blm_name=blm.name)
                                              for bi in self.beam_intervals)
             self.set_blm_subintervals(needed_blm_intervals)
             missing_blm_intervals = needed_blm_intervals - existing_blm_intervals
 
             if missing_blm_intervals:
-                self.set_blm_data(blm)
+                self.set_blm_data(blm) # possible improvement - set only data which needed for missing intervals
                 self.set_calculators_for_missing_intervals(blm, missing_blm_intervals)
                 self.update_blm_in_db(blm)
+            logging.info('{}\t done'.format(blm.name))
             return blm if self.should_return_blm else None
 
         except (BLMDataEmpty, BLMIntervalsEmpty) as e:
@@ -71,6 +77,8 @@ class BLMProcess:
         except Exception as e:
             logging.critical('{} {} {}'.format(blm.name, traceback.format_exc(), e))
             raise e
+        finally:
+            self.db_connector.close()
 
     def set_blm_subintervals(self, blm_intervals):
         beam_subintervals = {beam_interval.start_time:beam_interval.beam_subintervals for beam_interval in self.beam_intervals}
@@ -107,76 +115,76 @@ class BLMProcess:
                                                       id_blm=blm.id, table_name='raw_blm_data_loss_rs12')
         blm.interpolate_data()
 
-    def update_pickled_blm(self, blm_scratch, all_already_calculated_intervals, files_to_be_deleted):
-        """
-        It saves BLM's pickle updated version and removes the old pickle file.
-        :param BLM blm_scratch: A BLM with intervals that has been calculated during current program execution.
-        :param SortedSet all_already_calculated_intervals: collection of BLM intervals which have been already calculated
-        :param list files_to_be_deleted: list of files paths
-        :return:
-        """
-        blm_to_be_saved = blm_scratch
-        if all_already_calculated_intervals:
-            blm_to_be_saved = copy.deepcopy(blm_scratch)
-            blm_to_be_saved.blm_intervals.update(all_already_calculated_intervals)
-        file_path = self.save_blm_as_pickle(blm_to_be_saved)
-        # self.remove_old_pickles(files_to_be_deleted, file_path)
+    # def update_pickled_blm(self, blm_scratch, all_already_calculated_intervals, files_to_be_deleted):
+    #     """
+    #     It saves BLM's pickle updated version and removes the old pickle file.
+    #     :param BLM blm_scratch: A BLM with intervals that has been calculated during current program execution.
+    #     :param SortedSet all_already_calculated_intervals: collection of BLM intervals which have been already calculated
+    #     :param list files_to_be_deleted: list of files paths
+    #     :return:
+    #     """
+    #     blm_to_be_saved = blm_scratch
+    #     if all_already_calculated_intervals:
+    #         blm_to_be_saved = copy.deepcopy(blm_scratch)
+    #         blm_to_be_saved.blm_intervals.update(all_already_calculated_intervals)
+    #     file_path = self.save_blm_as_pickle(blm_to_be_saved)
+    #     # self.remove_old_pickles(files_to_be_deleted, file_path)
 
-    def get_only_needed_blm_intervals(self, blm_scratch, all_calculated_blm_intervals):
-        """
-        It returns only those blm intervals, that haven't been calculated yet.
-        :param BLM blm_scratch: BLM with non calculated intervals
-        :param SortedSet all_calculated_blm_intervals: list of already calculated BLM intervals
-        :return:
-        """
-        return blm_scratch.blm_intervals.intersection(all_calculated_blm_intervals)
+    # def get_only_needed_blm_intervals(self, blm_scratch, all_calculated_blm_intervals):
+    #     """
+    #     It returns only those blm intervals, that haven't been calculated yet.
+    #     :param BLM blm_scratch: BLM with non calculated intervals
+    #     :param SortedSet all_calculated_blm_intervals: list of already calculated BLM intervals
+    #     :return:
+    #     """
+    #     return blm_scratch.blm_intervals.intersection(all_calculated_blm_intervals)
+    #
+    # def remove_old_pickles(self, files_to_be_deleted, new_pickle_file_path):
+    #     """
+    #     It deletes all files from the files_to_be_deleted list. If new_pickle_file_path appears in files_to_be_deleted it won't be deleted.
+    #     :param list files_to_be_deleted: files with those paths will be removed.
+    #     :param str new_pickle_file_path: file with that path won't be deleted
+    #     :return:
+    #     """
+    #     if files_to_be_deleted is not None:
+    #         files_to_be_removed = filter(lambda f_path: f_path != new_pickle_file_path, files_to_be_deleted)
+    #         for file_path in files_to_be_removed:
+    #             os.remove(file_path)
+    #             logging.info('{}\t removed'.format(file_path))
+    #
 
-    def remove_old_pickles(self, files_to_be_deleted, new_pickle_file_path):
-        """
-        It deletes all files from the files_to_be_deleted list. If new_pickle_file_path appears in files_to_be_deleted it won't be deleted.
-        :param list files_to_be_deleted: files with those paths will be removed.
-        :param str new_pickle_file_path: file with that path won't be deleted
-        :return:
-        """
-        if files_to_be_deleted is not None:
-            files_to_be_removed = filter(lambda f_path: f_path != new_pickle_file_path, files_to_be_deleted)
-            for file_path in files_to_be_removed:
-                os.remove(file_path)
-                logging.info('{}\t removed'.format(file_path))
-
-
-    def set_calculators_for_missing_intervals(self, blm_scratch, missing_intervals):
+    def set_calculators_for_missing_intervals(self, blm, missing_intervals):
         """
         It sets calculators (offset estimation, integration etc.) only to missing BLM intervals.
         :param BLM blm_scratch: BLM
         :param SortedSet missing_intervals: BLM intervals, that haven't been already calculated (integrated dose + offsets are not calculated)
         :return:
         """
-        logging.info('{}\t missing {} intervals'.format(blm_scratch.name, len(missing_intervals)))
-        blm_already_calculated_blm_intervals = blm_scratch.blm_intervals
-        blm_scratch.blm_intervals = list(missing_intervals)
-        self.set_blm_calculators(blm_scratch)
-        blm_scratch.blm_intervals = list(self.merge_already_and_new_calculated_blm_intervals(blm_scratch.blm_intervals, blm_already_calculated_blm_intervals))
+        logging.info('{}\t missing {} intervals'.format(blm.name, len(missing_intervals)))
+        if not blm.data.empty:
+            for calc in self.calculators:
+                calc.run(blm.data, missing_intervals)
+        blm.blm_intervals.extend(missing_intervals)
 
-    def merge_already_and_new_calculated_blm_intervals(self, blm_new_calculated_intervals, blm_already_calculated_blms):
-        """
-        It merges BLM intervals SortedSets, which are passed as arguments.
-        :param SortedSet blm_new_calculated_intervals:
-        :param SortedSet blm_already_calculated_blms:
-        :return SortedSet: merged BLM intervals
-        """
-        return SortedSet(blm_already_calculated_blms) | SortedSet(blm_new_calculated_intervals)
+    # def merge_already_and_new_calculated_blm_intervals(self, blm_new_calculated_intervals, blm_already_calculated_blms):
+    #     """
+    #     It merges BLM intervals SortedSets, which are passed as arguments.
+    #     :param SortedSet blm_new_calculated_intervals:
+    #     :param SortedSet blm_already_calculated_blms:
+    #     :return SortedSet: merged BLM intervals
+    #     """
+    #     return SortedSet(blm_already_calculated_blms) | SortedSet(blm_new_calculated_intervals)
 
-    def load_calculated_blm(self, blm, calculated_blm_loader):
-        """
-        It
-        :param BLM blm:
-        :param BLMsCalculatedLoader calculated_blm_loader:
-        :return :
-        """
-        logging.info('{}\t exists'.format(blm.name))
-        blm_calculated = calculated_blm_loader.load_pickles()
-        return blm_calculated
+    # def load_calculated_blm(self, blm, calculated_blm_loader):
+    #     """
+    #     It
+    #     :param BLM blm:
+    #     :param BLMsCalculatedLoader calculated_blm_loader:
+    #     :return :
+    #     """
+    #     logging.info('{}\t exists'.format(blm.name))
+    #     blm_calculated = calculated_blm_loader.load_pickles()
+    #     return blm_calculated
 
 
 
@@ -188,3 +196,13 @@ class BLMProcess:
         """
         for calc in self.calculators:
             blm.set(calc)
+    #
+    # def set_blm_calculators_for_missing_intervals(self, data, blm_name, blm_intervals):
+    #     """
+    #     It sets calculators to the BLM.
+    #     :param BLM blm: a BLM class object which needs to be calculated.
+    #     :return:
+    #     """
+    #
+    #     for calc in self.calculators:
+    #         blm.set(calc)

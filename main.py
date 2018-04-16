@@ -7,7 +7,8 @@ from datetime import datetime
 with open('.gitmodules') as f:
     content = f.read()
     for submodule_dir_name in re.findall(r"^\s*path\s*\=\s(\w+)$", content, re.MULTILINE):
-        sys.path.insert(0, submodule_dir_name)
+        if submodule_dir_name != 'LHC_runs':
+            sys.path.insert(0, submodule_dir_name)
 from Common_classes.DBConnector import DBConnector, BLM, BeamInterval, Run, BeamMode
 from multiprocessing import Pool
 # from config import BLM_LIST_DIR, PICKLE_INTENSITY_INTERVALS_PATH, PLOTS_DIR_PATH
@@ -86,7 +87,7 @@ if __name__ == '__main__':
     right_offset = 700
 
 # ####################################################################################
-    logging.basicConfig(level=logging_level)
+    logging.basicConfig(level=logging.INFO)
 
     calculators = [PreOffsetCalc(), PreOffsetCorrectedIntegralCalc(),
                    RawIntegralCalc(),
@@ -136,7 +137,7 @@ if __name__ == '__main__':
 
     # Reading and processing BLMs data
     with Pool(processes=number_of_simultaneous_processes) as pool:
-        blms = [blm for blm in pool.map(blm_process.run, blms[:]) if blm is not None]
+        blms = [blm for blm in pool.map(blm_process.run, blms[1:2]) if blm is not None]
 
     if blm_process.should_return_blm:
 
