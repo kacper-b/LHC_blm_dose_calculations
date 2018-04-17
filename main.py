@@ -50,9 +50,10 @@ if __name__ == '__main__':
     # print(args)
 
 ############################## Parsed command line arguments assignment ########
-    runs = extract_runs(args)
-    start = runs[0][0]
-    end = runs[-1][1]
+    runs = extract_runs_from_command_line_argument(args)
+    run = runs
+    start = run.dates[0][0]
+    end = run.dates[-1][1]
 
     blm_csv_list_filename = args.file_name
     number_of_simultaneous_processes = args.processes_num
