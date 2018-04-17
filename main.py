@@ -24,7 +24,7 @@ from source.BLMProcess import BLMProcess
 import logging
 from arguments_parser import build_blm_dose_calc_parser
 import pandas as pd
-from lhc_runs import lhc_runs, extract_runs
+from lhc_runs import lhc_runs, extract_runs_from_command_line_argument
 
 
 def save_to_excel(blms, fname='blms'):
