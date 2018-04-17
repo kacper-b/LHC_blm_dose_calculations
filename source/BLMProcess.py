@@ -35,6 +35,8 @@ class BLMProcess:
         self.should_return_blm = should_return_blm
         self.db_connector = db_connector
         self.beam_intervals = beam_intervals
+        self.beam_subintervals = {beam_interval.start_time: beam_interval.beam_subintervals for beam_interval in self.beam_intervals}
+
 
 
     def run(self, blm):
@@ -83,7 +85,6 @@ class BLMProcess:
             self.db_connector.close()
 
     def set_blm_subintervals(self, blm_intervals):
-        beam_subintervals = {beam_interval.start_time:beam_interval.beam_subintervals for beam_interval in self.beam_intervals}
         for blm_interval in blm_intervals:
             blm_interval.blm_subintervals = list(SingleBeamModeBLMSubInterval(
                 bs.start_time,
@@ -92,7 +93,7 @@ class BLMProcess:
                 None,
                 bs.id,
                 blm_interval.id
-            ) for bs in beam_subintervals[blm_interval.start_time])
+            ) for bs in self.beam_subintervals[blm_interval.start_time])
 
     def update_blm_in_db(self, blm):
 
