@@ -58,7 +58,7 @@ class IntegralCalc(Calc):
         if not data.empty:
             integral = np.trapz(y=data[data.columns[0]], x=data.index.astype(np.int64) / 10**9)
             if np.isnan(integral):
-                IntegrationResultIsNan('{} integrated dose is Nan: {}'.format(col_name, blm_interval))
+                raise IntegrationResultIsNan('{} integrated dose is Nan: {}'.format(col_name, blm_interval))
             return integral
         else:
             raise NoBLMDataForIntensityInterval(
