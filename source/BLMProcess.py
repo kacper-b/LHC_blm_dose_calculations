@@ -66,7 +66,9 @@ class BLMProcess:
             missing_blm_intervals = needed_blm_intervals - existing_blm_intervals
 
             if missing_blm_intervals:
-                self.set_blm_data(blm) # possible improvement - set only data which needed for missing intervals
+                earliest_interval_start = missing_blm_intervals[0].start_time
+                latest_interval_end = missing_blm_intervals[-1].end_time
+                self.set_blm_data(blm, earliest_interval_start - timedelta(days=1), latest_interval_end + timedelta(days=1))
                 self.set_calculators_for_missing_intervals(blm, missing_blm_intervals)
                 self.update_blm_in_db(blm)
             logging.info('{}\t done'.format(blm.name))
@@ -109,9 +111,13 @@ class BLMProcess:
             self.db_connector.close()
 
 
-    def set_blm_data(self, blm):
-        blm.data = self.db_connector.get_raw_blm_data(self.requested_run.get_earliest_date() - timedelta(days=1),
-                                                      self.requested_run.get_latest_date() + timedelta(days=1),
+    def set_blm_data(self, blm, start=None, end=None):
+        if start is None:
+            start = self.requested_run.get_earliest_date() - timedelta(days=1)
+        if end is None:
+            end = self.requested_run.get_latest_date() + timedelta(days=1),
+        blm.data = self.db_connector.get_raw_blm_data(start,
+                                                      end,
                                                       id_blm=blm.id, table_name='raw_blm_data_loss_rs12')
         blm.interpolate_data()
 
