@@ -24,7 +24,7 @@ from source.BLMProcess import BLMProcess
 import logging
 from arguments_parser import build_blm_dose_calc_parser
 import pandas as pd
-from lhc_runs import lhc_runs, extract_runs_from_command_line_argument
+from lhc_runs import extract_runs_from_command_line_argument
 
 
 def save_to_excel(blms, fname='blms'):
@@ -50,8 +50,7 @@ if __name__ == '__main__':
     # print(args)
 
 ############################## Parsed command line arguments assignment ########
-    runs = extract_runs_from_command_line_argument(args)
-    run = runs
+    run = extract_runs_from_command_line_argument(args)
     start = run.dates[0][0]
     end = run.dates[-1][1]
 
@@ -92,7 +91,7 @@ if __name__ == '__main__':
     iil = IntensityIntervalsLoader()
     iil.set_files_paths(PICKLE_INTENSITY_INTERVALS_PATH, start, end)
     iil.load_pickles()
-    iil.filter_interval_by_dates(runs)
+    iil.filter_interval_by_dates([run,])
     print('Integrated intensity for {} {} \t{}'.format(str(start), str(end), sum(ii.integrated_intensity_offset_corrected for ii in iil.data)))
     # iil.filter_interval_by_valid_flag()
 
