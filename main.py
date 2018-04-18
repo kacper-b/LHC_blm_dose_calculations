@@ -33,15 +33,11 @@ def save_to_excel(blms, fname='blms'):
         blm.get_as_pandas_dataframe().to_excel(writer,blm.name)
     writer.save()
 
-
 def save_to_excel_beam_modes(blms, fname, all_beam_modes):
     writer = pd.ExcelWriter(fname + '.xlsx')
     rslt = pd.concat([blm.get_beam_mode_doses_as_dataframe(all_beam_modes) for blm in blms], axis=0)
     rslt.to_excel(writer,'data')
     writer.save()
-
-
-
 
 
 if __name__ == '__main__':
