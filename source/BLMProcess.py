@@ -3,7 +3,7 @@ import os
 import sys
 
 from config import PICKLE_BLM_INTERVALS_DIR, BLM_DATA_DIR
-from BLM_classes.BLM_exceptions import BLMDataEmpty, BLMIntervalsEmpty, BLMInvalidRawData
+from BLM_classes.BLM_exceptions import BLMDataEmpty, BLMIntervalsEmpty, BLMInvalidRawData, BLMLoaderWrongNumberOfColumns
 from BLM_classes.BLMsRawPandasDataLoader import BLMsRawPandasDataLoader
 from Common_classes.BLM_classes.BLMsCalculatedLoader import BLMsCalculatedLoader
 import logging
@@ -78,7 +78,7 @@ class BLMProcess:
             logging.info('{}\t done'.format(blm_name))
             return blm_scratch if self.should_return_blm else None
 
-        except (BLMDataEmpty, BLMIntervalsEmpty) as e:
+        except (BLMDataEmpty, BLMIntervalsEmpty, BLMLoaderWrongNumberOfColumns) as e:
             e.logging_func('{} {}'.format(blm_name, e))
         except Exception as e:
             logging.critical('{} {} {}'.format(blm_name, traceback.format_exc(), e))
