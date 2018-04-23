@@ -3,8 +3,8 @@ import os
 import sys
 
 from config import PICKLE_BLM_INTERVALS_DIR, BLM_DATA_DIR
-from BLM_classes.BLM_exceptions import BLMDataEmpty, BLMIntervalsEmpty, BLMInvalidRawData, BLMLoaderWrongNumberOfColumns
-from BLM_classes.BLMsRawPandasDataLoader import BLMsRawPandasDataLoader
+from BLM_classes.BLM_exceptions import BLMDataEmpty, BLMIntervalsEmpty, BLMInvalidRawData
+from BLM_classes.BLMsRawPandasDataLoader import BLMsRawPandasDataLoader, BLMLoaderWrongNumberOfColumns
 from Common_classes.BLM_classes.BLMsCalculatedLoader import BLMsCalculatedLoader
 import logging
 import traceback
