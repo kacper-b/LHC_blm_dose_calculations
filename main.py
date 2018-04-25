@@ -4,6 +4,7 @@ import sys
 # Add submodules to path
 from datetime import datetime
 
+
 with open('.gitmodules') as f:
     content = f.read()
     for submodule_dir_name in re.findall(r"^\s*path\s*\=\s(\w+)$", content, re.MULTILINE):
@@ -11,6 +12,8 @@ with open('.gitmodules') as f:
             sys.path.insert(0, submodule_dir_name)
 from Common_classes.DBConnector import DBConnector, BLM, BeamInterval, Run, BeamMode
 from multiprocessing import Pool
+from source.Plotters.PlotCalc import PlotCalc
+
 # from config import BLM_LIST_DIR, PICKLE_INTENSITY_INTERVALS_PATH, PLOTS_DIR_PATH
 from source.Calculators.Integral.BeamModeSubIntervalsCalc import BeamModeSubIntervalsCalc
 from source.Calculators.Integral.PostOffsetCorrectedIntegralCalc import PostOffsetCorrectedIntegralCalc
@@ -88,8 +91,8 @@ if __name__ == '__main__':
     calculators = [PreOffsetCalc(), PreOffsetCorrectedIntegralCalc(),
                    RawIntegralCalc(),
                    PostOffsetCalc(), PostOffsetCorrectedIntegralCalc(),
-                   BeamModeSubIntervalsCalc()
-                   # PlotCalc(BLM_INTERVALS_PLOTS_DIR)
+                   BeamModeSubIntervalsCalc(),
+                   # PlotCalc('plots')
                    ]
 
 
@@ -106,9 +109,9 @@ if __name__ == '__main__':
         filter_func = True
 
     blms = list(dbc_test.session.query(BLM).filter(filter_func).all())
+    # blms =list(filter(lambda  blm: '16L2' in blm.name or '17L2' in blm.name or '15L2' in blm.name, blms))
     print(len(blms))
     beam_modes = list(dbc_test.session.query(BeamMode))
-
     beam_intervals = list(filter(lambda beam_interval: beam_interval.start_time in requested_run, dbc_test.session.query(BeamInterval).all()))
     dbc_test.close()
 
@@ -119,16 +122,19 @@ if __name__ == '__main__':
     # Reading and processing BLMs data
     with Pool(processes=number_of_simultaneous_processes) as pool:
         blm_names_blm_intervals = {pseudoBLM.name: pseudoBLM.blm_intervals for pseudoBLM in pool.map(blm_process.run, blms[:]) if pseudoBLM is not None}
-    # p
-    blm_names = set(blm_names_blm_intervals.keys())
-    for blm in blms:
-        if blm.name in blm_names:
-            blm.blm_intervals_filtered = blm_names_blm_intervals[blm.name]
-        else:
-            blm.blm_intervals = []
 
     if blm_process.should_return_blm:
 
+        blm_names = set(blm_names_blm_intervals.keys())
+        for blm in blms:
+            # print(blm.name, blm_names)
+            if blm.name in blm_names:
+                blm.blm_intervals_filtered = blm_names_blm_intervals[blm.name]
+                # for i in blm.blm_intervals_filtered:
+                #     print('{:%Y-%m-%d %H:%M}\t{:%Y-%m-%d %H:%M}\t{:.3e}\t{:.3e}'.format(i.start_time, i.end_time, i.integrated_dose, i.offset_pre))
+            else:
+                blm.blm_intervals_filtered = []
+                # sys.exit()
         logging.info('Analysed BLM types: {}'.format(', '.join(set(blm.get_blm_type() for blm in blms))))
 
         if should_save_excel and blms:

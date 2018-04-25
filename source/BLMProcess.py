@@ -58,9 +58,9 @@ class BLMProcess:
             self.db_connector.connect_to_db()
             blm = self.db_connector.session.query(type(blm)).populate_existing().get(blm.name)
 
-            blm_intervals = blm.blm_intervals.filter(BLMInterval.start_time >= self.requested_run.get_earliest_date()). \
+            blm.blm_intervals.filter(BLMInterval.start_time >= self.requested_run.get_earliest_date()). \
                 filter(BLMInterval.start_time <= self.requested_run.get_latest_date()).all()
-            existing_blm_intervals = SortedSet(blm_intervals)
+            existing_blm_intervals = SortedSet(blm.blm_intervals)
 
             needed_blm_intervals = SortedSet(BLMInterval(start=bi.start_time,
                                                          end=bi.end_time,
@@ -70,29 +70,52 @@ class BLMProcess:
                                              for bi in self.beam_intervals)
             self.set_blm_subintervals(needed_blm_intervals)
             missing_blm_intervals = needed_blm_intervals - existing_blm_intervals
-
+            overwrite = True
             if missing_blm_intervals:
                 earliest_interval_start = missing_blm_intervals[0].start_time
                 latest_interval_end = missing_blm_intervals[-1].end_time
                 self.set_blm_data(blm, earliest_interval_start - timedelta(days=1), latest_interval_end + timedelta(days=1))
                 self.set_calculators_for_missing_intervals(blm, missing_blm_intervals)
-                self.update_blm_in_db(blm)
+                self.db_connector.session.commit()
+            elif overwrite:
+                earliest_interval_start = self.requested_run.get_earliest_date()
+                latest_interval_end = self.requested_run.get_latest_date()
+                self.set_blm_data(blm, earliest_interval_start - timedelta(days=1), latest_interval_end + timedelta(days=1))
+                self.set_calculators_for_missing_intervals(blm, blm.blm_intervals.filter(BLMInterval.start_time >= self.requested_run.get_earliest_date()). \
+                filter(BLMInterval.start_time <= self.requested_run.get_latest_date()).all())
+                self.db_connector.session.commit()
             logging.info('{}\t done'.format(blm.name))
+            # blm_intervals = list(filter(lambda blm_interval: blm_interval.start_time in self.requested_run,
+            #                             blm.blm_intervals.filter(BLMInterval.start_time >= self.requested_run.get_earliest_date()).
+            #                             filter(BLMInterval.start_time <= self.requested_run.get_latest_date())))
+            # print(sum(i.integrated_dose_preoc for i in missing_blm_intervals))
 
-            if self.should_return_blm:
-                blm_intervals = list(filter(lambda blm_interval: blm_interval.start_time in self.requested_run,
+            if self.should_return_blm or True:
+                # print(list(filter(lambda blm_interval: blm_interval.start_time in self.requested_run,
+                #                              blm.blm_intervals.filter(BLMInterval.start_time >= self.requested_run.get_earliest_date()).
+                #                              filter(BLMInterval.start_time <= self.requested_run.get_latest_date()).all())))
+                considered_blm_intervals = list(filter(lambda blm_interval: blm_interval.start_time in self.requested_run,
                                              blm.blm_intervals.filter(BLMInterval.start_time >= self.requested_run.get_earliest_date()).
                                              filter(BLMInterval.start_time <= self.requested_run.get_latest_date())))
-                to_be_returned = pBLM(name=blm.name, blm_intervals=list(blm_intervals))
 
+
+                to_be_returned = pBLM(name=blm.name, blm_intervals=considered_blm_intervals)
+            # print(len(to_be_returned.blm_intervals))
         except (BLMDataEmpty, BLMIntervalsEmpty) as e:
             e.logging_func('{} {}'.format(blm.name, e))
         except Exception as e:
-            logging.critical('{} {} {}'.format(blm.name, traceback.format_exc(), e))
             raise e
         finally:
             self.db_connector.close()
-            return to_be_returned
+
+        return to_be_returned
+
+
+        #     raise e
+        # except Exception as e:
+        #     logging.critical('{} {} {}'.format(blm.name, traceback.format_exc(), e))
+        #     raise e
+
 
     def set_blm_subintervals(self, blm_intervals):
         for blm_interval in blm_intervals:
@@ -108,16 +131,8 @@ class BLMProcess:
     def update_blm_in_db(self, blm):
 
         logging.info('to be updated {}'.format(str(blm)))
-
-        try:
-            self.db_connector.session.merge(blm)
-        except psycopg2.IntegrityError as e:
-            # logging.warning('{}: {} duplicated rows'.format(PyTimberIntensityDownloader.class_name, task_description))
-            raise e
-
-        else:
-            self.db_connector.session.commit()
-            logging.info('{} saved to db'.format(str(blm)))
+        self.db_connector.session.commit()
+        logging.info('{} saved to db'.format(str(blm)))
 
 
     def set_blm_data(self, blm, start=None, end=None):
