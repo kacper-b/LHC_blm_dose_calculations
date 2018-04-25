@@ -71,18 +71,19 @@ class BLMProcess:
             self.set_blm_subintervals(needed_blm_intervals)
             missing_blm_intervals = needed_blm_intervals - existing_blm_intervals
             overwrite = True
-            if missing_blm_intervals:
-                earliest_interval_start = missing_blm_intervals[0].start_time
-                latest_interval_end = missing_blm_intervals[-1].end_time
-                self.set_blm_data(blm, earliest_interval_start - timedelta(days=1), latest_interval_end + timedelta(days=1))
-                self.set_calculators_for_missing_intervals(blm, missing_blm_intervals)
-                self.db_connector.session.commit()
-            elif overwrite:
+            if overwrite:
                 earliest_interval_start = self.requested_run.get_earliest_date()
                 latest_interval_end = self.requested_run.get_latest_date()
                 self.set_blm_data(blm, earliest_interval_start - timedelta(days=1), latest_interval_end + timedelta(days=1))
                 self.set_calculators_for_missing_intervals(blm, blm.blm_intervals.filter(BLMInterval.start_time >= self.requested_run.get_earliest_date()). \
-                filter(BLMInterval.start_time <= self.requested_run.get_latest_date()).all())
+                                                           filter(BLMInterval.start_time <= self.requested_run.get_latest_date()).all())
+                self.db_connector.session.commit()
+
+            elif missing_blm_intervals and not overwrite:
+                earliest_interval_start = missing_blm_intervals[0].start_time
+                latest_interval_end = missing_blm_intervals[-1].end_time
+                self.set_blm_data(blm, earliest_interval_start - timedelta(days=1), latest_interval_end + timedelta(days=1))
+                self.set_calculators_for_missing_intervals(blm, missing_blm_intervals)
                 self.db_connector.session.commit()
             logging.info('{}\t done'.format(blm.name))
             # blm_intervals = list(filter(lambda blm_interval: blm_interval.start_time in self.requested_run,
