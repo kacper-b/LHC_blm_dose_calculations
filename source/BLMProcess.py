@@ -60,7 +60,7 @@ class BLMProcess:
 
             # blm.blm_intervals.filter(BLMInterval.start_time >= self.requested_run.get_earliest_date()). \
             #     filter(BLMInterval.start_time <= self.requested_run.get_latest_date()).all()
-            existing_blm_intervals = SortedSet([]])
+            existing_blm_intervals = SortedSet([])
 
             needed_blm_intervals = SortedSet(BLMInterval(start=bi.start_time,
                                                          end=bi.end_time + timedelta(seconds=120),
