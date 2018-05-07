@@ -82,16 +82,16 @@ class BLMProcess:
             #                             filter(BLMInterval.start_time <= self.requested_run.get_latest_date())))
             # print(sum(i.integrated_dose_preoc for i in missing_blm_intervals))
 
-            if self.should_return_blm or True:
-                # print(list(filter(lambda blm_interval: blm_interval.start_time in self.requested_run,
-                #                              blm.blm_intervals.filter(BLMInterval.start_time >= self.requested_run.get_earliest_date()).
-                #                              filter(BLMInterval.start_time <= self.requested_run.get_latest_date()).all())))
-                considered_blm_intervals = list(filter(lambda blm_interval: blm_interval.start_time in self.requested_run,
-                                             blm.blm_intervals.filter(BLMInterval.start_time >= self.requested_run.get_earliest_date()).
-                                             filter(BLMInterval.start_time <= self.requested_run.get_latest_date())))
+            # if self.should_return_blm or True:
+            #     # print(list(filter(lambda blm_interval: blm_interval.start_time in self.requested_run,
+            #     #                              blm.blm_intervals.filter(BLMInterval.start_time >= self.requested_run.get_earliest_date()).
+            #     #                              filter(BLMInterval.start_time <= self.requested_run.get_latest_date()).all())))
+            #     considered_blm_intervals = list(filter(lambda blm_interval: blm_interval.start_time in self.requested_run,
+            #                                  blm.blm_intervals.filter(BLMInterval.start_time >= self.requested_run.get_earliest_date()).
+            #                                  filter(BLMInterval.start_time <= self.requested_run.get_latest_date())))
 
 
-                to_be_returned = pBLM(name=blm.name, blm_intervals=missing_blm_intervals)
+            to_be_returned = pBLM(name=blm.name, blm_intervals=missing_blm_intervals)
             # print(len(to_be_returned.blm_intervals))
         except (BLMDataEmpty, BLMIntervalsEmpty) as e:
             e.logging_func('{} {}'.format(blm.name, e))
