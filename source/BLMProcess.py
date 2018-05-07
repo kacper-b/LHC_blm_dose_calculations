@@ -58,33 +58,24 @@ class BLMProcess:
             self.db_connector.connect_to_db()
             blm = self.db_connector.session.query(type(blm)).populate_existing().get(blm.name)
 
-            blm.blm_intervals.filter(BLMInterval.start_time >= self.requested_run.get_earliest_date()). \
-                filter(BLMInterval.start_time <= self.requested_run.get_latest_date()).all()
-            existing_blm_intervals = SortedSet(blm.blm_intervals)
+            # blm.blm_intervals.filter(BLMInterval.start_time >= self.requested_run.get_earliest_date()). \
+            #     filter(BLMInterval.start_time <= self.requested_run.get_latest_date()).all()
+            existing_blm_intervals = SortedSet([]])
 
             needed_blm_intervals = SortedSet(BLMInterval(start=bi.start_time,
-                                                         end=bi.end_time,
+                                                         end=bi.end_time + timedelta(seconds=120),
                                                          variable=self.field,
                                                          beam_interval_id=bi.id,
                                                          blm_name=blm.name)
                                              for bi in self.beam_intervals)
             self.set_blm_subintervals(needed_blm_intervals)
             missing_blm_intervals = needed_blm_intervals - existing_blm_intervals
-            overwrite = False
-            if overwrite:
-                earliest_interval_start = self.requested_run.get_earliest_date()
-                latest_interval_end = self.requested_run.get_latest_date()
-                self.set_blm_data(blm, earliest_interval_start - timedelta(days=1), latest_interval_end + timedelta(days=1))
-                self.set_calculators_for_missing_intervals(blm, blm.blm_intervals.filter(BLMInterval.start_time >= earliest_interval_start). \
-                                                           filter(BLMInterval.start_time <= latest_interval_end).all())
-                self.db_connector.session.commit()
 
-            elif missing_blm_intervals and not overwrite:
-                earliest_interval_start = missing_blm_intervals[0].start_time
-                latest_interval_end = missing_blm_intervals[-1].end_time
-                self.set_blm_data(blm, earliest_interval_start - timedelta(days=1), latest_interval_end + timedelta(days=1))
-                self.set_calculators_for_missing_intervals(blm, missing_blm_intervals)
-                self.db_connector.session.commit()
+            earliest_interval_start = missing_blm_intervals[0].start_time
+            latest_interval_end = missing_blm_intervals[-1].end_time
+            self.set_blm_data(blm, earliest_interval_start - timedelta(days=1), latest_interval_end + timedelta(days=1))
+            self.set_calculators_for_missing_intervals(blm, missing_blm_intervals)
+                # self.db_connector.session.commit()
             logging.info('{}\t done'.format(blm.name))
             # blm_intervals = list(filter(lambda blm_interval: blm_interval.start_time in self.requested_run,
             #                             blm.blm_intervals.filter(BLMInterval.start_time >= self.requested_run.get_earliest_date()).
@@ -100,7 +91,7 @@ class BLMProcess:
                                              filter(BLMInterval.start_time <= self.requested_run.get_latest_date())))
 
 
-                to_be_returned = pBLM(name=blm.name, blm_intervals=considered_blm_intervals)
+                to_be_returned = pBLM(name=blm.name, blm_intervals=missing_blm_intervals)
             # print(len(to_be_returned.blm_intervals))
         except (BLMDataEmpty, BLMIntervalsEmpty) as e:
             e.logging_func('{} {}'.format(blm.name, e))
