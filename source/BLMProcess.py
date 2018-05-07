@@ -148,7 +148,7 @@ class BLMProcess:
         if not blm.data.empty:
             for calc in self.calculators:
                 calc.run(blm.data, missing_intervals)
-            blm.blm_intervals.extend(missing_intervals)
+            # blm.blm_intervals.extend(missing_intervals)
 
     def set_blm_calculators(self, blm):
         """
