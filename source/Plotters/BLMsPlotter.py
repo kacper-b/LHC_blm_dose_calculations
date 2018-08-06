@@ -47,7 +47,7 @@ ir8 = ["BLMQI.09L8.B2I30_MQM", "BLMQI.08L8.B2I10_MQML", "BLMTI.06L8.B2I10_TCLIB.
        "BLMQI.08R8.B1I10_MQML", "BLMQI.09R8.B1I30_MQM"]
 
 BLMs_to_be_annotated = ir1 + ir2 + ir3 + ir4 + ir5 + ir6 + ir7 + ir8
-
+BLMs_to_be_annotated = []
 class BLMsPlotter(IPlotter):
     """
     Tools to plot dose and normalized dose for specific blms.
@@ -102,7 +102,7 @@ class BLMsPlotter(IPlotter):
         f.suptitle(r'Total integrated dose for [{} : {}] normalized with luminosity: {} fb${{^-1}}$'.
                    format(start.strftime(self.title_date_format), end.strftime(self.title_date_format), luminosity), fontsize=16, weight='bold')
 
-        ax.set_ylabel(r'normalized TID [Gy/fb$^{-1}$]', fontsize=12)
+        ax.set_ylabel(r'normalized TID (Gy/fb$^{-1}$)', fontsize=12)
 
         self.__plot_blms(blm_positions, integrated_doses / luminosity, blm_types, ax.semilogy)
         ax.legend()
@@ -155,7 +155,7 @@ class BLMsPlotter(IPlotter):
         f.suptitle(r'Total integrated dose for [{} : {}] normalized with intensity: {:.2e} ps'.
                    format(start.strftime(self.title_date_format), end.strftime(self.title_date_format), integrated_intensity), fontsize=16, weight='bold')
 
-        ax.set_ylabel(r'normalized TID [Gy/ps]', fontsize=12)
+        ax.set_ylabel(r'normalized TID (Gy/ps)', fontsize=12)
         self.__plot_blms(blm_positions, integrated_doses / integrated_intensity, blm_types, ax.semilogy)
         ax.legend()
         if self.check_intensity_normalized_plot_range(integrated_doses / integrated_intensity):
@@ -230,7 +230,7 @@ class BLMsPlotter(IPlotter):
                 #             arrowprops=dict(arrowstyle='-', linestyle="dashed", color="0"))
 
 
-    def plot_total_dose(self, blms, blm_summing_func):
+    def plot_total_dose(self, blms, blm_summing_func, requested_run):
         """
         The functions plots dose (logscale), then saves plot and plot's data.
         :param list blms: BLM list
@@ -238,15 +238,15 @@ class BLMsPlotter(IPlotter):
         :param normalization_func: a function which takes blm as an argument and returns integrated intensity
         :return:
         """
-        blm_positions, integrated_doses, blm_types, blm_names, f, ax, dcum_start, dcum_end, start, end = self.run_common_functions(blm_summing_func, blms)
+        blm_positions, integrated_doses, blm_types, blm_names, f, ax, dcum_start, dcum_end = self.run_common_functions(blm_summing_func, blms)
 
         # f.suptitle(r'Total integrated dose for [{} : {}]'.format(start.strftime(self.title_date_format), end.strftime(self.title_date_format)), fontsize=16, weight='bold')
-
-        ax.set_ylabel(r'TID [Gy]')
+        start, end  = requested_run.get_earliest_date(), requested_run.get_latest_date()
+        ax.set_ylabel(r'TID (Gy)')
 
         self.__plot_blms(blm_positions, integrated_doses, blm_types, ax.semilogy)
 
-        self.add_annotations(ax, BLMs_to_be_annotated, blm_names, blm_positions, integrated_doses)
+        # self.add_annotations(ax, BLMs_to_be_annotated, blm_names, blm_positions, integrated_doses)
 
         ax.legend()
         ax.set_ylim((5e-3,1e6))
@@ -269,7 +269,7 @@ class BLMsPlotter(IPlotter):
         ax.xaxis_date()
         f.autofmt_xdate()
         plt.xlabel(r'Date')
-        plt.ylabel(r'TID [Gy]')
+        plt.ylabel(r'TID (Gy)')
 
         # variables which will store the earliest and latest date of analysed blms data
         start_xaxis_date = None
@@ -334,7 +334,7 @@ class BLMsPlotter(IPlotter):
         blm_names = np.zeros(len(blms), dtype=np.dtype('a64')).astype(str)
         for index, blm in enumerate(blms):
             integrated_doses[index] = blm_summing_func(blm)
-            blm_positions[index] = blm.position
+            blm_positions[index] = blm.dcum
             blm_names[index] = blm.name
             blm_types[index] = self.get_blm_type(blm)
         if -1 in blm_types:
@@ -350,7 +350,8 @@ class BLMsPlotter(IPlotter):
         :return tuple: blm_positions, integrated_doses, blm_types, blm_names, plt,ax, dcum_start, dcum_end, start, end
         """
         blm_positions, integrated_doses, blm_types, blm_names = self.remove_nans(*self.get_sorted_blm_data(blms, blm_summing_func))
-        start, end = self.get_plot_dates(blms)
+
+        # start, end = self.get_plot_dates(blms)
         dcum_start, dcum_end = self.get_plot_xlim(blm_positions)
         plt, ax = self.build_blm_layout(dcum_start, dcum_end)
 
@@ -359,7 +360,7 @@ class BLMsPlotter(IPlotter):
         plt.text(self.layout_plotter.start + .9 * self.layout_plotter.ran, -7.5,
                  'Courtesy MCWG: {}'.format(datetime.today().strftime('%Y-%m-%d %H:%M')), fontsize=12, va='bottom', ha='right', color='gray', alpha=0.5, rotation=0)
         ax.grid(True)
-        return blm_positions, integrated_doses, blm_types, blm_names, plt,ax, dcum_start, dcum_end, start, end
+        return blm_positions, integrated_doses, blm_types, blm_names, plt,ax, dcum_start, dcum_end
 
     def remove_nans(self, blm_positions, integrated_doses, blm_types,blm_names):
         """
@@ -379,6 +380,8 @@ class BLMsPlotter(IPlotter):
         :param list blms: sorted by date BLM list
         :return tuple: first and last timestamp in the first BLM from the BLM list - blms.
         """
+        print(list(blms[0].blm_intervals))
+
         return second2datetime(blms[0].blm_intervals[0].start_time), second2datetime(blms[0].blm_intervals[-1].end_time)
 
     def get_plot_xlim(self, blm_positions):
@@ -438,7 +441,7 @@ class BLMsPlotter(IPlotter):
         func(blm_positions[blm_types == 1], integrated_doses[blm_types == 1], 'r.-', linewidth=0.4, markersize=10, label='Beam 1')
         func(blm_positions[blm_types == 2], integrated_doses[blm_types == 2], 'b.-', linewidth=0.4, markersize=10, label='Beam 2')
         # func(blm_positions[blm_types == 0], integrated_doses[blm_types == 0], 'g.-', linewidth=0.4, markersize=10, label='Top BLMs')
-        func(blm_positions[blm_types == 0], integrated_doses[blm_types == 0], 'g.', markersize=10, label='Top BLMs')
+        func(blm_positions[blm_types == 0], integrated_doses[blm_types == 0], 'g.-', linewidth=0.4, markersize=10, label='Top BLMs')
 
 
     def heat_map_plot(self, blms):
@@ -477,7 +480,7 @@ class BLMsPlotter(IPlotter):
         f.suptitle(r'Extrapolated TID for HL LHC (3000 fb$^{{-1}}$) based on BLM data from {} until {} normalized with luminosity (44 fb^${{-1}}$)'.
                    format(start.strftime(self.title_date_format), end.strftime(self.title_date_format)), fontsize=25)
 
-        ax.set_ylabel(r'Extrapolated TID [Gy]')
+        ax.set_ylabel(r'Extrapolated TID (Gy)')
 
         self.__plot_blms(blm_positions, integrated_doses * 3000 / 44., blm_types, ax.semilogy)
         ax.legend()

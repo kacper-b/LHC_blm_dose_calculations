@@ -13,3 +13,6 @@
 	url = ssh://git@gitlab.cern.ch:7999/mcwg/LHC_runs.git
     branch = database
 
+[submodule "tools"]
+	path = tools
+	url = ssh://git@gitlab.cern.ch:7999/mcwg/tools.git
