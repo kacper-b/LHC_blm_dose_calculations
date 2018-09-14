@@ -138,7 +138,8 @@ if __name__ == '__main__':
         logging.info('Analysed BLM types: {}'.format(', '.join(set(blm.get_blm_type() for blm in blms))))
 
         if should_save_excel and blms:
-            save_to_excel_beam_modes(blms, 'BLMs_with_beam_modes_{}'.format(requested_run),beam_modes)
+            # save_to_excel_beam_modes(blms, 'BLMs_with_beam_modes_{}'.format(requested_run),beam_modes)
+            save_to_excel_beam_modes(blms, 'BLMs_with_beam_modes_{}_{}'.format(requested_run.get_earliest_date(), requested_run.get_latest_date()),beam_modes)
 
         if should_plot:
             # Plotting
