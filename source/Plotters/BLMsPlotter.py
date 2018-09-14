@@ -56,12 +56,18 @@ class BLMsPlotter(IPlotter):
     title_date_format = '%Y-%m-%d'
 
 
-    def __init__(self, output_directory):
+
+    def __init__(self, output_directory, blm_csv_list_filename, start=None, end=None):
         """
         :param str output_directory: plots output directory
         """
         self.plot_directory = output_directory
         self.layout_plotter = plotter_layout()
+        self.blm_csv_list_filename = blm_csv_list_filename
+        self.start = start
+        self.end = end
+
+
 
     def build_blm_layout(self, dcum_start, dcum_end):
         """
@@ -249,8 +255,13 @@ class BLMsPlotter(IPlotter):
         # self.add_annotations(ax, BLMs_to_be_annotated, blm_names, blm_positions, integrated_doses)
 
         ax.legend()
-        ax.set_ylim((5e-3,1e6))
-        file_name = 'TID_{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
+        # ax.set_ylim((5e-3,1e6))
+        if self.start and self.end:
+            start = self.start
+            end = self.end
+        file_name = 'TID_{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format),self.blm_csv_list_filename)
+
+        # file_name = 'TID_{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
         file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses, blm_names)
 
