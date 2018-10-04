@@ -120,9 +120,10 @@ if __name__ == '__main__':
     should_return_blm = should_plot or should_save_excel
     blm_process = BLMProcess(requested_run, field, calculators, should_return_blm, dbc_test, beam_intervals)
     # Reading and processing BLMs data
-    with Pool(processes=number_of_simultaneous_processes) as pool:
-        blm_names_blm_intervals = {pseudoBLM.name: pseudoBLM.blm_intervals for pseudoBLM in pool.map(blm_process.run, blms[:]) if pseudoBLM is not None}
+    # with Pool(processes=number_of_simultaneous_processes) as pool:
+    #     blm_names_blm_intervals = {pseudoBLM.name: pseudoBLM.blm_intervals for pseudoBLM in pool.map(blm_process.run, blms[:]) if pseudoBLM is not None}
 
+    blm_names_blm_intervals = {pseudoBLM.name: pseudoBLM.blm_intervals for pseudoBLM in list(map(blm_process.run, blms[:])) if pseudoBLM is not None}
     if blm_process.should_return_blm:
 
         blm_names = set(blm_names_blm_intervals.keys())
