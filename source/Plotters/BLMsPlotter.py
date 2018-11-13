@@ -259,8 +259,9 @@ class BLMsPlotter(IPlotter):
         start, end  = requested_run.get_earliest_date(), requested_run.get_latest_date()
         ax.set_ylabel(r'TID (Gy)')
 
-        self.__plot_blms(self.fix_ip1_positios(blm_positions), integrated_doses, blm_types, ax.semilogy)
-
+        new_positions = self.fix_ip1_positios(blm_positions)
+        self.__plot_blms(new_positions, integrated_doses, blm_types, ax.semilogy)
+        ax.set_xlim(min(new_positions)-10, max(new_positions)+10)
         # self.add_annotations(ax, BLMs_to_be_annotated, blm_names, blm_positions, integrated_doses)
 
         ax.legend()
@@ -504,7 +505,7 @@ class BLMsPlotter(IPlotter):
 
         self.__plot_blms(blm_positions, integrated_doses * 3000 / 44., blm_types, ax.semilogy)
         ax.legend()
-
+        
         file_name = 'extrapolated_TID_{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
         file_path_name_without_extension = os.path.join(self.plot_directory, file_name)
         self.save_plot_and_data(file_path_name_without_extension, blm_positions, integrated_doses, blm_names)
