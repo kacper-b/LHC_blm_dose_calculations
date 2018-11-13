@@ -238,7 +238,7 @@ class BLMsPlotter(IPlotter):
     def fix_ip1_positios(self, blm_positions):
         lhc_len = 26658.883
         if max(blm_positions) - min(blm_positions) > lhc_len / 2:
-            new_positons = np.copy(blm_positions)
+            new_positions = np.copy(blm_positions)
             new_positions[new_positions > lhc_len / 2] -= lhc_len
             return new_positions
         return blm_positons
