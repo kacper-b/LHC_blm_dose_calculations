@@ -235,8 +235,16 @@ class BLMsPlotter(IPlotter):
                 # ax.annotate(counter, (blm_positions[index], integrated_doses[index]), (0, 20), textcoords='offset points',
                 #             arrowprops=dict(arrowstyle='-', linestyle="dashed", color="0"))
 
-
+    def fix_ip1_positios(blm_positions):
+        lhc_len = 26658.883
+        if max(blm_positions) - min(blm_positions) > lhc_len / 2:
+            new_positons = np.copy(blm_positions)
+            new_positions[new_positions > lhc_len / 2] -= lhc_len
+            return new_positions
+        return blm_positons
+    
     def plot_total_dose(self, blms, blm_summing_func, requested_run):
+        
         """
         The functions plots dose (logscale), then saves plot and plot's data.
         :param list blms: BLM list
@@ -244,13 +252,14 @@ class BLMsPlotter(IPlotter):
         :param normalization_func: a function which takes blm as an argument and returns integrated intensity
         :return:
         """
+        
         blm_positions, integrated_doses, blm_types, blm_names, f, ax, dcum_start, dcum_end = self.run_common_functions(blm_summing_func, blms)
-
+        
         # f.suptitle(r'Total integrated dose for [{} : {}]'.format(start.strftime(self.title_date_format), end.strftime(self.title_date_format)), fontsize=16, weight='bold')
         start, end  = requested_run.get_earliest_date(), requested_run.get_latest_date()
         ax.set_ylabel(r'TID (Gy)')
 
-        self.__plot_blms(blm_positions, integrated_doses, blm_types, ax.semilogy)
+        self.__plot_blms(fix_ip1_positios(blm_positions), integrated_doses, blm_types, ax.semilogy)
 
         # self.add_annotations(ax, BLMs_to_be_annotated, blm_names, blm_positions, integrated_doses)
 
