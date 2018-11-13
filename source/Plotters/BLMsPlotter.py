@@ -235,7 +235,7 @@ class BLMsPlotter(IPlotter):
                 # ax.annotate(counter, (blm_positions[index], integrated_doses[index]), (0, 20), textcoords='offset points',
                 #             arrowprops=dict(arrowstyle='-', linestyle="dashed", color="0"))
 
-    def fix_ip1_positios(blm_positions):
+    def fix_ip1_positios(self, blm_positions):
         lhc_len = 26658.883
         if max(blm_positions) - min(blm_positions) > lhc_len / 2:
             new_positons = np.copy(blm_positions)
