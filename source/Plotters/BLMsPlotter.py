@@ -259,7 +259,7 @@ class BLMsPlotter(IPlotter):
         start, end  = requested_run.get_earliest_date(), requested_run.get_latest_date()
         ax.set_ylabel(r'TID (Gy)')
 
-        self.__plot_blms(fix_ip1_positios(blm_positions), integrated_doses, blm_types, ax.semilogy)
+        self.__plot_blms(self.fix_ip1_positios(blm_positions), integrated_doses, blm_types, ax.semilogy)
 
         # self.add_annotations(ax, BLMs_to_be_annotated, blm_names, blm_positions, integrated_doses)
 
