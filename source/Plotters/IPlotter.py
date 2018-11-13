@@ -40,7 +40,7 @@ class IPlotter(ABC):
         :return:
         """
         # plt.legend(loc='best')
-        plt.savefig(file_path, bbox_inches='tight', dpi=300)
+        plt.savefig(file_path, bbox_inches='tight', dpi=200)
 
     def save_plot_data(self, file_path, x, y, blm_names):
         """
