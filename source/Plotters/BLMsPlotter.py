@@ -261,6 +261,7 @@ class BLMsPlotter(IPlotter):
 
         new_positions = self.fix_ip1_positios(blm_positions)
         self.__plot_blms(new_positions, integrated_doses, blm_types, ax.semilogy)
+        print(min(new_positions)-10, max(new_positions)+10)
         ax.set_xlim(min(new_positions)-10, max(new_positions)+10)
         # self.add_annotations(ax, BLMs_to_be_annotated, blm_names, blm_positions, integrated_doses)
 
