@@ -253,16 +253,14 @@ class BLMsPlotter(IPlotter):
         :return:
         """
         
-        blm_positions, integrated_doses, blm_types, blm_names, f, ax, dcum_start, dcum_end = self.run_common_functions(blm_summing_func, blms)
+        blm_positions, integrated_doses, blm_types, blm_names, f, ax, dcum_start, dcum_end = self.run_common_functions(blm_summing_func, blms, should_fix_ip1=True)
         
         # f.suptitle(r'Total integrated dose for [{} : {}]'.format(start.strftime(self.title_date_format), end.strftime(self.title_date_format)), fontsize=16, weight='bold')
         start, end  = requested_run.get_earliest_date(), requested_run.get_latest_date()
         ax.set_ylabel(r'TID (Gy)')
 
-        new_positions = self.fix_ip1_positios(blm_positions)
-        self.__plot_blms(new_positions, integrated_doses, blm_types, ax.semilogy)
-        print(min(new_positions)-10, max(new_positions)+10)
-        ax.set_xlim(min(new_positions)-10, max(new_positions)+10)
+        self.__plot_blms(blm_positions, integrated_doses, blm_types, ax.semilogy)
+        # ax.set_xlim(min(new_positions)-10, max(new_positions)+10)
         # self.add_annotations(ax, BLMs_to_be_annotated, blm_names, blm_positions, integrated_doses)
 
         ax.legend()
@@ -364,7 +362,7 @@ class BLMsPlotter(IPlotter):
         order = blm_positions.argsort()
         return blm_positions[order], integrated_doses[order], blm_types[order], blm_names[order]
 
-    def run_common_functions(self, blm_summing_func, blms):
+    def run_common_functions(self, blm_summing_func, blms, should_fix_ip1=False):
         """
         It runs common functions: sums integrated doses, removes nans, gets plot xrange, plots layout and adds 'Courtesy MCWG' & 'PRELIMINARY' watermarks.
         :param lambda blm_summing_func: a function which takes blm as an argument and returns integrated dose for that blm
@@ -372,6 +370,8 @@ class BLMsPlotter(IPlotter):
         :return tuple: blm_positions, integrated_doses, blm_types, blm_names, plt,ax, dcum_start, dcum_end, start, end
         """
         blm_positions, integrated_doses, blm_types, blm_names = self.remove_nans(*self.get_sorted_blm_data(blms, blm_summing_func))
+        if should_fix_ip1:
+            blm_positions = self.fix_ip1_positios(blm_positions)
 
         # start, end = self.get_plot_dates(blms)
         dcum_start, dcum_end = self.get_plot_xlim(blm_positions)
