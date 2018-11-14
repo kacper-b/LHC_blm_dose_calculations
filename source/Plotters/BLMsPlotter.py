@@ -241,7 +241,7 @@ class BLMsPlotter(IPlotter):
             new_positions = np.copy(blm_positions)
             new_positions[new_positions > lhc_len / 2] -= lhc_len
             return new_positions
-        return blm_positons
+        return blm_positions
     
     def plot_total_dose(self, blms, blm_summing_func, requested_run):
         
@@ -269,7 +269,8 @@ class BLMsPlotter(IPlotter):
         # ax.set_ylim((5e-3,1e6))
         if self.start and self.end:
             start = self.start
-            end = self.end
+            end = min(self.end, datetime.today().date())
+        end = min(end, datetime.today())
         ax.set_title('[{}, {})'.format(start.strftime(self.date_format), end.strftime(self.date_format)))
         file_name = 'TID_{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format),self.blm_csv_list_filename)
 
@@ -465,10 +466,11 @@ class BLMsPlotter(IPlotter):
         :param func: plotting function - ex. ax.plot
         :return:
         """
-        func(blm_positions[blm_types == 1], integrated_doses[blm_types == 1], 'r.-', linewidth=0.4, markersize=10, label='Beam 1')
-        func(blm_positions[blm_types == 2], integrated_doses[blm_types == 2], 'b.-', linewidth=0.4, markersize=10, label='Beam 2')
+
+        func(blm_positions[np.logical_and(blm_types == 1, integrated_doses>0)], integrated_doses[np.logical_and(blm_types == 1, integrated_doses>0)], 'r.-', linewidth=0.4, markersize=10, label='Beam 1')
+        func(blm_positions[np.logical_and(blm_types == 2, integrated_doses>0)], integrated_doses[np.logical_and(blm_types == 2, integrated_doses>0)], 'b.-', linewidth=0.4, markersize=10, label='Beam 2')
         # func(blm_positions[blm_types == 0], integrated_doses[blm_types == 0], 'g.-', linewidth=0.4, markersize=10, label='Top BLMs')
-        func(blm_positions[blm_types == 0], integrated_doses[blm_types == 0], 'g.-', linewidth=0.4, markersize=10, label='Top BLMs')
+        func(blm_positions[np.logical_and(blm_types == 0, integrated_doses>0)], integrated_doses[np.logical_and(blm_types == 0, integrated_doses>0)], 'g.-', linewidth=0.4, markersize=10, label='Top BLMs')
 
 
     def heat_map_plot(self, blms):

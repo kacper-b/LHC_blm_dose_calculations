@@ -10,7 +10,7 @@ with open('.gitmodules') as f:
     for submodule_dir_name in re.findall(r"^\s*path\s*\=\s(\w+)$", content, re.MULTILINE):
         if submodule_dir_name != 'LHC_runs':
             sys.path.insert(0, submodule_dir_name)
-from Common_classes.DBConnector import DBConnector, BLM, BeamInterval, Run, BeamMode
+from Common_classes.DBConnector import DBConnector, BLM, BeamInterval, Run, BeamMode, BLMInterval
 from multiprocessing import Pool
 from source.Plotters.PlotCalc import PlotCalc
 
@@ -28,7 +28,7 @@ from arguments_parser import build_blm_dose_calc_parser
 import pandas as pd
 # from lhc_runs import lhc_runs, extract_runs
 
-BLM_LIST_DIR = '/mnt/monitoring_analysis/data/blm_lists'
+# BLM_LIST_DIR = '/mnt/monitoring_analysis/data/blm_lists'
 
 def save_to_excel(blms, fname='blms'):
     writer = pd.ExcelWriter(fname + '.xlsx')
@@ -45,7 +45,7 @@ def save_to_excel_beam_modes(blms, fname, all_beam_modes):
 
 if __name__ == '__main__':
     dbc_test = DBConnector('pcen35754', db_name='lhc_raw', user='grafanareader')
-    dbc_test.read_password_from_the_file('grafanareader_password')
+    # dbc_test.read_password_from_the_file('grafanareader_password')
     dbc_test.connect_to_db()
     dbc_test.build_database()
     dbc_test.commit()
@@ -88,12 +88,6 @@ if __name__ == '__main__':
 # ####################################################################################
     logging.basicConfig(level=logging_level)
 
-    calculators = [PreOffsetCalc(), PreOffsetCorrectedIntegralCalc(),
-                   RawIntegralCalc(),
-                   PostOffsetCalc(), PostOffsetCorrectedIntegralCalc(),
-                   BeamModeSubIntervalsCalc(),
-                   # PlotCalc('plots')
-                   ]
 
 
     dbc_test.connect_to_db()
@@ -101,58 +95,31 @@ if __name__ == '__main__':
     dbc_test.commit()
 
     if blm_csv_list_filename is not None:
-        # blms_list = ['BLMED.04R8.B2C10_TDI.4R8.B2', ]
-        blm_list_file_path = os.path.join(BLM_LIST_DIR, blm_csv_list_filename)
         blms_list = pd.read_csv(blm_csv_list_filename, header=None)[0].values
         filter_func = BLM.name.in_(blms_list)
     else:
         filter_func = True
 
     blms = list(dbc_test.session.query(BLM).filter(filter_func).all())
-    # blms =list(filter(lambda  blm: '16L2' in blm.name or '17L2' in blm.name or '15L2' in blm.name, blms))
-    print(len(blms))
     beam_modes = list(dbc_test.session.query(BeamMode))
     beam_intervals = list(filter(lambda beam_interval: beam_interval.start_time in requested_run, dbc_test.session.query(BeamInterval).all()))
-    dbc_test.close()
 
 
     should_plot = should_plot_total or should_plot_cumsum or should_plot_intensity_norm or should_plot_luminosity_norm
     should_return_blm = should_plot or should_save_excel
-    blm_process = BLMProcess(requested_run, field, calculators, should_return_blm, dbc_test, beam_intervals)
-    # Reading and processing BLMs data
-    with Pool(processes=number_of_simultaneous_processes) as pool:
-        blm_names_blm_intervals = {pseudoBLM.name: pseudoBLM.blm_intervals for pseudoBLM in pool.map(blm_process.run, blms[:]) if pseudoBLM is not None}
 
-    if blm_process.should_return_blm:
-
-        blm_names = set(blm_names_blm_intervals.keys())
+    if should_return_blm:
         for blm in blms:
-            # print(blm.name, blm_names)
-            if blm.name in blm_names:
-                blm.blm_intervals_filtered = blm_names_blm_intervals[blm.name]
-                # for i in blm.blm_intervals_filtered:
-                #     print('{:%Y-%m-%d %H:%M}\t{:%Y-%m-%d %H:%M}\t{:.3e}\t{:.3e}'.format(i.start_time, i.end_time, i.integrated_dose, i.offset_pre))
-            else:
-                blm.blm_intervals_filtered = []
-                # sys.exit()
+            blm = dbc_test.session.query(type(blm)).populate_existing().get(blm.name)
+            blm.blm_intervals_filtered = blm.blm_intervals.filter(BLMInterval.start_time >= requested_run.get_earliest_date()). \
+                filter(BLMInterval.start_time <= requested_run.get_latest_date()).all()
+
         logging.info('Analysed BLM types: {}'.format(', '.join(set(blm.get_blm_type() for blm in blms))))
-
+        # dbc_test.close()
         if should_save_excel and blms:
-            save_to_excel_beam_modes(blms, 'BLMs_with_beam_modes_{}'.format(requested_run),beam_modes)
-
+            save_to_excel_beam_modes(blms, 'BLMs_with_beam_modes_{}'.format(requested_run.get_representation_for_filename()),beam_modes)
         if should_plot:
-            # Plotting
             pass
             p = BLMsPlotter('.', blm_csv_list_filename=blm_csv_list_filename.split(os.sep)[-1].replace('.csv',''))
-
-
-            # if should_plot_luminosity_norm:
-            #     p.plot_luminosity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), luminosity)
-            # if should_plot_intensity_norm:
-            #     p.plot_intensity_normalized_dose(blms, lambda blm: blm.get_pre_oc_dose(), lambda blm: blm.get_oc_intensity_integral())
-            # if should_plot_cumsum:
-            #     p.plot_total_cumulated_dose(blms, lambda blm, start, end: blm.get_pre_oc_dose(start, end))
             if should_plot_total:
                 p.plot_total_dose(blms, lambda blm: blm.get_pre_oc_dose(), requested_run)
-            # if should_plot_heatmap:
-            #     p.heat_map_plot(blms)
