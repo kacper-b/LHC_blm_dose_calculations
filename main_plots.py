@@ -47,8 +47,8 @@ if __name__ == '__main__':
     dbc_test = DBConnector('pcen35754', db_name='lhc_raw', user='grafanareader')
     # dbc_test.read_password_from_the_file('grafanareader_password')
     dbc_test.connect_to_db()
-    dbc_test.build_database()
-    dbc_test.commit()
+    # dbc_test.build_database()
+    # dbc_test.commit()
     runs = list(dbc_test.get_lhc_runs())
 ####################################################################################
 
