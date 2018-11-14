@@ -258,8 +258,10 @@ class BLMsPlotter(IPlotter):
         # f.suptitle(r'Total integrated dose for [{} : {}]'.format(start.strftime(self.title_date_format), end.strftime(self.title_date_format)), fontsize=16, weight='bold')
         start, end  = requested_run.get_earliest_date(), requested_run.get_latest_date()
         ax.set_ylabel(r'TID (Gy)')
+        indices_ordered_by_dcum = np.argsort(blm_positions)
 
-        self.__plot_blms(blm_positions, integrated_doses, blm_types, ax.semilogy)
+
+        self.__plot_blms(blm_positions[indices_ordered_by_dcum], integrated_doses[indices_ordered_by_dcum], blm_types[indices_ordered_by_dcum], ax.semilogy)
         # ax.set_xlim(min(new_positions)-10, max(new_positions)+10)
         # self.add_annotations(ax, BLMs_to_be_annotated, blm_names, blm_positions, integrated_doses)
 
