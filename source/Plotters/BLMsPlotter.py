@@ -412,8 +412,10 @@ class BLMsPlotter(IPlotter):
         :param numpy.array blm_positions:
         :return tuple:
         """
-        dcum_start = blm_positions[0] - (blm_positions[-1] - blm_positions[0]) * 0.01
-        dcum_end = blm_positions[-1] + (blm_positions[-1] - blm_positions[0]) * 0.01
+        length = max(blm_positions) - min(blm_positions)
+
+        dcum_start = min(blm_positions) - length * 0.01
+        dcum_end = max(blm_positions) + length * 0.01
         return dcum_start, dcum_end
 
     def get_plot_file_name(self, blm):
