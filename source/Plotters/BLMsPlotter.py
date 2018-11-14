@@ -270,6 +270,7 @@ class BLMsPlotter(IPlotter):
         if self.start and self.end:
             start = self.start
             end = self.end
+        ax.set_title('[{}, {})'.format(start.strftime(self.date_format), end.strftime(self.date_format)))
         file_name = 'TID_{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format),self.blm_csv_list_filename)
 
         # file_name = 'TID_{}_{}_{}'.format(start.strftime(self.date_format), end.strftime(self.date_format), self.get_fully_covered_lhc_section(dcum_start, dcum_end))
