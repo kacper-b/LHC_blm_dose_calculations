@@ -16,3 +16,6 @@
 [submodule "tools"]
 	path = tools
 	url = ssh://git@gitlab.cern.ch:7999/mcwg/tools.git
+[submodule "blm_lists"]
+	path = blm_lists
+	url = ssh://git@gitlab.cern.ch:7999/mcwg/blm_lists.git
