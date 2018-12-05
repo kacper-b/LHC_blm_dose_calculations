@@ -467,8 +467,8 @@ class BLMsPlotter(IPlotter):
         :return:
         """
 
-        func(blm_positions[np.logical_and(blm_types == 1, integrated_doses>0)], integrated_doses[np.logical_and(blm_types == 1, integrated_doses>0)], 'r.-', linewidth=0.4, markersize=10, label='Beam 1')
-        func(blm_positions[np.logical_and(blm_types == 2, integrated_doses>0)], integrated_doses[np.logical_and(blm_types == 2, integrated_doses>0)], 'b.-', linewidth=0.4, markersize=10, label='Beam 2')
+        func(blm_positions[np.logical_and(blm_types == 1, integrated_doses>0)], integrated_doses[np.logical_and(blm_types == 1, integrated_doses>0)], 'b.-', linewidth=0.4, markersize=10, label='Beam 1')
+        func(blm_positions[np.logical_and(blm_types == 2, integrated_doses>0)], integrated_doses[np.logical_and(blm_types == 2, integrated_doses>0)], 'r.-', linewidth=0.4, markersize=10, label='Beam 2')
         # func(blm_positions[blm_types == 0], integrated_doses[blm_types == 0], 'g.-', linewidth=0.4, markersize=10, label='Top BLMs')
         func(blm_positions[np.logical_and(blm_types == 0, integrated_doses>0)], integrated_doses[np.logical_and(blm_types == 0, integrated_doses>0)], 'g.-', linewidth=0.4, markersize=10, label='Top BLMs')
 
