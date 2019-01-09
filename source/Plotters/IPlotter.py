@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 from abc import ABC
 import pandas as pd
-import config
-from config import ARC_DISTANCE_OFFSET, IPs,LHC_LENGTH
+from configurations.config import ARC_DISTANCE_OFFSET, IPs,LHC_LENGTH
 
 
 def get_LHC_sectors():

@@ -3,7 +3,7 @@ matplotlib.use('agg')
 from source.Calculators.Calc import Calc
 from datetime import datetime
 import os
-import config
+import configurations.config
 # from tools.workers import second2datetime
 import matplotlib.dates as md
 import matplotlib.pyplot as plt

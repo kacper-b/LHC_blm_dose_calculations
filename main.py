@@ -5,11 +5,6 @@ import sys
 from datetime import datetime
 
 
-with open('.gitmodules') as f:
-    content = f.read()
-    for submodule_dir_name in re.findall(r"^\s*path\s*\=\s(\w+)$", content, re.MULTILINE):
-        if submodule_dir_name != 'LHC_runs':
-            sys.path.insert(0, submodule_dir_name)
 from Common_classes.DBConnector import DBConnector, BLM, BeamInterval, Run, BeamMode
 from multiprocessing import Pool
 from source.Plotters.PlotCalc import PlotCalc

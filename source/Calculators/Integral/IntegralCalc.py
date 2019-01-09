@@ -4,7 +4,7 @@ import sys
 
 from source.Calculators.Calc import Calc
 import numpy as np
-from config import TIMBER_LOGGING_FREQ
+from configurations.config import TIMBER_LOGGING_FREQ
 from source.BLM_dose_calculation_exceptions import IntegrationResultBelowZero, NoBLMDataForIntensityInterval, IntegrationResultIsNan
 
 

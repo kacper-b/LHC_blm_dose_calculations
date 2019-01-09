@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 import pandas as pd
-from config import TIMBER_LOGGING_FREQ
+from configurations.config import TIMBER_LOGGING_FREQ
 from source.BLM_dose_calculation_exceptions import IntegrationResultBelowZero, NoBLMDataForIntensitySubInterval, \
     IntegrationResultIsNan
 from source.Calculators.Integral.IntegralCalc import IntegralCalc

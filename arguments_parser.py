@@ -1,5 +1,5 @@
 import argparse
-from config import PICKLE_BLM_INTERVALS_DIR, BLM_DATA_DIR
+from configurations.config import PICKLE_BLM_INTERVALS_DIR, BLM_DATA_DIR
 from datetime import datetime
 from dateutil import tz
 # from tools.workers import str2datetime
