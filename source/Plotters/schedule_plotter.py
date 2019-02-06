@@ -13,7 +13,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 # from projects.Plotting.python.plotting_layout import plotter_layout, PLOT_DIR
-import config
+import configurations.config as config
 from tools.workers import str2datetime
 import matplotlib.dates as mdates
 import matplotlib.patches as patches
