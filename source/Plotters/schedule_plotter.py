@@ -2,7 +2,7 @@ import os
 import re
 from datetime import datetime
 import time
-from config import *
+from configurations.config import *
 import matplotlib
 matplotlib.use('agg') 
 import matplotlib.gridspec as gridspec
