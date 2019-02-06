@@ -2,7 +2,7 @@ import logging
 import os
 import re
 from datetime import datetime
-import config
+import configurations.config as config
 from config import BEAM_MODES
 from tools.workers import second2datetime
 import matplotlib
