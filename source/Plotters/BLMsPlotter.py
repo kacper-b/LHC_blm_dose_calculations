@@ -3,7 +3,7 @@ import os
 import re
 from datetime import datetime
 import configurations.config as config
-from config import BEAM_MODES
+from configurations.config import BEAM_MODES
 from tools.workers import second2datetime
 import matplotlib
 matplotlib.use('agg') 
