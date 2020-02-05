@@ -1,5 +1,8 @@
 from abc import abstractmethod, abstractproperty
 
+import sys
+from datetime import timedelta
+
 from source.Calculators.Calc import Calc
 import numpy as np
 
@@ -79,8 +82,8 @@ class OffsetCalc(Calc):
          #post_offset_shift seconds (with reference to the end of a BLM interval)
         :param std_dev_threshold: offset's standard deviation relative value - if an offset data have a higher stddev, exception will occur.
         """
-        self.offset_length = offset_length
-        self.post_offset_shift = post_offset_shift
+        self.offset_length = timedelta(seconds=offset_length)
+        self.post_offset_shift = timedelta(seconds=post_offset_shift)
         self.std_dev_threshold = std_dev_threshold
 
     def fill_interval_with_offset(self, blm_intervals, col_name, current_blm_interval_idx, current_offset_val, data, offset_period_start, offset_period_end):
@@ -97,8 +100,11 @@ class OffsetCalc(Calc):
         """
         try:
             offset_period = self.get_offset_period(blm_intervals, col_name, data, current_blm_interval_idx)
+            # print(blm_intervals[current_blm_interval_idx].start_time)
+
             offset_data = data[offset_period]
             current_offset_val = self.find_offset(offset_data, col_name, blm_intervals[current_blm_interval_idx])
+            # print(current_offset_val)
             offset_period_start = offset_data.index[0]
             offset_period_end = offset_data.index[-1]
         except self.OffsetNotSetDueToNeighbourhood as e:
@@ -129,9 +135,11 @@ class OffsetCalc(Calc):
         offset_period_start = data.index[0]
         offset_period_end = data.index[0]
         for current_blm_interval_idx in self.get_blm_intervals_iterator(blm_intervals):
+
             current_offset_val, offset_period_start, offset_period_end = self.fill_interval_with_offset(blm_intervals, col_name, current_blm_interval_idx,
                                                                                                             current_offset_val, data, offset_period_start,
                                                                                                             offset_period_end)
+            # print(current_blm_interval_idx, current_offset_val)
 
     def is_stdev_lower_than_threshold(self, data, average):
         """

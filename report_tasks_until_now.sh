@@ -1,7 +1,7 @@
 #!/bin/bash
 
 plot_total_for_dates_ip(){
-    python3 main.py -s $1 -n 16 -pt  -l INFO -f report/ir$2.csv
+    python3 main_plots.py -s $1 -n 16 -pt  -l INFO -f /mnt/hdd/monitoring_analysis/data/blm_lists/report_new/ir$2.csv
 }
 
 
@@ -13,7 +13,7 @@ plot_total_for_dates_arcs(){
         a=$(( $2 + 1 ))
     fi
 
-    python3 main.py -s $1 -n 16 -pt  -l INFO -f report/arc$2$a.csv
+    python3 main_plots.py -s $1 -n 16 -pt  -l INFO -f /mnt/hdd/monitoring_analysis/data/blm_lists/report_new/arc$2$a.csv
 }
 
 iterate_over_ips(){
@@ -26,5 +26,4 @@ iterate_over_ips(){
 
 
 iterate_over_ips 28-03-2018
-
 

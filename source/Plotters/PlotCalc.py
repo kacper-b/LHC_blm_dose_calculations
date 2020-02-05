@@ -1,8 +1,10 @@
+import matplotlib
+matplotlib.use('agg')
 from source.Calculators.Calc import Calc
 from datetime import datetime
 import os
-import config
-from tools.workers import second2datetime
+import configurations.config
+# from tools.workers import second2datetime
 import matplotlib.dates as md
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -13,7 +15,7 @@ class PlotCalc(Calc, IPlotter):
     """
     The class allows to plot suspected (with should_plot flag set to True) BLM intervals.
     """
-    regex_name_pattern = re.compile(r"([\w\.]+):(\w+)")
+    regex_name_pattern = re.compile(r"([\w\.]+)(\w+)")
     date_format = '%Y_%m_%d_%H%M'
 
     def __init__(self, output_directory):
@@ -33,6 +35,7 @@ class PlotCalc(Calc, IPlotter):
         intervals_to_be_plotted = filter(self.should_plot, blm_intervals)
         for blm_interval in intervals_to_be_plotted:
             self.__plotter(col_name, blm_interval,data)
+
     
     def should_plot(self, blm_interval):
         """
@@ -40,6 +43,7 @@ class PlotCalc(Calc, IPlotter):
         :param blm_interval:
         :return bool:
         """
+        return True
         return bool(blm_interval.should_plot)
 
     def get_plot_file_name(self, blm_timber_query, blm_interval):
@@ -49,13 +53,9 @@ class PlotCalc(Calc, IPlotter):
         :param blm_interval: blm interval to be plotted.
         :return:
         """
-        name_field = re.match(PlotCalc.regex_name_pattern, blm_timber_query)
-        if name_field:
-            name = name_field.group(1).replace('.', '_')
-            field = name_field.group(2)
-            start = second2datetime(blm_interval.start).strftime(PlotCalc.date_format)
-            end = second2datetime(blm_interval.end).strftime(PlotCalc.date_format)
-            return '{0}_{1}_{2}_{3}'.format(name, start, end, field)
+        # start = blm_interval.start_time.strftime(PlotCalc.date_format)
+        # end = .strftime(PlotCalc.date_format)
+        return  '{}_{:%Y_%m_%d_%H%M}_{:%Y_%m_%d_%H%M}'.format(blm_interval.blm_name.replace('.', '_'), blm_interval.start_time, blm_interval.end_time)
 
     def __plotter(self, blm_name, blm_interval,data):
         """
@@ -78,8 +78,8 @@ class PlotCalc(Calc, IPlotter):
         plotted_pre_oc = self.__pre_offset(blm_name, blm_interval, data)
         plotted_post_oc = self.__post_offset(blm_name, blm_interval, data)
         # if anything has been plotted, save it
-        if plotted_data and plotted_pre_oc and plotted_post_oc:
-            self.save_plot(plot_file_path)
+        # if plotted_data and plotted_pre_oc and plotted_post_oc:
+        self.save_plot(plot_file_path)
         self.clear()
 
 
@@ -93,7 +93,7 @@ class PlotCalc(Calc, IPlotter):
         """
         data_to_plot = blm_interval.get_preoffset_data(data)
         if not data_to_plot.empty:
-            plt.plot(pd.to_datetime(data_to_plot.index, unit='s'), data_to_plot[blm_name], 'g-', label='pre_offset')
+            plt.plot(data_to_plot.index, data_to_plot[blm_name], 'g-', label='pre_offset')
             return True
         return False
 
@@ -107,7 +107,7 @@ class PlotCalc(Calc, IPlotter):
         """
         data_to_plot = blm_interval.get_postoffset_data(data)
         if not data_to_plot.empty:
-            plt.plot(pd.to_datetime(data_to_plot.index, unit='s'), data_to_plot[blm_name], 'r--', label='post_offset')
+            plt.plot(data_to_plot.index, data_to_plot[blm_name], 'r--', label='post_offset')
             return True
         return False
 
@@ -121,6 +121,6 @@ class PlotCalc(Calc, IPlotter):
         """
         data_to_plot = blm_interval.get_integrated_data(data)
         if not data_to_plot.empty:
-            plt.plot(pd.to_datetime(data_to_plot.index, unit='s'), data_to_plot[blm_name], 'b-', label='raw data')
+            plt.plot(data_to_plot.index, data_to_plot[blm_name], 'b-', label='raw data')
             return True
         return False

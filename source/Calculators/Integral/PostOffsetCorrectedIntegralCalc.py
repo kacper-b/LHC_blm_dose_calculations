@@ -21,4 +21,4 @@ class PostOffsetCorrectedIntegralCalc(IntegralCalc):
         :param integration_result:
         :return:
         """
-        blm_interval.integral_post_offset_corrected = integration_result
+        blm_interval.integrated_dose_postoc = integration_result

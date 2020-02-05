@@ -1,5 +1,8 @@
 import logging
-from Common_classes.Interfaces.ExceptionLogging import ExceptionLogging
+
+class ExceptionLogging:
+    def __init__(self, logging_func):
+        self.logging_func = logging_func
 
 
 class PreOffsetEmpty(Exception, ExceptionLogging):

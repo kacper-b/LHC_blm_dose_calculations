@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 from abc import ABC
 import pandas as pd
-import config
-from config import ARC_DISTANCE_OFFSET, IPs,LHC_LENGTH
+from configurations.config import ARC_DISTANCE_OFFSET, IPs,LHC_LENGTH
 
 
 def get_LHC_sectors():
@@ -40,7 +39,7 @@ class IPlotter(ABC):
         :return:
         """
         # plt.legend(loc='best')
-        plt.savefig(file_path, bbox_inches='tight', dpi=300)
+        plt.savefig(file_path, bbox_inches='tight', dpi=200)
 
     def save_plot_data(self, file_path, x, y, blm_names):
         """

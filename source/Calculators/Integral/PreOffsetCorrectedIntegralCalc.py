@@ -21,5 +21,5 @@ class PreOffsetCorrectedIntegralCalc(IntegralCalc):
         :param integration_result:
         :return:
         """
-        blm_interval.integral_pre_offset_corrected = integration_result
+        blm_interval.integrated_dose_preoc = integration_result
 

@@ -1,6 +1,8 @@
 [submodule "Common_classes"]
 	path = Common_classes
 	url = ssh://git@gitlab.cern.ch:7999/mcwg/Common_classes.git
+	branch = database
+	ignore = untracked
 [submodule "Plotting"]
 	path = Plotting
 	url = ssh://git@gitlab.cern.ch:7999/mcwg/Plotting.git
@@ -10,3 +12,11 @@
 [submodule "LHC_runs"]
 	path = LHC_runs
 	url = ssh://git@gitlab.cern.ch:7999/mcwg/LHC_runs.git
+    branch = database
+
+[submodule "tools"]
+	path = tools
+	url = ssh://git@gitlab.cern.ch:7999/mcwg/tools.git
+[submodule "blm_lists"]
+	path = blm_lists
+	url = ssh://git@gitlab.cern.ch:7999/mcwg/blm_lists.git
